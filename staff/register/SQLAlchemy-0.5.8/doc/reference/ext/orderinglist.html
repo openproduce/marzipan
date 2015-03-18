@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    orderinglist
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.ext" href="index.html" />
+        <link rel="next" title="serializer" href="serializer.html" />
+        <link rel="prev" title="associationproxy" href="associationproxy.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/ext/orderinglist.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.ext">sqlalchemy.ext</a>
+                » 
+    orderinglist
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="associationproxy.html" title="previous chapter">associationproxy</a>
+        Next:
+        <a href="serializer.html" title="next chapter">serializer</a>
+</div>
+
+                <h2>
+                    
+    orderinglist
+ 
+                </h2>
+            </div>
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.ext.orderinglist">
+<h1>orderinglist<a class="headerlink" href="#module-sqlalchemy.ext.orderinglist" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">author:</th><td class="field-body">Jason Kirtland</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">orderinglist</span></tt> is a helper for mutable ordered relations.  It will intercept
+list operations performed on a relation collection and automatically
+synchronize changes in list position with an attribute on the related objects.
+(See <a class="reference external" href="../../mappers.html#advdatamapping-entitycollections"><em>Alternate Collection Implementations</em></a> for more information on the general pattern.)</p>
+<p>Example: Two tables that store slides in a presentation.  Each slide
+has a number of bullet points, displayed in order by the &#8216;position&#8217;
+column on the bullets table.  These bullets can be inserted and re-ordered
+by your end users, and you need to update the &#8216;position&#8217; column of all
+affected rows when changes are made.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">slides_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;Slides&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+                     <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                     <span class="n">Column</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">))</span>
+
+<span class="n">bullets_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;Bullets&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+                      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;slide_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&#39;Slides.id&#39;</span><span class="p">)),</span>
+                      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+                      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">))</span>
+
+ <span class="k">class</span> <span class="nc">Slide</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+     <span class="k">pass</span>
+ <span class="k">class</span> <span class="nc">Bullet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+     <span class="k">pass</span>
+
+ <span class="n">mapper</span><span class="p">(</span><span class="n">Slide</span><span class="p">,</span> <span class="n">slides_table</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+       <span class="s">&#39;bullets&#39;</span><span class="p">:</span> <span class="n">relation</span><span class="p">(</span><span class="n">Bullet</span><span class="p">,</span> <span class="n">order_by</span><span class="o">=</span><span class="p">[</span><span class="n">bullets_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">position</span><span class="p">])</span>
+ <span class="p">})</span>
+ <span class="n">mapper</span><span class="p">(</span><span class="n">Bullet</span><span class="p">,</span> <span class="n">bullets_table</span><span class="p">)</span></pre></div>
+</div>
+<p>The standard relation mapping will produce a list-like attribute on each Slide
+containing all related Bullets, but coping with changes in ordering is totally
+your responsibility.  If you insert a Bullet into that list, there is no
+magic- it won&#8217;t have a position attribute unless you assign it it one, and
+you&#8217;ll need to manually renumber all the subsequent Bullets in the list to
+accommodate the insert.</p>
+<p>An <tt class="docutils literal"><span class="pre">orderinglist</span></tt> can automate this and manage the &#8216;position&#8217; attribute on all
+related bullets for you.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">mapper</span><span class="p">(</span><span class="n">Slide</span><span class="p">,</span> <span class="n">slides_table</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+       <span class="s">&#39;bullets&#39;</span><span class="p">:</span> <span class="n">relation</span><span class="p">(</span><span class="n">Bullet</span><span class="p">,</span>
+                           <span class="n">collection_class</span><span class="o">=</span><span class="n">ordering_list</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">),</span>
+                           <span class="n">order_by</span><span class="o">=</span><span class="p">[</span><span class="n">bullets_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">position</span><span class="p">])</span>
+<span class="p">})</span>
+<span class="n">mapper</span><span class="p">(</span><span class="n">Bullet</span><span class="p">,</span> <span class="n">bullets_table</span><span class="p">)</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Slide</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">bullets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Bullet</span><span class="p">())</span>
+<span class="n">s</span><span class="o">.</span><span class="n">bullets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Bullet</span><span class="p">())</span>
+<span class="n">s</span><span class="o">.</span><span class="n">bullets</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">1</span>
+<span class="n">s</span><span class="o">.</span><span class="n">bullets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="n">Bullet</span><span class="p">())</span>
+<span class="n">s</span><span class="o">.</span><span class="n">bullets</span><span class="p">[</span><span class="mf">2</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">2</span></pre></div>
+</div>
+<p>Use the <tt class="docutils literal"><span class="pre">ordering_list</span></tt> function to set up the <tt class="docutils literal"><span class="pre">collection_class</span></tt> on relations
+(as in the mapper example above).  This implementation depends on the list
+starting in the proper order, so be SURE to put an order_by on your relation.</p>
+<p><tt class="docutils literal"><span class="pre">ordering_list</span></tt> takes the name of the related object&#8217;s ordering attribute as
+an argument.  By default, the zero-based integer index of the object&#8217;s
+position in the <tt class="docutils literal"><span class="pre">ordering_list</span></tt> is synchronized with the ordering attribute:
+index 0 will get position 0, index 1 position 1, etc.  To start numbering at 1
+or some other integer, provide <tt class="docutils literal"><span class="pre">count_from=1</span></tt>.</p>
+<p>Ordering values are not limited to incrementing integers.  Almost any scheme
+can implemented by supplying a custom <tt class="docutils literal"><span class="pre">ordering_func</span></tt> that maps a Python list
+index to any value you require.  See the [module
+documentation](rel:docstrings_sqlalchemy.ext.orderinglist) for more
+information, and also check out the unit tests for examples of stepped
+numbering, alphabetical and Fibonacci numbering.</p>
+<p>A custom list that manages index/position information for its children.</p>
+<p><tt class="docutils literal"><span class="pre">orderinglist</span></tt> is a custom list collection implementation for mapped
+relations that keeps an arbitrary &#8220;position&#8221; attribute on contained objects in
+sync with each object&#8217;s position in the Python list.</p>
+<p>The collection acts just like a normal Python <tt class="docutils literal"><span class="pre">list</span></tt>, with the added
+behavior that as you manipulate the list (via <tt class="docutils literal"><span class="pre">insert</span></tt>, <tt class="docutils literal"><span class="pre">pop</span></tt>, assignment,
+deletion, what have you), each of the objects it contains is updated as needed
+to reflect its position.  This is very useful for managing ordered relations
+which have a user-defined, serialized order:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">ForeignKey</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">mapper</span><span class="p">,</span> <span class="n">relation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sqlalchemy.ext.orderinglist</span> <span class="kn">import</span> <span class="n">ordering_list</span></pre></div>
+</div>
+<p>A simple model of users their &#8220;top 10&#8221; things:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">users</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">blurbs</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;user_top_ten_list&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+<span class="gp">... </span>              <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&#39;users.id&#39;</span><span class="p">)),</span>
+<span class="gp">... </span>              <span class="n">Column</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+<span class="gp">... </span>              <span class="n">Column</span><span class="p">(</span><span class="s">&#39;blurb&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">80</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">pass</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Blurb</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blurb</span><span class="p">):</span>
+<span class="gp">... </span>       <span class="bp">self</span><span class="o">.</span><span class="n">blurb</span> <span class="o">=</span> <span class="n">blurb</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapper</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="n">users</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">... </span> <span class="s">&#39;topten&#39;</span><span class="p">:</span> <span class="n">relation</span><span class="p">(</span><span class="n">Blurb</span><span class="p">,</span> <span class="n">collection_class</span><span class="o">=</span><span class="n">ordering_list</span><span class="p">(</span><span class="s">&#39;position&#39;</span><span class="p">),</span>
+<span class="gp">... </span>                    <span class="n">order_by</span><span class="o">=</span><span class="p">[</span><span class="n">blurbs</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">position</span><span class="p">])})</span>
+<span class="go">&lt;Mapper ...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapper</span><span class="p">(</span><span class="n">Blurb</span><span class="p">,</span> <span class="n">blurbs</span><span class="p">)</span>
+<span class="go">&lt;Mapper ...&gt;</span></pre></div>
+</div>
+<p>Acts just like a regular list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Blurb</span><span class="p">(</span><span class="s">&#39;Number one!&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Blurb</span><span class="p">(</span><span class="s">&#39;Number two!&#39;</span><span class="p">))</span></pre></div>
+</div>
+<p>But the <tt class="docutils literal"><span class="pre">.position</span></tt> attibute is set automatically behind the scenes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">[</span><span class="n">blurb</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">blurb</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mf">0</span><span class="p">,</span> <span class="mf">1</span><span class="p">]</span></pre></div>
+</div>
+<p>The objects will be renumbered automaticaly after any list-changing operation,
+for example an <tt class="docutils literal"><span class="pre">insert()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="n">Blurb</span><span class="p">(</span><span class="s">&#39;I am the new Number Two.&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="p">[</span><span class="n">blurb</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">blurb</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mf">0</span><span class="p">,</span> <span class="mf">1</span><span class="p">,</span> <span class="mf">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span><span class="o">.</span><span class="n">blurb</span> <span class="o">==</span> <span class="s">&#39;I am the new Number Two.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">u</span><span class="o">.</span><span class="n">topten</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">==</span> <span class="mf">1</span></pre></div>
+</div>
+<p>Numbering and serialization are both highly configurable.  See the docstrings
+in this module and the main SQLAlchemy documentation for more information and
+examples.</p>
+<p>The <a title="sqlalchemy.ext.orderinglist.ordering_list" class="reference internal" href="#sqlalchemy.ext.orderinglist.ordering_list"><tt class="xref docutils literal"><span class="pre">ordering_list</span></tt></a> factory function is the
+ORM-compatible constructor for <cite>OrderingList</cite> instances.</p>
+<dl class="function">
+<dt id="sqlalchemy.ext.orderinglist.ordering_list">
+<tt class="descclassname">sqlalchemy.ext.orderinglist.</tt><tt class="descname">ordering_list</tt><big>(</big><em>attr</em>, <em>count_from=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.ext.orderinglist.ordering_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares an OrderingList factory for use in mapper definitions.</p>
+<p>Returns an object suitable for use as an argument to a Mapper relation&#8217;s
+<tt class="docutils literal"><span class="pre">collection_class</span></tt> option.  Arguments are:</p>
+<dl class="docutils">
+<dt>attr</dt>
+<dd>Name of the mapped attribute to use for storage and retrieval of
+ordering information</dd>
+<dt>count_from (optional)</dt>
+<dd>Set up an integer-based ordering, starting at <tt class="docutils literal"><span class="pre">count_from</span></tt>.  For
+example, <tt class="docutils literal"><span class="pre">ordering_list('pos',</span> <span class="pre">count_from=1)</span></tt> would create a 1-based
+list in SQL, storing the value in the &#8216;pos&#8217; column.  Ignored if
+<tt class="docutils literal"><span class="pre">ordering_func</span></tt> is supplied.</dd>
+</dl>
+<p>Passes along any keyword arguments to <tt class="docutils literal"><span class="pre">OrderingList</span></tt> constructor.</p>
+</dd></dl>
+
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="associationproxy.html" title="previous chapter">associationproxy</a>
+        Next:
+        <a href="serializer.html" title="next chapter">serializer</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    Oracle
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.databases" href="index.html" />
+        <link rel="next" title="PostgreSQL" href="postgres.html" />
+        <link rel="prev" title="MySQL" href="mysql.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/oracle.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.databases">sqlalchemy.databases</a>
+                » 
+    Oracle
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="mysql.html" title="previous chapter">MySQL</a>
+        Next:
+        <a href="postgres.html" title="next chapter">PostgreSQL</a>
+</div>
+
+                <h2>
+                    
+    Oracle
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">Oracle</a><ul>
+<li><a class="reference external" href="#driver">Driver</a></li>
+<li><a class="reference external" href="#connecting">Connecting</a></li>
+<li><a class="reference external" href="#auto-increment-behavior">Auto Increment Behavior</a></li>
+<li><a class="reference external" href="#lob-objects">LOB Objects</a></li>
+<li><a class="reference external" href="#limit-offset-support">LIMIT/OFFSET Support</a></li>
+<li><a class="reference external" href="#two-phase-transaction-support">Two Phase Transaction Support</a></li>
+<li><a class="reference external" href="#oracle-8-compatibility">Oracle 8 Compatibility</a></li>
+<li><a class="reference external" href="#synonym-dblink-reflection">Synonym/DBLINK Reflection</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.databases.oracle">
+<h1>Oracle<a class="headerlink" href="#module-sqlalchemy.databases.oracle" title="Permalink to this headline">¶</a></h1>
+<p>Support for the Oracle database.</p>
+<p>Oracle version 8 through current (11g at the time of this writing) are supported.</p>
+<div class="section" id="driver">
+<h2>Driver<a class="headerlink" href="#driver" title="Permalink to this headline">¶</a></h2>
+<p>The Oracle dialect uses the cx_oracle driver, available at 
+<a class="reference external" href="http://cx-oracle.sourceforge.net/">http://cx-oracle.sourceforge.net/</a> .   The dialect has several behaviors 
+which are specifically tailored towards compatibility with this module.</p>
+</div>
+<div class="section" id="connecting">
+<h2>Connecting<a class="headerlink" href="#connecting" title="Permalink to this headline">¶</a></h2>
+<p>Connecting with create_engine() uses the standard URL approach of 
+<tt class="docutils literal"><span class="pre">oracle://user:pass&#64;host:port/dbname[?key=value&amp;key=value...]</span></tt>.  If dbname is present, the 
+host, port, and dbname tokens are converted to a TNS name using the cx_oracle 
+<tt class="xref docutils literal"><span class="pre">makedsn()</span></tt> function.  Otherwise, the host token is taken directly as a TNS name.</p>
+<p>Additional arguments which may be specified either as query string arguments on the
+URL, or as keyword arguments to <a title="sqlalchemy.create_engine" class="reference external" href="../sqlalchemy/connections.html#sqlalchemy.create_engine"><tt class="xref docutils literal"><span class="pre">create_engine()</span></tt></a> are:</p>
+<ul class="simple">
+<li><em>allow_twophase</em> - enable two-phase transactions.  Defaults to <tt class="xref docutils literal"><span class="pre">True</span></tt>.</li>
+<li><em>auto_convert_lobs</em> - defaults to True, see the section on LOB objects.</li>
+<li><em>auto_setinputsizes</em> - the cx_oracle.setinputsizes() call is issued for all bind parameters.
+This is required for LOB datatypes but can be disabled to reduce overhead.  Defaults
+to <tt class="xref docutils literal"><span class="pre">True</span></tt>.</li>
+<li><em>mode</em> - This is given the string value of SYSDBA or SYSOPER, or alternatively an
+integer value.  This value is only available as a URL query string argument.</li>
+<li><em>threaded</em> - enable multithreaded access to cx_oracle connections.  Defaults
+to <tt class="xref docutils literal"><span class="pre">True</span></tt>.  Note that this is the opposite default of cx_oracle itself.</li>
+<li><em>use_ansi</em> - Use ANSI JOIN constructs (see the section on Oracle 8).  Defaults
+to <tt class="xref docutils literal"><span class="pre">True</span></tt>.  If <tt class="xref docutils literal"><span class="pre">False</span></tt>, Oracle-8 compatible constructs are used for joins.</li>
+<li><em>optimize_limits</em> - defaults to <tt class="xref docutils literal"><span class="pre">False</span></tt>. see the section on LIMIT/OFFSET.</li>
+</ul>
+</div>
+<div class="section" id="auto-increment-behavior">
+<h2>Auto Increment Behavior<a class="headerlink" href="#auto-increment-behavior" title="Permalink to this headline">¶</a></h2>
+<p>SQLAlchemy Table objects which include integer primary keys are usually assumed to have
+&#8220;autoincrementing&#8221; behavior, meaning they can generate their own primary key values upon
+INSERT.  Since Oracle has no &#8220;autoincrement&#8221; feature, SQLAlchemy relies upon sequences 
+to produce these values.   With the Oracle dialect, <em>a sequence must always be explicitly
+specified to enable autoincrement</em>.  This is divergent with the majority of documentation 
+examples which assume the usage of an autoincrement-capable database.   To specify sequences,
+use the sqlalchemy.schema.Sequence object which is passed to a Column construct:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> 
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;id_seq&#39;</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="o">...</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>This step is also required when using table reflection, i.e. autoload=True:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> 
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;id_seq&#39;</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+      <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="lob-objects">
+<h2>LOB Objects<a class="headerlink" href="#lob-objects" title="Permalink to this headline">¶</a></h2>
+<p>cx_oracle presents some challenges when fetching LOB objects.  A LOB object in a result set
+is presented by cx_oracle as a cx_oracle.LOB object which has a read() method.  By default, 
+SQLAlchemy converts these LOB objects into Python strings.  This is for two reasons.  First,
+the LOB object requires an active cursor association, meaning if you were to fetch many rows
+at once such that cx_oracle had to go back to the database and fetch a new batch of rows,
+the LOB objects in the already-fetched rows are now unreadable and will raise an error. 
+SQLA &#8220;pre-reads&#8221; all LOBs so that their data is fetched before further rows are read.  
+The size of a &#8220;batch of rows&#8221; is controlled by the cursor.arraysize value, which SQLAlchemy
+defaults to 50 (cx_oracle normally defaults this to one).</p>
+<p>Secondly, the LOB object is not a standard DBAPI return value so SQLAlchemy seeks to 
+&#8220;normalize&#8221; the results to look more like other DBAPIs.</p>
+<p>The conversion of LOB objects by this dialect is unique in SQLAlchemy in that it takes place
+for all statement executions, even plain string-based statements for which SQLA has no awareness
+of result typing.  This is so that calls like fetchmany() and fetchall() can work in all cases
+without raising cursor errors.  The conversion of LOB in all cases, as well as the &#8220;prefetch&#8221;
+of LOB objects, can be disabled using auto_convert_lobs=False.</p>
+</div>
+<div class="section" id="limit-offset-support">
+<h2>LIMIT/OFFSET Support<a class="headerlink" href="#limit-offset-support" title="Permalink to this headline">¶</a></h2>
+<p>Oracle has no support for the LIMIT or OFFSET keywords.  Whereas previous versions of SQLAlchemy
+used the &#8220;ROW NUMBER OVER...&#8221; construct to simulate LIMIT/OFFSET, SQLAlchemy 0.5 now uses 
+a wrapped subquery approach in conjunction with ROWNUM.  The exact methodology is taken from
+<a class="reference external" href="http://www.oracle.com/technology/oramag/oracle/06-sep/o56asktom.html">http://www.oracle.com/technology/oramag/oracle/06-sep/o56asktom.html</a> .  Note that the 
+&#8220;FIRST ROWS()&#8221; optimization keyword mentioned is not used by default, as the user community felt
+this was stepping into the bounds of optimization that is better left on the DBA side, but this
+prefix can be added by enabling the optimize_limits=True flag on create_engine().</p>
+</div>
+<div class="section" id="two-phase-transaction-support">
+<h2>Two Phase Transaction Support<a class="headerlink" href="#two-phase-transaction-support" title="Permalink to this headline">¶</a></h2>
+<p>Two Phase transactions are implemented using XA transactions.  Success has been reported of them
+working successfully but this should be regarded as an experimental feature.</p>
+</div>
+<div class="section" id="oracle-8-compatibility">
+<h2>Oracle 8 Compatibility<a class="headerlink" href="#oracle-8-compatibility" title="Permalink to this headline">¶</a></h2>
+<p>When using Oracle 8, a &#8220;use_ansi=False&#8221; flag is available which converts all
+JOIN phrases into the WHERE clause, and in the case of LEFT OUTER JOIN
+makes use of Oracle&#8217;s (+) operator.</p>
+</div>
+<div class="section" id="synonym-dblink-reflection">
+<h2>Synonym/DBLINK Reflection<a class="headerlink" href="#synonym-dblink-reflection" title="Permalink to this headline">¶</a></h2>
+<p>When using reflection with Table objects, the dialect can optionally search for tables
+indicated by synonyms that reference DBLINK-ed tables by passing the flag 
+oracle_resolve_synonyms=True as a keyword argument to the Table construct.  If DBLINK 
+is not in use this flag should be left off.</p>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="mysql.html" title="previous chapter">MySQL</a>
+        Next:
+        <a href="postgres.html" title="next chapter">PostgreSQL</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

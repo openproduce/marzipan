@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    SQL Server
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.databases" href="index.html" />
+        <link rel="next" title="MySQL" href="mysql.html" />
+        <link rel="prev" title="MaxDB" href="maxdb.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/mssql.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.databases">sqlalchemy.databases</a>
+                » 
+    SQL Server
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="maxdb.html" title="previous chapter">MaxDB</a>
+        Next:
+        <a href="mysql.html" title="next chapter">MySQL</a>
+</div>
+
+                <h2>
+                    
+    SQL Server
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">SQL Server</a><ul>
+<li><a class="reference external" href="#driver">Driver</a></li>
+<li><a class="reference external" href="#connecting">Connecting</a></li>
+<li><a class="reference external" href="#auto-increment-behavior">Auto Increment Behavior</a></li>
+<li><a class="reference external" href="#collation-support">Collation Support</a></li>
+<li><a class="reference external" href="#limit-offset-support">LIMIT/OFFSET Support</a></li>
+<li><a class="reference external" href="#nullability">Nullability</a></li>
+<li><a class="reference external" href="#date-time-handling">Date / Time Handling</a></li>
+<li><a class="reference external" href="#compatibility-levels">Compatibility Levels</a></li>
+<li><a class="reference external" href="#known-issues">Known Issues</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.databases.mssql">
+<h1>SQL Server<a class="headerlink" href="#module-sqlalchemy.databases.mssql" title="Permalink to this headline">¶</a></h1>
+<p>Support for the Microsoft SQL Server database.</p>
+<div class="section" id="driver">
+<h2>Driver<a class="headerlink" href="#driver" title="Permalink to this headline">¶</a></h2>
+<p>The MSSQL dialect will work with three different available drivers:</p>
+<ul class="simple">
+<li><em>pyodbc</em> - <a class="reference external" href="http://pyodbc.sourceforge.net/">http://pyodbc.sourceforge.net/</a>. This is the recommeded
+driver.</li>
+<li><em>pymssql</em> - <a class="reference external" href="http://pymssql.sourceforge.net/">http://pymssql.sourceforge.net/</a></li>
+<li><em>adodbapi</em> - <a class="reference external" href="http://adodbapi.sourceforge.net/">http://adodbapi.sourceforge.net/</a></li>
+</ul>
+<p>Drivers are loaded in the order listed above based on availability.</p>
+<p>If you need to load a specific driver pass <tt class="docutils literal"><span class="pre">module_name</span></tt> when
+creating the engine:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mssql://dsn&#39;</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="s">&#39;pymssql&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">module_name</span></tt> currently accepts: <tt class="docutils literal"><span class="pre">pyodbc</span></tt>, <tt class="docutils literal"><span class="pre">pymssql</span></tt>, and
+<tt class="docutils literal"><span class="pre">adodbapi</span></tt>.</p>
+<p>Currently the pyodbc driver offers the greatest level of
+compatibility.</p>
+</div>
+<div class="section" id="connecting">
+<h2>Connecting<a class="headerlink" href="#connecting" title="Permalink to this headline">¶</a></h2>
+<p>Connecting with create_engine() uses the standard URL approach of
+<tt class="docutils literal"><span class="pre">mssql://user:pass&#64;host/dbname[?key=value&amp;key=value...]</span></tt>.</p>
+<p>If the database name is present, the tokens are converted to a
+connection string with the specified values. If the database is not
+present, then the host token is taken directly as the DSN name.</p>
+<p>Examples of pyodbc connection string URLs:</p>
+<ul>
+<li><p class="first"><em>mssql://mydsn</em> - connects using the specified DSN named <tt class="docutils literal"><span class="pre">mydsn</span></tt>.
+The connection string that is created will appear like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsn</span><span class="o">=</span><span class="n">mydsn</span><span class="p">;</span><span class="n">Trusted_Connection</span><span class="o">=</span><span class="n">Yes</span></pre></div>
+</div>
+</li>
+<li><p class="first"><em>mssql://user:pass&#64;mydsn</em> - connects using the DSN named
+<tt class="docutils literal"><span class="pre">mydsn</span></tt> passing in the <tt class="docutils literal"><span class="pre">UID</span></tt> and <tt class="docutils literal"><span class="pre">PWD</span></tt> information. The
+connection string that is created will appear like:</p>
+<div class="highlight-python"><pre>dsn=mydsn;UID=user;PWD=pass</pre>
+</div>
+</li>
+<li><p class="first"><em>mssql://user:pass&#64;mydsn/?LANGUAGE=us_english</em> - connects
+using the DSN named <tt class="docutils literal"><span class="pre">mydsn</span></tt> passing in the <tt class="docutils literal"><span class="pre">UID</span></tt> and <tt class="docutils literal"><span class="pre">PWD</span></tt>
+information, plus the additional connection configuration option
+<tt class="docutils literal"><span class="pre">LANGUAGE</span></tt>. The connection string that is created will appear
+like:</p>
+<div class="highlight-python"><pre>dsn=mydsn;UID=user;PWD=pass;LANGUAGE=us_english</pre>
+</div>
+</li>
+<li><p class="first"><em>mssql://user:pass&#64;host/db</em> - connects using a connection string
+dynamically created that would appear like:</p>
+<div class="highlight-python"><pre>DRIVER={SQL Server};Server=host;Database=db;UID=user;PWD=pass</pre>
+</div>
+</li>
+<li><p class="first"><em>mssql://user:pass&#64;host:123/db</em> - connects using a connection
+string that is dynamically created, which also includes the port
+information using the comma syntax. If your connection string
+requires the port information to be passed as a <tt class="docutils literal"><span class="pre">port</span></tt> keyword
+see the next example. This will create the following connection
+string:</p>
+<div class="highlight-python"><pre>DRIVER={SQL Server};Server=host,123;Database=db;UID=user;PWD=pass</pre>
+</div>
+</li>
+<li><p class="first"><em>mssql://user:pass&#64;host/db?port=123</em> - connects using a connection
+string that is dynamically created that includes the port
+information as a separate <tt class="docutils literal"><span class="pre">port</span></tt> keyword. This will create the
+following connection string:</p>
+<div class="highlight-python"><pre>DRIVER={SQL Server};Server=host;Database=db;UID=user;PWD=pass;port=123</pre>
+</div>
+</li>
+</ul>
+<p>If you require a connection string that is outside the options
+presented above, use the <tt class="docutils literal"><span class="pre">odbc_connect</span></tt> keyword to pass in a
+urlencoded connection string. What gets passed in will be urldecoded
+and passed directly.</p>
+<p>For example:</p>
+<div class="highlight-python"><pre>mssql:///?odbc_connect=dsn%3Dmydsn%3BDatabase%3Ddb</pre>
+</div>
+<p>would create the following connection string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsn</span><span class="o">=</span><span class="n">mydsn</span><span class="p">;</span><span class="n">Database</span><span class="o">=</span><span class="n">db</span></pre></div>
+</div>
+<p>Encoding your connection string can be easily accomplished through
+the python shell. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">urllib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">urllib</span><span class="o">.</span><span class="n">quote_plus</span><span class="p">(</span><span class="s">&#39;dsn=mydsn;Database=db&#39;</span><span class="p">)</span>
+<span class="go">&#39;dsn%3Dmydsn%3BDatabase%3Ddb&#39;</span></pre></div>
+</div>
+<p>Additional arguments which may be specified either as query string
+arguments on the URL, or as keyword argument to
+<a title="sqlalchemy.create_engine" class="reference external" href="../sqlalchemy/connections.html#sqlalchemy.create_engine"><tt class="xref docutils literal"><span class="pre">create_engine()</span></tt></a> are:</p>
+<ul class="simple">
+<li><em>auto_identity_insert</em> - enables support for IDENTITY inserts by
+automatically turning IDENTITY INSERT ON and OFF as required.
+Defaults to <tt class="xref docutils literal"><span class="pre">True</span></tt>.</li>
+<li><em>query_timeout</em> - allows you to override the default query timeout.
+Defaults to <tt class="xref docutils literal"><span class="pre">None</span></tt>. This is only supported on pymssql.</li>
+<li><em>text_as_varchar</em> - if enabled this will treat all TEXT column
+types as their equivalent VARCHAR(max) type. This is often used if
+you need to compare a VARCHAR to a TEXT field, which is not
+supported directly on MSSQL. Defaults to <tt class="xref docutils literal"><span class="pre">False</span></tt>.</li>
+<li><em>use_scope_identity</em> - allows you to specify that SCOPE_IDENTITY
+should be used in place of the non-scoped version &#64;&#64;IDENTITY.
+Defaults to <tt class="xref docutils literal"><span class="pre">False</span></tt>. On pymssql this defaults to <tt class="xref docutils literal"><span class="pre">True</span></tt>, and on
+pyodbc this defaults to <tt class="xref docutils literal"><span class="pre">True</span></tt> if the version of pyodbc being
+used supports it.</li>
+<li><em>has_window_funcs</em> - indicates whether or not window functions
+(LIMIT and OFFSET) are supported on the version of MSSQL being
+used. If you&#8217;re running MSSQL 2005 or later turn this on to get
+OFFSET support. Defaults to <tt class="xref docutils literal"><span class="pre">False</span></tt>.</li>
+<li><em>max_identifier_length</em> - allows you to se the maximum length of
+identfiers supported by the database. Defaults to 128. For pymssql
+the default is 30.</li>
+<li><em>schema_name</em> - use to set the schema name. Defaults to <tt class="docutils literal"><span class="pre">dbo</span></tt>.</li>
+</ul>
+</div>
+<div class="section" id="auto-increment-behavior">
+<h2>Auto Increment Behavior<a class="headerlink" href="#auto-increment-behavior" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">IDENTITY</span></tt> columns are supported by using SQLAlchemy
+<tt class="docutils literal"><span class="pre">schema.Sequence()</span></tt> objects. In other words:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Table</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">mss_engine</span><span class="p">,</span>
+       <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span>
+              <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;blah&#39;</span><span class="p">,</span><span class="mf">100</span><span class="p">,</span><span class="mf">10</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+       <span class="n">Column</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">))</span>
+     <span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></pre></div>
+</div>
+<p>would yield:</p>
+<div class="highlight-python"><pre>CREATE TABLE test (
+  id INTEGER NOT NULL IDENTITY(100,10) PRIMARY KEY,
+  name VARCHAR(20) NULL,
+  )</pre>
+</div>
+<p>Note that the <tt class="docutils literal"><span class="pre">start</span></tt> and <tt class="docutils literal"><span class="pre">increment</span></tt> values for sequences are
+optional and will default to 1,1.</p>
+<ul class="simple">
+<li>Support for <tt class="docutils literal"><span class="pre">SET</span> <span class="pre">IDENTITY_INSERT</span> <span class="pre">ON</span></tt> mode (automagic on / off for
+<tt class="docutils literal"><span class="pre">INSERT</span></tt> s)</li>
+<li>Support for auto-fetching of <tt class="docutils literal"><span class="pre">&#64;&#64;IDENTITY/&#64;&#64;SCOPE_IDENTITY()</span></tt> on
+<tt class="docutils literal"><span class="pre">INSERT</span></tt></li>
+</ul>
+</div>
+<div class="section" id="collation-support">
+<h2>Collation Support<a class="headerlink" href="#collation-support" title="Permalink to this headline">¶</a></h2>
+<p>MSSQL specific string types support a collation parameter that
+creates a column-level specific collation for the column. The
+collation parameter accepts a Windows Collation Name or a SQL
+Collation Name. Supported types are MSChar, MSNChar, MSString,
+MSNVarchar, MSText, and MSNText. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Column</span><span class="p">(</span><span class="s">&#39;login&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">32</span><span class="p">,</span> <span class="n">collation</span><span class="o">=</span><span class="s">&#39;Latin1_General_CI_AS&#39;</span><span class="p">))</span></pre></div>
+</div>
+<p>will yield:</p>
+<div class="highlight-python"><pre>login VARCHAR(32) COLLATE Latin1_General_CI_AS NULL</pre>
+</div>
+</div>
+<div class="section" id="limit-offset-support">
+<h2>LIMIT/OFFSET Support<a class="headerlink" href="#limit-offset-support" title="Permalink to this headline">¶</a></h2>
+<p>MSSQL has no support for the LIMIT or OFFSET keysowrds. LIMIT is
+supported directly through the <tt class="docutils literal"><span class="pre">TOP</span></tt> Transact SQL keyword:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">select</span><span class="o">.</span><span class="n">limit</span></pre></div>
+</div>
+<p>will yield:</p>
+<div class="highlight-python"><pre>SELECT TOP n</pre>
+</div>
+<p>If the <tt class="docutils literal"><span class="pre">has_window_funcs</span></tt> flag is set then LIMIT with OFFSET
+support is available through the <tt class="docutils literal"><span class="pre">ROW_NUMBER</span> <span class="pre">OVER</span></tt> construct. This
+construct requires an <tt class="docutils literal"><span class="pre">ORDER</span> <span class="pre">BY</span></tt> to be specified as well and is
+only available on MSSQL 2005 and later.</p>
+</div>
+<div class="section" id="nullability">
+<h2>Nullability<a class="headerlink" href="#nullability" title="Permalink to this headline">¶</a></h2>
+<p>MSSQL has support for three levels of column nullability. The default
+nullability allows nulls and is explicit in the CREATE TABLE
+construct:</p>
+<div class="highlight-python"><pre>name VARCHAR(20) NULL</pre>
+</div>
+<p>If <tt class="docutils literal"><span class="pre">nullable=None</span></tt> is specified then no specification is made. In
+other words the database&#8217;s configured default is used. This will
+render:</p>
+<div class="highlight-python"><pre>name VARCHAR(20)</pre>
+</div>
+<p>If <tt class="docutils literal"><span class="pre">nullable</span></tt> is <tt class="xref docutils literal"><span class="pre">True</span></tt> or <tt class="xref docutils literal"><span class="pre">False</span></tt> then the column will be
+<tt class="docutils literal"><span class="pre">NULL`</span> <span class="pre">or</span> <span class="pre">``NOT</span> <span class="pre">NULL</span></tt> respectively.</p>
+</div>
+<div class="section" id="date-time-handling">
+<h2>Date / Time Handling<a class="headerlink" href="#date-time-handling" title="Permalink to this headline">¶</a></h2>
+<p>For MSSQL versions that support the <tt class="docutils literal"><span class="pre">DATE</span></tt> and <tt class="docutils literal"><span class="pre">TIME</span></tt> types
+(MSSQL 2008+) the data type is used. For versions that do not
+support the <tt class="docutils literal"><span class="pre">DATE</span></tt> and <tt class="docutils literal"><span class="pre">TIME</span></tt> types a <tt class="docutils literal"><span class="pre">DATETIME</span></tt> type is used
+instead and the MSSQL dialect handles converting the results
+properly. This means <tt class="docutils literal"><span class="pre">Date()</span></tt> and <tt class="docutils literal"><span class="pre">Time()</span></tt> are fully supported
+on all versions of MSSQL. If you do not desire this behavior then
+do not use the <tt class="docutils literal"><span class="pre">Date()</span></tt> or <tt class="docutils literal"><span class="pre">Time()</span></tt> types.</p>
+</div>
+<div class="section" id="compatibility-levels">
+<h2>Compatibility Levels<a class="headerlink" href="#compatibility-levels" title="Permalink to this headline">¶</a></h2>
+<p>MSSQL supports the notion of setting compatibility levels at the
+database level. This allows, for instance, to run a database that
+is compatibile with SQL2000 while running on a SQL2005 database
+server. <tt class="docutils literal"><span class="pre">server_version_info</span></tt> will always retrun the database
+server version information (in this case SQL2005) and not the
+compatibiility level information. Because of this, if running under
+a backwards compatibility mode SQAlchemy may attempt to use T-SQL
+statements that are unable to be parsed by the database server.</p>
+</div>
+<div class="section" id="known-issues">
+<h2>Known Issues<a class="headerlink" href="#known-issues" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>No support for more than one <tt class="docutils literal"><span class="pre">IDENTITY</span></tt> column per table</li>
+<li>pymssql has problems with binary and unicode data that this module
+does <strong>not</strong> work around</li>
+</ul>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="maxdb.html" title="previous chapter">MaxDB</a>
+        Next:
+        <a href="mysql.html" title="next chapter">MySQL</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

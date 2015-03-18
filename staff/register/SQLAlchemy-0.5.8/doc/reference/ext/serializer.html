@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    serializer
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.ext" href="index.html" />
+        <link rel="next" title="SqlSoup" href="sqlsoup.html" />
+        <link rel="prev" title="orderinglist" href="orderinglist.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/ext/serializer.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.ext">sqlalchemy.ext</a>
+                » 
+    serializer
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="orderinglist.html" title="previous chapter">orderinglist</a>
+        Next:
+        <a href="sqlsoup.html" title="next chapter">SqlSoup</a>
+</div>
+
+                <h2>
+                    
+    serializer
+ 
+                </h2>
+            </div>
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.ext.serializer">
+<h1>serializer<a class="headerlink" href="#module-sqlalchemy.ext.serializer" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">author:</th><td class="field-body">Mike Bayer</td>
+</tr>
+</tbody>
+</table>
+<p>Serializer/Deserializer objects for usage with SQLAlchemy structures.</p>
+<p>Any SQLAlchemy structure, including Tables, Columns, expressions, mappers,
+Query objects etc. can be serialized in a minimally-sized format,
+and deserialized when given a Metadata and optional ScopedSession object
+to use as context on the way out.</p>
+<p>Usage is nearly the same as that of the standard Python pickle module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy.ext.serializer</span> <span class="kn">import</span> <span class="n">loads</span><span class="p">,</span> <span class="n">dumps</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">some_engine</span><span class="p">)</span>
+<span class="n">Session</span> <span class="o">=</span> <span class="n">scoped_session</span><span class="p">(</span><span class="n">sessionmaker</span><span class="p">())</span>
+
+<span class="c"># ... define mappers</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">MyClass</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">MyClass</span><span class="o">.</span><span class="n">somedata</span><span class="o">==</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">MyClass</span><span class="o">.</span><span class="n">sortkey</span><span class="p">)</span>
+
+<span class="c"># pickle the query</span>
+<span class="n">serialized</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+<span class="c"># unpickle.  Pass in metadata + scoped_session</span>
+<span class="n">query2</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">serialized</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">Session</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">query2</span><span class="o">.</span><span class="n">all</span><span class="p">()</span></pre></div>
+</div>
+<p>Similar restrictions as when using raw pickle apply; mapped classes must be 
+themselves be pickleable, meaning they are importable from a module-level
+namespace.</p>
+<p>Note that instances of user-defined classes do not require this extension
+in order to be pickled; these contain no references to engines, sessions
+or expression constructs in the typical case and can be serialized directly.
+This module is specifically for ORM and expression constructs.</p>
+<dl class="function">
+<dt id="sqlalchemy.ext.serializer.Serializer">
+<tt class="descclassname">sqlalchemy.ext.serializer.</tt><tt class="descname">Serializer</tt><big>(</big><em>*args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.ext.serializer.Serializer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sqlalchemy.ext.serializer.Deserializer">
+<tt class="descclassname">sqlalchemy.ext.serializer.</tt><tt class="descname">Deserializer</tt><big>(</big><em>file</em>, <em>metadata=None</em>, <em>scoped_session=None</em>, <em>engine=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.ext.serializer.Deserializer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sqlalchemy.ext.serializer.dumps">
+<tt class="descclassname">sqlalchemy.ext.serializer.</tt><tt class="descname">dumps</tt><big>(</big><em>obj</em><big>)</big><a class="headerlink" href="#sqlalchemy.ext.serializer.dumps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sqlalchemy.ext.serializer.loads">
+<tt class="descclassname">sqlalchemy.ext.serializer.</tt><tt class="descname">loads</tt><big>(</big><em>data</em>, <em>metadata=None</em>, <em>scoped_session=None</em>, <em>engine=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.ext.serializer.loads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="orderinglist.html" title="previous chapter">orderinglist</a>
+        Next:
+        <a href="sqlsoup.html" title="next chapter">SqlSoup</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

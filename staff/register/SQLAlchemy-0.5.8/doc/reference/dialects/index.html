@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    sqlalchemy.databases
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="API Reference" href="../index.html" />
+        <link rel="next" title="Access" href="access.html" />
+        <link rel="prev" title="Utilities" href="../orm/utilities.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/index.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                » 
+    sqlalchemy.databases
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="../orm/utilities.html" title="previous chapter">Utilities</a>
+        Next:
+        <a href="access.html" title="next chapter">Access</a>
+</div>
+
+                <h2>
+                    
+    sqlalchemy.databases
+ 
+                </h2>
+            </div>
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="sqlalchemy-databases">
+<span id="id1"></span><h1>sqlalchemy.databases<a class="headerlink" href="#sqlalchemy-databases" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="access.html">Access</a></li>
+<li class="toctree-l1"><a class="reference external" href="firebird.html">Firebird</a><ul>
+<li class="toctree-l2"><a class="reference external" href="firebird.html#firebird-backend">Firebird backend</a><ul>
+<li class="toctree-l3"><a class="reference external" href="firebird.html#firebird-dialects">Firebird dialects</a></li>
+<li class="toctree-l3"><a class="reference external" href="firebird.html#pooling-connections">Pooling connections</a></li>
+<li class="toctree-l3"><a class="reference external" href="firebird.html#returning-support">RETURNING support</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="informix.html">Informix</a></li>
+<li class="toctree-l1"><a class="reference external" href="maxdb.html">MaxDB</a><ul>
+<li class="toctree-l2"><a class="reference external" href="maxdb.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference external" href="maxdb.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference external" href="maxdb.html#implementation-notes">Implementation Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="mssql.html">SQL Server</a><ul>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#driver">Driver</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#auto-increment-behavior">Auto Increment Behavior</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#collation-support">Collation Support</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#limit-offset-support">LIMIT/OFFSET Support</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#nullability">Nullability</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#date-time-handling">Date / Time Handling</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#compatibility-levels">Compatibility Levels</a></li>
+<li class="toctree-l2"><a class="reference external" href="mssql.html#known-issues">Known Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="mysql.html">MySQL</a><ul>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#supported-versions-and-features">Supported Versions and Features</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#character-sets">Character Sets</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#storage-engines">Storage Engines</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#keys">Keys</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#sql-mode">SQL Mode</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#mysql-sql-extensions">MySQL SQL Extensions</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference external" href="mysql.html#mysql-column-types">MySQL Column Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="oracle.html">Oracle</a><ul>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#driver">Driver</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#auto-increment-behavior">Auto Increment Behavior</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#lob-objects">LOB Objects</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#limit-offset-support">LIMIT/OFFSET Support</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#two-phase-transaction-support">Two Phase Transaction Support</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#oracle-8-compatibility">Oracle 8 Compatibility</a></li>
+<li class="toctree-l2"><a class="reference external" href="oracle.html#synonym-dblink-reflection">Synonym/DBLINK Reflection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="postgres.html">PostgreSQL</a><ul>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#driver">Driver</a></li>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#connecting">Connecting</a></li>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#sequences-serial">Sequences/SERIAL</a></li>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#insert-update-returning">INSERT/UPDATE...RETURNING</a></li>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#indexes">Indexes</a></li>
+<li class="toctree-l2"><a class="reference external" href="postgres.html#transactions">Transactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="sqlite.html">SQLite</a><ul>
+<li class="toctree-l2"><a class="reference external" href="sqlite.html#driver">Driver</a></li>
+<li class="toctree-l2"><a class="reference external" href="sqlite.html#connect-strings">Connect Strings</a></li>
+<li class="toctree-l2"><a class="reference external" href="sqlite.html#threading-behavior">Threading Behavior</a></li>
+<li class="toctree-l2"><a class="reference external" href="sqlite.html#date-and-time-types">Date and Time Types</a></li>
+<li class="toctree-l2"><a class="reference external" href="sqlite.html#unicode">Unicode</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="sybase.html">Sybase</a></li>
+</ul>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="../orm/utilities.html" title="previous chapter">Utilities</a>
+        Next:
+        <a href="access.html" title="next chapter">Access</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

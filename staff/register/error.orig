@@ -1,0 +1,34 @@
+Traceback (most recent call last):
+  File "ui.py", line 27, in main
+    sale_editor.main()
+  File "/home/openproduce/marzipan/ui/dialogs.py", line 1587, in main
+    self._make_search()
+  File "/home/openproduce/marzipan/ui/dialogs.py", line 1563, in _make_search
+    layout.FillRightDown(self.measure.layout.width, 0))
+  File "/home/openproduce/marzipan/ui/dialogs.py", line 1249, in __init__
+    SearchDialog.__init__(self, 'item', has_cancel, layout, search)
+  File "/home/openproduce/marzipan/ui/dialogs.py", line 1087, in __init__
+    self.make_index()
+  File "/home/openproduce/marzipan/ui/dialogs.py", line 1255, in make_index
+    self.items = self.s.query(db.Item).all()
+  File "/var/lib/python-support/python2.6/sqlalchemy/orm/query.py", line 878, in all
+    return list(self)
+  File "/var/lib/python-support/python2.6/sqlalchemy/orm/query.py", line 938, in __iter__
+    return self._execute_and_instances(context)
+  File "/var/lib/python-support/python2.6/sqlalchemy/orm/query.py", line 941, in _execute_and_instances
+    result = self.session.execute(querycontext.statement, params=self._params, mapper=self.mapper, instance=self._refresh_instance)
+  File "/var/lib/python-support/python2.6/sqlalchemy/orm/session.py", line 628, in execute
+    return self.__connection(engine, close_with_result=True).execute(clause, params or {})
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 844, in execute
+    return Connection.executors[c](self, object, multiparams, params)
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 895, in execute_clauseelement
+    return self._execute_compiled(elem.compile(dialect=self.dialect, column_keys=keys, inline=len(params) > 1), distilled_params=params)
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 907, in _execute_compiled
+    self.__execute_raw(context)
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 916, in __execute_raw
+    self._cursor_execute(context.cursor, context.statement, context.parameters[0], context=context)
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 960, in _cursor_execute
+    self._handle_dbapi_exception(e, statement, parameters, cursor)
+  File "/var/lib/python-support/python2.6/sqlalchemy/engine/base.py", line 942, in _handle_dbapi_exception
+    raise exceptions.DBAPIError.instance(statement, parameters, e, connection_invalidated=is_disconnect)
+OperationalError: (OperationalError) (2006, 'MySQL server has gone away') u'SELECT items.id AS items_id, items.name AS items_name, items.barcode AS items_barcode, items.plu AS items_plu, items.price_id AS items_price_id, items.size AS items_size, items.size_unit_id AS items_size_unit_id, items.is_discontinued AS items_is_discontinued \nFROM items ORDER BY items.id' []

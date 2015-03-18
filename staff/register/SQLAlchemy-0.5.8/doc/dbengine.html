@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    Database Engines
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/init.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+        <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="index.html" />
+        <link rel="next" title="Database Meta Data" href="metadata.html" />
+        <link rel="prev" title="Using the Session" href="session.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="reference/index.html">API Reference</a>
+                |
+                <a href="genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="_sources/dbengine.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="index.html">Table of Contents</a>
+                » 
+    Database Engines
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="session.html" title="previous chapter">Using the Session</a>
+        Next:
+        <a href="metadata.html" title="next chapter">Database Meta Data</a>
+</div>
+
+                <h2>
+                    
+    Database Engines
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">Database Engines</a><ul>
+<li><a class="reference external" href="#supported-databases">Supported Databases</a></li>
+<li><a class="reference external" href="#create-engine-url-arguments">create_engine() URL Arguments</a><ul>
+<li><a class="reference external" href="#custom-dbapi-connect-arguments">Custom DBAPI connect() arguments</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#database-engine-options">Database Engine Options</a></li>
+<li><a class="reference external" href="#more-on-connections">More On Connections</a></li>
+<li><a class="reference external" href="#using-transactions-with-connection">Using Transactions with Connection</a><ul>
+<li><a class="reference external" href="#understanding-autocommit">Understanding Autocommit</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#connectionless-execution-implicit-execution">Connectionless Execution, Implicit Execution</a><ul>
+<li><a class="reference external" href="#using-the-threadlocal-execution-strategy">Using the Threadlocal Execution Strategy</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#configuring-logging">Configuring Logging</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="database-engines">
+<span id="engines-toplevel"></span><h1>Database Engines<a class="headerlink" href="#database-engines" title="Permalink to this headline">¶</a></h1>
+<p>The <strong>Engine</strong> is the starting point for any SQLAlchemy application.  It&#8217;s &#8220;home base&#8221; for the actual database and its DBAPI, delivered to the SQLAlchemy application through a connection pool and a <strong>Dialect</strong>, which describes how to talk to a specific kind of database/DBAPI combination.</p>
+<p>The general structure is this:</p>
+<div class="highlight-python"><pre>                                     +-----------+                        __________
+                                 /---|   Pool    |---\                   (__________)
+             +-------------+    /    +-----------+    \     +--------+   |          |
+connect() &lt;--|   Engine    |---x                       x----| DBAPI  |---| database |
+             +-------------+    \    +-----------+    /     +--------+   |          |
+                                 \---|  Dialect  |---/                   |__________|
+                                     +-----------+                       (__________)</pre>
+</div>
+<p>Where above, a <tt class="xref docutils literal"><span class="pre">Engine</span></tt> references both a  <tt class="xref docutils literal"><span class="pre">Dialect</span></tt> and <a title="sqlalchemy.pool.Pool" class="reference external" href="reference/sqlalchemy/pooling.html#sqlalchemy.pool.Pool"><tt class="xref docutils literal"><span class="pre">Pool</span></tt></a>, which together interpret the DBAPI&#8217;s module functions as well as the behavior of the database.</p>
+<p>Creating an engine is just a matter of issuing a single call, <tt class="xref docutils literal"><span class="pre">create_engine()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://scott:tiger@localhost:5432/mydatabase&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>The above engine invokes the <tt class="docutils literal"><span class="pre">postgres</span></tt> dialect and a connection pool which references <tt class="docutils literal"><span class="pre">localhost:5432</span></tt>.</p>
+<p>The engine can be used directly to issue SQL to the database.  The most generic way is to use connections, which you get via the <tt class="docutils literal"><span class="pre">connect()</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;select username from users&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;username:&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">]</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>The connection is an instance of <tt class="xref docutils literal"><span class="pre">Connection</span></tt>, which is a <strong>proxy</strong> object for an actual DBAPI connection.  The returned result is an instance of <tt class="xref docutils literal"><span class="pre">ResultProxy</span></tt>, which acts very much like a DBAPI cursor.</p>
+<p>When you say <tt class="docutils literal"><span class="pre">engine.connect()</span></tt>, a new <tt class="docutils literal"><span class="pre">Connection</span></tt> object is created, and a DBAPI connection is retrieved from the connection pool.  Later, when you call <tt class="docutils literal"><span class="pre">connection.close()</span></tt>, the DBAPI connection is returned to the pool; nothing is actually &#8220;closed&#8221; from the perspective of the database.</p>
+<p>To execute some SQL more quickly, you can skip the <tt class="docutils literal"><span class="pre">Connection</span></tt> part and just say:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">result</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;select username from users&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;username:&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;username&#39;</span><span class="p">]</span>
+<span class="n">result</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Where above, the <tt class="docutils literal"><span class="pre">execute()</span></tt> method on the <tt class="docutils literal"><span class="pre">Engine</span></tt> does the <tt class="docutils literal"><span class="pre">connect()</span></tt> part for you, and returns the <tt class="docutils literal"><span class="pre">ResultProxy</span></tt> directly.  The actual <tt class="docutils literal"><span class="pre">Connection</span></tt> is <em>inside</em> the <tt class="docutils literal"><span class="pre">ResultProxy</span></tt>, waiting for you to finish reading the result.  In this case, when you <tt class="docutils literal"><span class="pre">close()</span></tt> the <tt class="docutils literal"><span class="pre">ResultProxy</span></tt>, the underlying <tt class="docutils literal"><span class="pre">Connection</span></tt> is closed, which returns the DBAPI connection to the pool.</p>
+<p>To summarize the above two examples, when you use a <tt class="docutils literal"><span class="pre">Connection</span></tt> object, it&#8217;s known as <strong>explicit execution</strong>.  When you don&#8217;t see the <tt class="docutils literal"><span class="pre">Connection</span></tt> object, but you still use the <tt class="docutils literal"><span class="pre">execute()</span></tt> method on the <tt class="docutils literal"><span class="pre">Engine</span></tt>, it&#8217;s called <strong>explicit, connectionless execution</strong>.   A third variant of execution also exists called <strong>implicit execution</strong>; this will be described later.</p>
+<p>The <tt class="docutils literal"><span class="pre">Engine</span></tt> and <tt class="docutils literal"><span class="pre">Connection</span></tt> can do a lot more than what we illustrated above; SQL strings are only its most rudimentary function.  Later chapters will describe how &#8220;constructed SQL&#8221; expressions can be used with engines; in many cases, you don&#8217;t have to deal with the <tt class="docutils literal"><span class="pre">Engine</span></tt> at all after it&#8217;s created.  The Object Relational Mapper (ORM), an optional feature of SQLAlchemy, also uses the <tt class="docutils literal"><span class="pre">Engine</span></tt> in order to get at connections; that&#8217;s also a case where you can often create the engine once, and then forget about it.</p>
+<div class="section" id="supported-databases">
+<span id="supported-dbapis"></span><h2>Supported Databases<a class="headerlink" href="#supported-databases" title="Permalink to this headline">¶</a></h2>
+<p>Recall that the <tt class="docutils literal"><span class="pre">Dialect</span></tt> is used to describe how to talk to a specific kind of database.  Dialects are included with SQLAlchemy for many different backends; these can be seen as a Python package within the <tt class="xref docutils literal"><span class="pre">databases</span></tt> package.  Each dialect requires the appropriate DBAPI drivers to be installed separately.</p>
+<p>Dialects included with SQLAlchemy fall under one of three categories: supported, experimental, and third party.  Supported drivers are those which work against the most common databases available in the open source world, including SQLite, PostgreSQL, MySQL, and Firebird.   Very popular commercial databases which provide easy access to test platforms are also supported, these currently include MSSQL and Oracle.   These dialects are tested frequently and the level of support should be close to 100% for each.</p>
+<p>The experimental category is for drivers against less common database platforms, or commercial platforms for which no freely available and easily usable test platform is provided.   These include Access, MaxDB, Informix, and Sybase at the time of this writing.  These are partially-functioning dialects for which the SQLAlchemy project is not able to provide regular test support.  If you&#8217;re interested in supporting one of these backends, contact the mailing list.</p>
+<p>There are also third-party dialects available - currently IBM offers a DB2/Informix IDS dialect for SQLAlchemy.</p>
+<p>Downloads for each DBAPI at the time of this writing are as follows:</p>
+<ul class="simple">
+<li>Supported Dialects</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>PostgreSQL:  <a class="reference external" href="http://www.initd.org/tracker/psycopg/wiki/PsycopgTwo">psycopg2</a></li>
+<li>SQLite:  <a class="reference external" href="http://www.python.org/doc/2.5.2/lib/module-sqlite3.html">sqlite3</a> (included in Python 2.5 or greater) <a class="reference external" href="http://initd.org/tracker/pysqlite">pysqlite</a></li>
+<li>MySQL:   <a class="reference external" href="http://sourceforge.net/projects/mysql-python">MySQLDB (a.k.a. mysql-python)</a></li>
+<li>Oracle:  <a class="reference external" href="http://cx-oracle.sourceforge.net/">cx_Oracle</a></li>
+<li>Firebird:  <a class="reference external" href="http://kinterbasdb.sourceforge.net/">kinterbasdb</a></li>
+<li>MS-SQL, MSAccess:  <a class="reference external" href="http://pyodbc.sourceforge.net/">pyodbc</a> (recommended) <a class="reference external" href="http://adodbapi.sourceforge.net/">adodbapi</a>  <a class="reference external" href="http://pymssql.sourceforge.net/">pymssql</a></li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li>Experimental Dialects</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>MSAccess:  <a class="reference external" href="http://pyodbc.sourceforge.net/">pyodbc</a></li>
+<li>Informix:  <a class="reference external" href="http://informixdb.sourceforge.net/">informixdb</a></li>
+<li>Sybase:   TODO</li>
+<li>MAXDB:    TODO</li>
+</ul>
+</blockquote>
+<ul class="simple">
+<li>Third Party Dialects</li>
+</ul>
+<blockquote>
+<ul class="simple">
+<li>DB2/Informix IDS: <a class="reference external" href="http://code.google.com/p/ibm-db/">ibm-db</a></li>
+</ul>
+</blockquote>
+<p>The SQLAlchemy Wiki contains a page of database notes, describing whatever quirks and behaviors have been observed.  Its a good place to check for issues with specific databases.  <a class="reference external" href="http://www.sqlalchemy.org/trac/wiki/DatabaseNotes">Database Notes</a></p>
+</div>
+<div class="section" id="create-engine-url-arguments">
+<h2>create_engine() URL Arguments<a class="headerlink" href="#create-engine-url-arguments" title="Permalink to this headline">¶</a></h2>
+<p>SQLAlchemy indicates the source of an Engine strictly via <a class="reference external" href="http://rfc.net/rfc1738.html">RFC-1738</a> style URLs, combined with optional keyword arguments to specify options for the Engine.  The form of the URL is:</p>
+<blockquote>
+driver://username:password&#64;host:port/database</blockquote>
+<p>Dialect names include the identifying name of the SQLAlchemy dialect which include <tt class="docutils literal"><span class="pre">sqlite</span></tt>, <tt class="docutils literal"><span class="pre">mysql</span></tt>, <tt class="docutils literal"><span class="pre">postgres</span></tt>, <tt class="docutils literal"><span class="pre">oracle</span></tt>, <tt class="docutils literal"><span class="pre">mssql</span></tt>, and <tt class="docutils literal"><span class="pre">firebird</span></tt>.  In SQLAlchemy 0.5 and earlier, the DBAPI implementation is automatically selected if more than one are available - currently this includes only MSSQL (pyodbc is the default, then adodbapi, then pymssql) and SQLite (sqlite3 is the default, or pysqlite if sqlite3 is not availble).   When using MSSQL, <tt class="docutils literal"><span class="pre">create_engine()</span></tt> accepts a <tt class="docutils literal"><span class="pre">module</span></tt> argument which specifies the name of the desired DBAPI to be used, overriding the default behavior.</p>
+<blockquote>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="c"># postgresql</span>
+<span class="n">pg_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://scott:tiger@localhost/mydatabase&#39;</span><span class="p">)</span>
+
+<span class="c"># mysql</span>
+<span class="n">mysql_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mysql://scott:tiger@localhost/mydatabase&#39;</span><span class="p">)</span>
+
+<span class="c"># oracle</span>
+<span class="n">oracle_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;oracle://scott:tiger@127.0.0.1:1521/sidname&#39;</span><span class="p">)</span>
+
+<span class="c"># oracle via TNS name</span>
+<span class="n">oracle_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;oracle://scott:tiger@tnsname&#39;</span><span class="p">)</span>
+
+<span class="c"># mssql using ODBC datasource names.  PyODBC is the default driver.</span>
+<span class="n">mssql_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mssql://mydsn&#39;</span><span class="p">)</span>
+<span class="n">mssql_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mssql://scott:tiger@mydsn&#39;</span><span class="p">)</span>
+
+<span class="c"># firebird</span>
+<span class="n">firebird_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;firebird://scott:tiger@localhost/sometest.gdm&#39;</span><span class="p">)</span></pre></div>
+</div>
+</blockquote>
+<p>SQLite connects to file based databases.   The same URL format is used, omitting the hostname, and using the &#8220;file&#8221; portion as the filename of the database.   This has the effect of four slashes being present for an absolute file path:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># sqlite://&lt;nohostname&gt;/&lt;path&gt;</span>
+<span class="c"># where &lt;path&gt; is relative:</span>
+<span class="n">sqlite_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///foo.db&#39;</span><span class="p">)</span>
+
+<span class="c"># or absolute, starting with a slash:</span>
+<span class="n">sqlite_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:////absolute/path/to/foo.db&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>To use a SQLite <tt class="docutils literal"><span class="pre">:memory:</span></tt> database, specify an empty URL:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sqlite_memory_db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite://&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>The <a title="sqlalchemy.engine.base.Engine" class="reference external" href="reference/sqlalchemy/connections.html#sqlalchemy.engine.base.Engine"><tt class="xref docutils literal"><span class="pre">Engine</span></tt></a> will ask the connection pool for a connection when the <tt class="docutils literal"><span class="pre">connect()</span></tt> or <tt class="docutils literal"><span class="pre">execute()</span></tt> methods are called.  The default connection pool, <a title="sqlalchemy.pool.QueuePool" class="reference external" href="reference/sqlalchemy/pooling.html#sqlalchemy.pool.QueuePool"><tt class="xref docutils literal"><span class="pre">QueuePool</span></tt></a>, as well as the default connection pool used with SQLite, <a title="sqlalchemy.pool.SingletonThreadPool" class="reference external" href="reference/sqlalchemy/pooling.html#sqlalchemy.pool.SingletonThreadPool"><tt class="xref docutils literal"><span class="pre">SingletonThreadPool</span></tt></a>, will open connections to the database on an as-needed basis.  As concurrent statements are executed, <a title="sqlalchemy.pool.QueuePool" class="reference external" href="reference/sqlalchemy/pooling.html#sqlalchemy.pool.QueuePool"><tt class="xref docutils literal"><span class="pre">QueuePool</span></tt></a> will grow its pool of connections to a default size of five, and will allow a default &#8220;overflow&#8221; of ten.   Since the <tt class="docutils literal"><span class="pre">Engine</span></tt> is essentially &#8220;home base&#8221; for the connection pool, it follows that you should keep a single <a title="sqlalchemy.engine.base.Engine" class="reference external" href="reference/sqlalchemy/connections.html#sqlalchemy.engine.base.Engine"><tt class="xref docutils literal"><span class="pre">Engine</span></tt></a> per database established within an application, rather than creating a new one for each connection.</p>
+<div class="section" id="custom-dbapi-connect-arguments">
+<h3>Custom DBAPI connect() arguments<a class="headerlink" href="#custom-dbapi-connect-arguments" title="Permalink to this headline">¶</a></h3>
+<p>Custom arguments used when issuing the <tt class="docutils literal"><span class="pre">connect()</span></tt> call to the underlying DBAPI may be issued in three distinct ways.  String-based arguments can be passed directly from the URL string as query arguments:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://scott:tiger@localhost/test?argument1=foo&amp;argument2=bar&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>If SQLAlchemy&#8217;s database connector is aware of a particular query argument, it may convert its type from string to its proper type.</p>
+<p><tt class="docutils literal"><span class="pre">create_engine</span></tt> also takes an argument <tt class="docutils literal"><span class="pre">connect_args</span></tt> which is an additional dictionary that will be passed to <tt class="docutils literal"><span class="pre">connect()</span></tt>.  This can be used when arguments of a type other than string are required, and SQLAlchemy&#8217;s database connector has no type conversion logic present for that parameter:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://scott:tiger@localhost/test&#39;</span><span class="p">,</span> <span class="n">connect_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;argument1&#39;</span><span class="p">:</span><span class="mf">17</span><span class="p">,</span> <span class="s">&#39;argument2&#39;</span><span class="p">:</span><span class="s">&#39;bar&#39;</span><span class="p">})</span></pre></div>
+</div>
+<p>The most customizable connection method of all is to pass a <tt class="docutils literal"><span class="pre">creator</span></tt> argument, which specifies a callable that returns a DBAPI connection:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="k">def</span> <span class="nf">connect</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s">&#39;scott&#39;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;localhost&#39;</span><span class="p">)</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://&#39;</span><span class="p">,</span> <span class="n">creator</span><span class="o">=</span><span class="n">connect</span><span class="p">)</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="database-engine-options">
+<span id="create-engine-args"></span><h2>Database Engine Options<a class="headerlink" href="#database-engine-options" title="Permalink to this headline">¶</a></h2>
+<p>Keyword options can also be specified to <tt class="docutils literal"><span class="pre">create_engine()</span></tt>, following the string URL as follows:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;postgres://...&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&#39;latin1&#39;</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></pre></div>
+</div>
+<p>Options common to all database dialects are described at <a title="sqlalchemy.create_engine" class="reference external" href="reference/sqlalchemy/connections.html#sqlalchemy.create_engine"><tt class="xref docutils literal"><span class="pre">create_engine()</span></tt></a>.</p>
+</div>
+<div class="section" id="more-on-connections">
+<h2>More On Connections<a class="headerlink" href="#more-on-connections" title="Permalink to this headline">¶</a></h2>
+<p>Recall from the beginning of this section that the Engine provides a <tt class="docutils literal"><span class="pre">connect()</span></tt> method which returns a <tt class="docutils literal"><span class="pre">Connection</span></tt> object.  <tt class="docutils literal"><span class="pre">Connection</span></tt> is a <em>proxy</em> object which maintains a reference to a DBAPI connection instance.  The <tt class="docutils literal"><span class="pre">close()</span></tt> method on <tt class="docutils literal"><span class="pre">Connection</span></tt> does not actually close the DBAPI connection, but instead returns it to the connection pool referenced by the <tt class="docutils literal"><span class="pre">Engine</span></tt>.  <tt class="docutils literal"><span class="pre">Connection</span></tt> will also automatically return its resources to the connection pool when the object is garbage collected, i.e. its <tt class="docutils literal"><span class="pre">__del__()</span></tt> method is called.  When using the standard C implementation of Python, this method is usually called immediately as soon as the object is dereferenced.  With other Python implementations such as Jython, this is not so guaranteed.</p>
+<p>The <tt class="docutils literal"><span class="pre">execute()</span></tt> methods on both <tt class="docutils literal"><span class="pre">Engine</span></tt> and <tt class="docutils literal"><span class="pre">Connection</span></tt> can also receive SQL clause constructs as well:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select</span><span class="p">([</span><span class="n">table1</span><span class="p">],</span> <span class="n">table1</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col1</span><span class="o">==</span><span class="mf">5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;col1&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;col2&#39;</span><span class="p">]</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>The above SQL construct is known as a <tt class="docutils literal"><span class="pre">select()</span></tt>.  The full range of SQL constructs available are described in <a class="reference external" href="sqlexpression.html"><em>SQL Expression Language Tutorial</em></a>.</p>
+<p>Both <tt class="docutils literal"><span class="pre">Connection</span></tt> and <tt class="docutils literal"><span class="pre">Engine</span></tt> fulfill an interface known as <tt class="docutils literal"><span class="pre">Connectable</span></tt> which specifies common functionality between the two objects, namely being able to call <tt class="docutils literal"><span class="pre">connect()</span></tt> to return a <tt class="docutils literal"><span class="pre">Connection</span></tt> object (<tt class="docutils literal"><span class="pre">Connection</span></tt> just returns itself), and being able to call <tt class="docutils literal"><span class="pre">execute()</span></tt> to get a result set.   Following this, most SQLAlchemy functions and objects which accept an <tt class="docutils literal"><span class="pre">Engine</span></tt> as a parameter or attribute with which to execute SQL will also accept a <tt class="docutils literal"><span class="pre">Connection</span></tt>.  As of SQLAlchemy 0.3.9, this argument is named <tt class="docutils literal"><span class="pre">bind</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///:memory:&#39;</span><span class="p">)</span>
+
+<span class="c"># specify some Table metadata</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;sometable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col1&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">))</span>
+
+<span class="c"># create the table with the Engine</span>
+<span class="n">table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+
+<span class="c"># drop the table with a Connection off the Engine</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">table</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">connection</span><span class="p">)</span></pre></div>
+</div>
+<p id="index-0">Connection facts:</p>
+<ul class="simple">
+<li>the Connection object is <strong>not thread-safe</strong>.  While a Connection can be shared among threads using properly synchronized access, this is also not recommended as many DBAPIs have issues with, if not outright disallow, sharing of connection state between threads.</li>
+<li>The Connection object represents a single dbapi connection checked out from the connection pool.  In this state, the connection pool has no affect upon the connection, including its expiration or timeout state.  For the connection pool to properly manage connections, <strong>connections should be returned to the connection pool (i.e. ``connection.close()``) whenever the connection is not in use</strong>.  If your application has a need for management of multiple connections or is otherwise long running (this includes all web applications, threaded or not), don&#8217;t hold a single connection open at the module level.</li>
+</ul>
+</div>
+<div class="section" id="using-transactions-with-connection">
+<h2>Using Transactions with Connection<a class="headerlink" href="#using-transactions-with-connection" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">Connection</span></tt> object provides a <tt class="docutils literal"><span class="pre">begin()</span></tt> method which returns a <tt class="docutils literal"><span class="pre">Transaction</span></tt> object.  This object is usually used within a try/except clause so that it is guaranteed to <tt class="docutils literal"><span class="pre">rollback()</span></tt> or <tt class="docutils literal"><span class="pre">commit()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">trans</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">r1</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">table1</span><span class="o">.</span><span class="n">select</span><span class="p">())</span>
+    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">table1</span><span class="o">.</span><span class="n">insert</span><span class="p">(),</span> <span class="n">col1</span><span class="o">=</span><span class="mf">7</span><span class="p">,</span> <span class="n">col2</span><span class="o">=</span><span class="s">&#39;this is some data&#39;</span><span class="p">)</span>
+    <span class="n">trans</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">trans</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+    <span class="k">raise</span></pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">Transaction</span></tt> object also handles &#8220;nested&#8221; behavior by keeping track of the outermost begin/commit pair.  In this example, two functions both issue a transaction on a Connection, but only the outermost Transaction object actually takes effect when it is committed.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="c"># method_a starts a transaction and calls method_b</span>
+<span class="k">def</span> <span class="nf">method_a</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span> <span class="c"># open a transaction</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">method_b</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+        <span class="n">trans</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c"># transaction is committed here</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trans</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span> <span class="c"># this rolls back the transaction unconditionally</span>
+        <span class="k">raise</span>
+
+<span class="c"># method_b also starts a transaction</span>
+<span class="k">def</span> <span class="nf">method_b</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span> <span class="c"># open a transaction - this runs in the context of method_a&#39;s transaction</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;insert into mytable values (&#39;bat&#39;, &#39;lala&#39;)&quot;</span><span class="p">)</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">mytable</span><span class="o">.</span><span class="n">insert</span><span class="p">(),</span> <span class="n">col1</span><span class="o">=</span><span class="s">&#39;bat&#39;</span><span class="p">,</span> <span class="n">col2</span><span class="o">=</span><span class="s">&#39;lala&#39;</span><span class="p">)</span>
+        <span class="n">trans</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c"># transaction is not committed yet</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trans</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span> <span class="c"># this rolls back the transaction unconditionally</span>
+        <span class="k">raise</span>
+
+<span class="c"># open a Connection and call method_a</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">method_a</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Above, <tt class="docutils literal"><span class="pre">method_a</span></tt> is called first, which calls <tt class="docutils literal"><span class="pre">connection.begin()</span></tt>.  Then it calls <tt class="docutils literal"><span class="pre">method_b</span></tt>. When <tt class="docutils literal"><span class="pre">method_b</span></tt> calls <tt class="docutils literal"><span class="pre">connection.begin()</span></tt>, it just increments a counter that is decremented when it calls <tt class="docutils literal"><span class="pre">commit()</span></tt>.  If either <tt class="docutils literal"><span class="pre">method_a</span></tt> or <tt class="docutils literal"><span class="pre">method_b</span></tt> calls <tt class="docutils literal"><span class="pre">rollback()</span></tt>, the whole transaction is rolled back.  The transaction is not committed until <tt class="docutils literal"><span class="pre">method_a</span></tt> calls the <tt class="docutils literal"><span class="pre">commit()</span></tt> method.  This &#8220;nesting&#8221; behavior allows the creation of functions which &#8220;guarantee&#8221; that a transaction will be used if one was not already available, but will automatically participate in an enclosing transaction if one exists.</p>
+<p>Note that SQLAlchemy&#8217;s Object Relational Mapper also provides a way to control transaction scope at a higher level; this is described in <a class="reference external" href="session.html#unitofwork-transaction"><em>Managing Transactions</em></a>.</p>
+<p id="index-1">Transaction Facts:</p>
+<ul class="simple">
+<li>the Transaction object, just like its parent Connection, is <strong>not thread-safe</strong>.</li>
+<li>SQLAlchemy 0.4 will feature transactions with two-phase commit capability as well as SAVEPOINT capability.</li>
+</ul>
+<div class="section" id="understanding-autocommit">
+<h3>Understanding Autocommit<a class="headerlink" href="#understanding-autocommit" title="Permalink to this headline">¶</a></h3>
+<p>The above transaction example illustrates how to use <tt class="docutils literal"><span class="pre">Transaction</span></tt> so that several executions can take part in the same transaction.  What happens when we issue an INSERT, UPDATE or DELETE call without using <tt class="docutils literal"><span class="pre">Transaction</span></tt>?  The answer is <strong>autocommit</strong>.  While many DBAPIs  implement a flag called <tt class="docutils literal"><span class="pre">autocommit</span></tt>, the current SQLAlchemy behavior is such that it implements its own autocommit.  This is achieved by detecting statements which represent data-changing operations, i.e. INSERT, UPDATE, DELETE, etc., and then issuing a COMMIT automatically if no transaction is in progress.  The detection is based on compiled statement attributes, or in the case of a text-only statement via regular expressions.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">conn</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;INSERT INTO users VALUES (1, &#39;john&#39;)&quot;</span><span class="p">)</span>  <span class="c"># autocommits</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="connectionless-execution-implicit-execution">
+<span id="dbengine-implicit"></span><h2>Connectionless Execution, Implicit Execution<a class="headerlink" href="#connectionless-execution-implicit-execution" title="Permalink to this headline">¶</a></h2>
+<p>Recall from the first section we mentioned executing with and without a <tt class="docutils literal"><span class="pre">Connection</span></tt>.  <tt class="docutils literal"><span class="pre">Connectionless</span></tt> execution refers to calling the <tt class="docutils literal"><span class="pre">execute()</span></tt> method on an object which is not a <tt class="docutils literal"><span class="pre">Connection</span></tt>, which could be on the <tt class="docutils literal"><span class="pre">Engine</span></tt> itself, or could be a constructed SQL object.  When we say &#8220;implicit&#8221;, we mean that we are calling the <tt class="docutils literal"><span class="pre">execute()</span></tt> method on an object which is neither a <tt class="docutils literal"><span class="pre">Connection</span></tt> nor an <tt class="docutils literal"><span class="pre">Engine</span></tt> object; this can only be used with constructed SQL objects which have their own <tt class="docutils literal"><span class="pre">execute()</span></tt> method, and can be &#8220;bound&#8221; to an <tt class="docutils literal"><span class="pre">Engine</span></tt>.  A description of &#8220;constructed SQL objects&#8221; may be found in <a class="reference external" href="sqlexpression.html"><em>SQL Expression Language Tutorial</em></a>.</p>
+<p>A summary of all three methods follows below.  First, assume the usage of the following <tt class="docutils literal"><span class="pre">MetaData</span></tt> and <tt class="docutils literal"><span class="pre">Table</span></tt> objects; while we haven&#8217;t yet introduced these concepts, for now you only need to know that we are representing a database table, and are creating an &#8220;executable&#8221; SQL construct which issues a statement to the database.  These objects are described in <a class="reference external" href="metadata.html"><em>Database Meta Data</em></a>.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">users_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">50</span><span class="p">))</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>Explicit execution delivers the SQL text or constructed SQL expression to the <tt class="docutils literal"><span class="pre">execute()</span></tt> method of <tt class="docutils literal"><span class="pre">Connection</span></tt>:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///file.db&#39;</span><span class="p">)</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">users_table</span><span class="o">.</span><span class="n">select</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="c"># ....</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Explicit, connectionless execution delivers the expression to the <tt class="docutils literal"><span class="pre">execute()</span></tt> method of <tt class="docutils literal"><span class="pre">Engine</span></tt>:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///file.db&#39;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">users_table</span><span class="o">.</span><span class="n">select</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="c"># ....</span>
+<span class="n">result</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Implicit execution is also connectionless, and calls the <tt class="docutils literal"><span class="pre">execute()</span></tt> method on the expression itself, utilizing the fact that either an <tt class="docutils literal"><span class="pre">Engine</span></tt> or <tt class="docutils literal"><span class="pre">Connection</span></tt> has been <em>bound</em> to the expression object (binding is discussed further in the next section, <a class="reference external" href="metadata.html"><em>Database Meta Data</em></a>):</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///file.db&#39;</span><span class="p">)</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="n">engine</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">users_table</span><span class="o">.</span><span class="n">select</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="c"># ....</span>
+<span class="n">result</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>In both &#8220;connectionless&#8221; examples, the <tt class="docutils literal"><span class="pre">Connection</span></tt> is created behind the scenes; the <tt class="docutils literal"><span class="pre">ResultProxy</span></tt> returned by the <tt class="docutils literal"><span class="pre">execute()</span></tt> call references the <tt class="docutils literal"><span class="pre">Connection</span></tt> used to issue the SQL statement.   When we issue <tt class="docutils literal"><span class="pre">close()</span></tt> on the <tt class="docutils literal"><span class="pre">ResultProxy</span></tt>, or if the result set object falls out of scope and is garbage collected, the underlying <tt class="docutils literal"><span class="pre">Connection</span></tt> is closed for us, resulting in the DBAPI connection being returned to the pool.</p>
+<div class="section" id="using-the-threadlocal-execution-strategy">
+<span id="threadlocal-strategy"></span><h3>Using the Threadlocal Execution Strategy<a class="headerlink" href="#using-the-threadlocal-execution-strategy" title="Permalink to this headline">¶</a></h3>
+<p>The &#8220;threadlocal&#8221; engine strategy is used by non-ORM applications which wish to bind a transaction to the current thread, such that all parts of the application can participate in that transaction implicitly without the need to explicitly reference a <tt class="docutils literal"><span class="pre">Connection</span></tt>.   &#8220;threadlocal&#8221; is designed for a very specific pattern of use, and is not appropriate unless this very specfic pattern, described below, is what&#8217;s desired.  It has <strong>no impact</strong> on the &#8220;thread safety&#8221; of SQLAlchemy components or one&#8217;s application.  It also should not be used when using an ORM <tt class="docutils literal"><span class="pre">Session</span></tt> object, as the <tt class="docutils literal"><span class="pre">Session</span></tt> itself represents an ongoing transaction and itself handles the job of maintaining connection and transactional resources.</p>
+<p>Enabling <tt class="docutils literal"><span class="pre">threadlocal</span></tt> is achieved as follows:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mysql://localhost/test&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s">&#39;threadlocal&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>When the engine above is used in a &#8220;connectionless&#8221; style, meaning <tt class="docutils literal"><span class="pre">engine.execute()</span></tt> is called, a DBAPI connection is retrieved from the connection pool and then associated with the current thread.   Subsequent operations on the <tt class="docutils literal"><span class="pre">Engine</span></tt> while the DBAPI connection remains checked out will make use of the <em>same</em> DBAPI connection object.  The connection stays allocated until all returned <tt class="docutils literal"><span class="pre">ResultProxy</span></tt> objects are closed, which occurs for a particular <tt class="docutils literal"><span class="pre">ResultProxy</span></tt> after all pending results are fetched, or immediately for an operation which returns no rows (such as an INSERT).</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="c"># execute one statement and receive results.  r1 now references a DBAPI connection resource.</span>
+<span class="n">r1</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;select * from table1&quot;</span><span class="p">)</span>
+
+<span class="c"># execute a second statement and receive results.  r2 now references the *same* resource as r1</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;select * from table2&quot;</span><span class="p">)</span>
+
+<span class="c"># fetch a row on r1 (assume more results are pending)</span>
+<span class="n">row1</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+<span class="c"># fetch a row on r2 (same)</span>
+<span class="n">row2</span> <span class="o">=</span> <span class="n">r2</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+<span class="c"># close r1.  the connection is still held by r2.</span>
+<span class="n">r1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c"># close r2.  with no more references to the underlying connection resources, they</span>
+<span class="c"># are returned to the pool.</span>
+<span class="n">r2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>The above example does not illustrate any pattern that is particularly useful, as it is not a frequent occurence that two execute/result fetching operations &#8220;leapfrog&#8221; one another.  There is a slight savings of connection pool checkout overhead between the two operations, and an implicit sharing of the same transactional context, but since there is no explicitly declared transaction, this association is short lived.</p>
+<p>The real usage of &#8220;threadlocal&#8221; comes when we want several operations to occur within the scope of a shared transaction.  The <tt class="docutils literal"><span class="pre">Engine</span></tt> now has <tt class="docutils literal"><span class="pre">begin()</span></tt>, <tt class="docutils literal"><span class="pre">commit()</span></tt> and <tt class="docutils literal"><span class="pre">rollback()</span></tt> methods which will retrieve a connection resource from the pool and establish a new transaction, maintaining the connection against the current thread until the transaction is committed or rolled back:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">call_operation1</span><span class="p">()</span>
+    <span class="n">call_operation2</span><span class="p">()</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span></pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">call_operation1()</span></tt> and <tt class="docutils literal"><span class="pre">call_operation2()</span></tt> can make use of the <tt class="docutils literal"><span class="pre">Engine</span></tt> as a global variable, using the &#8220;connectionless&#8221; execution style, and their operations will participate in the same transaction:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="k">def</span> <span class="nf">call_operation1</span><span class="p">():</span>
+    <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&quot;insert into users values (?, ?)&quot;</span><span class="p">,</span> <span class="mf">1</span><span class="p">,</span> <span class="s">&quot;john&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">call_operation2</span><span class="p">():</span>
+    <span class="n">users</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">users</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">user_id</span><span class="o">==</span><span class="mf">5</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;ed&#39;</span><span class="p">)</span></pre></div>
+</div>
+<p>When using threadlocal, operations that do call upon the <tt class="docutils literal"><span class="pre">engine.connect()</span></tt> method will receive a <tt class="docutils literal"><span class="pre">Connection</span></tt> that is <strong>outside</strong> the scope of the transaction.  This can be used for operations such as logging the status of an operation regardless of transaction success:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">log_table</span><span class="o">.</span><span class="n">insert</span><span class="p">(),</span> <span class="n">message</span><span class="o">=</span><span class="s">&quot;Operation started&quot;</span><span class="p">)</span>
+    <span class="n">call_operation1</span><span class="p">()</span>
+    <span class="n">call_operation2</span><span class="p">()</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">log_table</span><span class="o">.</span><span class="n">insert</span><span class="p">(),</span> <span class="n">message</span><span class="o">=</span><span class="s">&quot;Operation succeeded&quot;</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">log_table</span><span class="o">.</span><span class="n">insert</span><span class="p">(),</span> <span class="n">message</span><span class="o">=</span><span class="s">&quot;Operation failed&quot;</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Functions which are written to use an explicit <tt class="docutils literal"><span class="pre">Connection</span></tt> object, but wish to participate in the threadlocal transaction, can receive their <tt class="docutils literal"><span class="pre">Connection</span></tt> object from the <tt class="docutils literal"><span class="pre">contextual_connect()</span></tt> method, which returns a <tt class="docutils literal"><span class="pre">Connection</span></tt> that is <strong>inside</strong> the scope of the transaction:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">conn</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">contextual_connect</span><span class="p">()</span>
+<span class="n">call_operation3</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+</div>
+<p>Calling <tt class="docutils literal"><span class="pre">close()</span></tt> on the &#8220;contextual&#8221; connection does not release the connection resources to the pool if other resources are making use of it.  A resource-counting mechanism is employed so that the connection is released back to the pool only when all users of that connection, including the transaction established by <tt class="docutils literal"><span class="pre">engine.begin()</span></tt>, have been completed.</p>
+<p>So remember - if you&#8217;re not sure if you need to use <tt class="docutils literal"><span class="pre">strategy=&quot;threadlocal&quot;</span></tt> or not, the answer is <strong>no</strong> !  It&#8217;s driven by a specific programming pattern that is generally not the norm.</p>
+</div>
+</div>
+<div class="section" id="configuring-logging">
+<h2>Configuring Logging<a class="headerlink" href="#configuring-logging" title="Permalink to this headline">¶</a></h2>
+<p>Python&#8217;s standard <a class="reference external" href="http://www.python.org/doc/lib/module-logging.html">logging</a> module is used to implement informational and debug log output with SQLAlchemy.  This allows SQLAlchemy&#8217;s logging to integrate in a standard way with other applications and libraries.  The <tt class="docutils literal"><span class="pre">echo</span></tt> and <tt class="docutils literal"><span class="pre">echo_pool</span></tt> flags that are present on <tt class="docutils literal"><span class="pre">create_engine()</span></tt>, as well as the <tt class="docutils literal"><span class="pre">echo_uow</span></tt> flag used on <tt class="docutils literal"><span class="pre">Session</span></tt>, all interact with regular loggers.</p>
+<p>This section assumes familiarity with the above linked logging module.  All logging performed by SQLAlchemy exists underneath the <tt class="docutils literal"><span class="pre">sqlalchemy</span></tt> namespace, as used by <tt class="docutils literal"><span class="pre">logging.getLogger('sqlalchemy')</span></tt>.  When logging has been configured (i.e. such as via <tt class="docutils literal"><span class="pre">logging.basicConfig()</span></tt>), the general namespace of SA loggers that can be turned on is as follows:</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">sqlalchemy.engine</span></tt> - controls SQL echoing.  set to <tt class="docutils literal"><span class="pre">logging.INFO</span></tt> for SQL query output, <tt class="docutils literal"><span class="pre">logging.DEBUG</span></tt> for query + result set output.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">sqlalchemy.pool</span></tt> - controls connection pool logging.  set to <tt class="docutils literal"><span class="pre">logging.INFO</span></tt> or lower to log connection pool checkouts/checkins.</p>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="docutils literal"><span class="pre">sqlalchemy.orm</span></tt> - controls logging of various ORM functions.  set to <tt class="docutils literal"><span class="pre">logging.INFO</span></tt> for configurational logging as well as unit of work dumps, <tt class="docutils literal"><span class="pre">logging.DEBUG</span></tt> for extensive logging during query and flush() operations.  Subcategories of <tt class="docutils literal"><span class="pre">sqlalchemy.orm</span></tt> include:</dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal"><span class="pre">sqlalchemy.orm.attributes</span></tt> - logs certain instrumented attribute operations, such as triggered callables</li>
+<li><tt class="docutils literal"><span class="pre">sqlalchemy.orm.mapper</span></tt> - logs Mapper configuration and operations</li>
+<li><tt class="docutils literal"><span class="pre">sqlalchemy.orm.unitofwork</span></tt> - logs flush() operations, including dependency sort graphs and other operations</li>
+<li><tt class="docutils literal"><span class="pre">sqlalchemy.orm.strategies</span></tt> - logs relation loader operations (i.e. lazy and eager loads)</li>
+<li><tt class="docutils literal"><span class="pre">sqlalchemy.orm.sync</span></tt> - logs synchronization of attributes from parent to child instances during a flush()</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>For example, to log SQL queries as well as unit of work debugging:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;sqlalchemy.engine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;sqlalchemy.orm.unitofwork&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span></pre></div>
+</div>
+<p>By default, the log level is set to <tt class="docutils literal"><span class="pre">logging.ERROR</span></tt> within the entire <tt class="docutils literal"><span class="pre">sqlalchemy</span></tt> namespace so that no log operations occur, even within an application that has logging enabled otherwise.</p>
+<p>The <tt class="docutils literal"><span class="pre">echo</span></tt> flags present as keyword arguments to <tt class="docutils literal"><span class="pre">create_engine()</span></tt> and others as well as the <tt class="docutils literal"><span class="pre">echo</span></tt> property on <tt class="docutils literal"><span class="pre">Engine</span></tt>, when set to <tt class="xref docutils literal"><span class="pre">True</span></tt>, will first attempt to ensure that logging is enabled.  Unfortunately, the <tt class="docutils literal"><span class="pre">logging</span></tt> module provides no way of determining if output has already been configured (note we are referring to if a logging configuration has been set up, not just that the logging level is set).  For this reason, any <tt class="docutils literal"><span class="pre">echo=True</span></tt> flags will result in a call to <tt class="docutils literal"><span class="pre">logging.basicConfig()</span></tt> using sys.stdout as the destination.  It also sets up a default format using the level name, timestamp, and logger name.  Note that this configuration has the affect of being configured <strong>in addition</strong> to any existing logger configurations.  Therefore, <strong>when using Python logging, ensure all echo flags are set to False at all times</strong>, to avoid getting duplicate log lines.</p>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="session.html" title="previous chapter">Using the Session</a>
+        Next:
+        <a href="metadata.html" title="next chapter">Database Meta Data</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

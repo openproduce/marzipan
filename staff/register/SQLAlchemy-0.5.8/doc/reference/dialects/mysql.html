@@ -1,0 +1,1302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    MySQL
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.databases" href="index.html" />
+        <link rel="next" title="Oracle" href="oracle.html" />
+        <link rel="prev" title="SQL Server" href="mssql.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/mysql.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.databases">sqlalchemy.databases</a>
+                » 
+    MySQL
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="mssql.html" title="previous chapter">SQL Server</a>
+        Next:
+        <a href="oracle.html" title="next chapter">Oracle</a>
+</div>
+
+                <h2>
+                    
+    MySQL
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">MySQL</a><ul>
+<li><a class="reference external" href="#overview">Overview</a></li>
+<li><a class="reference external" href="#supported-versions-and-features">Supported Versions and Features</a></li>
+<li><a class="reference external" href="#character-sets">Character Sets</a></li>
+<li><a class="reference external" href="#storage-engines">Storage Engines</a></li>
+<li><a class="reference external" href="#keys">Keys</a></li>
+<li><a class="reference external" href="#sql-mode">SQL Mode</a></li>
+<li><a class="reference external" href="#mysql-sql-extensions">MySQL SQL Extensions</a></li>
+<li><a class="reference external" href="#troubleshooting">Troubleshooting</a></li>
+<li><a class="reference external" href="#mysql-column-types">MySQL Column Types</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.databases.mysql">
+<h1>MySQL<a class="headerlink" href="#module-sqlalchemy.databases.mysql" title="Permalink to this headline">¶</a></h1>
+<p>Support for the MySQL database.</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>For normal SQLAlchemy usage, importing this module is unnecessary.  It will be
+loaded on-demand when a MySQL connection is needed.  The generic column types
+like <tt class="xref docutils literal"><span class="pre">String</span></tt> and <tt class="xref docutils literal"><span class="pre">Integer</span></tt> will
+automatically be adapted to the optimal matching MySQL column type.</p>
+<p>But if you would like to use one of the MySQL-specific or enhanced column
+types when creating tables with your <tt class="xref docutils literal"><span class="pre">Table</span></tt> definitions,
+then you will need to import them from this module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy.databases</span> <span class="kn">import</span> <span class="n">mysql</span>
+
+<span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;ittybittyblob&#39;</span><span class="p">,</span> <span class="n">mysql</span><span class="o">.</span><span class="n">MSTinyBlob</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;biggy&#39;</span><span class="p">,</span> <span class="n">mysql</span><span class="o">.</span><span class="n">MSBigInteger</span><span class="p">(</span><span class="n">unsigned</span><span class="o">=</span><span class="bp">True</span><span class="p">)))</span></pre></div>
+</div>
+<p>All standard MySQL column types are supported.  The OpenGIS types are
+available for use via table reflection but have no special support or mapping
+to Python classes.  If you&#8217;re using these types and have opinions about how
+OpenGIS can be smartly integrated into SQLAlchemy please join the mailing
+list!</p>
+</div>
+<div class="section" id="supported-versions-and-features">
+<h2>Supported Versions and Features<a class="headerlink" href="#supported-versions-and-features" title="Permalink to this headline">¶</a></h2>
+<p>SQLAlchemy supports 6 major MySQL versions: 3.23, 4.0, 4.1, 5.0, 5.1 and 6.0,
+with capabilities increasing with more modern servers.</p>
+<p>Versions 4.1 and higher support the basic SQL functionality that SQLAlchemy
+uses in the ORM and SQL expressions.  These versions pass the applicable tests
+in the suite 100%.  No heroic measures are taken to work around major missing
+SQL features- if your server version does not support sub-selects, for
+example, they won&#8217;t work in SQLAlchemy either.</p>
+<p>Currently, the only DB-API driver supported is <cite>MySQL-Python</cite> (also referred to
+as <cite>MySQLdb</cite>).  Either 1.2.1 or 1.2.2 are recommended.  The alpha, beta and
+gamma releases of 1.2.1 and 1.2.2 should be avoided.  Support for Jython and
+IronPython is planned.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Feature</th>
+<th class="head">Minimum Version</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>sqlalchemy.orm</td>
+<td>4.1.1</td>
+</tr>
+<tr><td>Table Reflection</td>
+<td>3.23.x</td>
+</tr>
+<tr><td>DDL Generation</td>
+<td>4.1.1</td>
+</tr>
+<tr><td>utf8/Full Unicode Connections</td>
+<td>4.1.1</td>
+</tr>
+<tr><td>Transactions</td>
+<td>3.23.15</td>
+</tr>
+<tr><td>Two-Phase Transactions</td>
+<td>5.0.3</td>
+</tr>
+<tr><td>Nested Transactions</td>
+<td>5.0.3</td>
+</tr>
+</tbody>
+</table>
+<p>See the official MySQL documentation for detailed information about features
+supported in any given server release.</p>
+</div>
+<div class="section" id="character-sets">
+<h2>Character Sets<a class="headerlink" href="#character-sets" title="Permalink to this headline">¶</a></h2>
+<p>Many MySQL server installations default to a <tt class="docutils literal"><span class="pre">latin1</span></tt> encoding for client
+connections.  All data sent through the connection will be converted into
+<tt class="docutils literal"><span class="pre">latin1</span></tt>, even if you have <tt class="docutils literal"><span class="pre">utf8</span></tt> or another character set on your tables
+and columns.  With versions 4.1 and higher, you can change the connection
+character set either through server configuration or by including the
+<tt class="docutils literal"><span class="pre">charset</span></tt> parameter in the URL used for <tt class="docutils literal"><span class="pre">create_engine</span></tt>.  The <tt class="docutils literal"><span class="pre">charset</span></tt>
+option is passed through to MySQL-Python and has the side-effect of also
+enabling <tt class="docutils literal"><span class="pre">use_unicode</span></tt> in the driver by default.  For regular encoded
+strings, also pass <tt class="docutils literal"><span class="pre">use_unicode=0</span></tt> in the connection arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># set client encoding to utf8; all strings come back as unicode</span>
+<span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mysql:///mydb?charset=utf8&#39;</span><span class="p">)</span>
+
+<span class="c"># set client encoding to utf8; all strings come back as utf8 str</span>
+<span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mysql:///mydb?charset=utf8&amp;use_unicode=0&#39;</span><span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="storage-engines">
+<h2>Storage Engines<a class="headerlink" href="#storage-engines" title="Permalink to this headline">¶</a></h2>
+<p>Most MySQL server installations have a default table type of <tt class="docutils literal"><span class="pre">MyISAM</span></tt>, a
+non-transactional table type.  During a transaction, non-transactional storage
+engines do not participate and continue to store table changes in autocommit
+mode.  For fully atomic transactions, all participating tables must use a
+transactional engine such as <tt class="docutils literal"><span class="pre">InnoDB</span></tt>, <tt class="docutils literal"><span class="pre">Falcon</span></tt>, <tt class="docutils literal"><span class="pre">SolidDB</span></tt>, <cite>PBXT</cite>, etc.</p>
+<p>Storage engines can be elected when creating tables in SQLAlchemy by supplying
+a <tt class="docutils literal"><span class="pre">mysql_engine='whatever'</span></tt> to the <tt class="docutils literal"><span class="pre">Table</span></tt> constructor.  Any MySQL table
+creation option can be specified in this syntax:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">32</span><span class="p">)),</span>
+      <span class="n">mysql_engine</span><span class="o">=</span><span class="s">&#39;InnoDB&#39;</span><span class="p">,</span>
+      <span class="n">mysql_charset</span><span class="o">=</span><span class="s">&#39;utf8&#39;</span>
+     <span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="keys">
+<h2>Keys<a class="headerlink" href="#keys" title="Permalink to this headline">¶</a></h2>
+<p>Not all MySQL storage engines support foreign keys.  For <tt class="docutils literal"><span class="pre">MyISAM</span></tt> and
+similar engines, the information loaded by table reflection will not include
+foreign keys.  For these tables, you may supply a
+<tt class="xref docutils literal"><span class="pre">ForeignKeyConstraint</span></tt> at reflection time:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+      <span class="n">ForeignKeyConstraint</span><span class="p">([</span><span class="s">&#39;other_id&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;othertable.other_id&#39;</span><span class="p">]),</span>
+      <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span>
+     <span class="p">)</span></pre></div>
+</div>
+<p>When creating tables, SQLAlchemy will automatically set <tt class="docutils literal"><span class="pre">AUTO_INCREMENT`</span></tt> on
+an integer primary key column:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="n">Column</span><span class="p">(</span><span class="s">&#39;mytable_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+<span class="go">CREATE TABLE mytable (</span>
+<span class="go">        id INTEGER NOT NULL AUTO_INCREMENT,</span>
+<span class="go">        PRIMARY KEY (id)</span>
+<span class="go">)</span></pre></div>
+</div>
+<p>You can disable this behavior by supplying <tt class="docutils literal"><span class="pre">autoincrement=False</span></tt> to the
+<tt class="xref docutils literal"><span class="pre">Column</span></tt>.  This flag can also be used to enable
+auto-increment on a secondary column in a multi-column key for some storage
+engines:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;gid&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+     <span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="sql-mode">
+<h2>SQL Mode<a class="headerlink" href="#sql-mode" title="Permalink to this headline">¶</a></h2>
+<p>MySQL SQL modes are supported.  Modes that enable <tt class="docutils literal"><span class="pre">ANSI_QUOTES</span></tt> (such as
+<tt class="docutils literal"><span class="pre">ANSI</span></tt>) require an engine option to modify SQLAlchemy&#8217;s quoting style.
+When using an ANSI-quoting mode, supply <tt class="docutils literal"><span class="pre">use_ansiquotes=True</span></tt> when
+creating your <tt class="docutils literal"><span class="pre">Engine</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;mysql://localhost/test&#39;</span><span class="p">,</span> <span class="n">use_ansiquotes</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></pre></div>
+</div>
+<p>This is an engine-wide option and is not toggleable on a per-connection basis.
+SQLAlchemy does not presume to <tt class="docutils literal"><span class="pre">SET</span> <span class="pre">sql_mode</span></tt> for you with this option.  For
+the best performance, set the quoting style server-wide in <tt class="docutils literal"><span class="pre">my.cnf</span></tt> or by
+supplying <tt class="docutils literal"><span class="pre">--sql-mode</span></tt> to <tt class="docutils literal"><span class="pre">mysqld</span></tt>.  You can also use a
+<a title="sqlalchemy.pool.Pool" class="reference external" href="../sqlalchemy/pooling.html#sqlalchemy.pool.Pool"><tt class="xref docutils literal"><span class="pre">sqlalchemy.pool.Pool</span></tt></a> listener hook to issue a <tt class="docutils literal"><span class="pre">SET</span> <span class="pre">SESSION</span>
+<span class="pre">sql_mode='...'</span></tt> on connect to configure each connection.</p>
+<p>If you do not specify <tt class="docutils literal"><span class="pre">use_ansiquotes</span></tt>, the regular MySQL quoting style is
+used by default.</p>
+<p>If you do issue a <tt class="docutils literal"><span class="pre">SET</span> <span class="pre">sql_mode</span></tt> through SQLAlchemy, the dialect must be
+updated if the quoting style is changed.  Again, this change will affect all
+connections:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;SET sql_mode=&quot;ansi&quot;&#39;</span><span class="p">)</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">dialect</span><span class="o">.</span><span class="n">use_ansiquotes</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+</div>
+</div>
+<div class="section" id="mysql-sql-extensions">
+<h2>MySQL SQL Extensions<a class="headerlink" href="#mysql-sql-extensions" title="Permalink to this headline">¶</a></h2>
+<p>Many of the MySQL SQL extensions are handled through SQLAlchemy&#8217;s generic
+function and operator support:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">table</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">password</span><span class="o">==</span><span class="n">func</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="s">&#39;plaintext&#39;</span><span class="p">))</span>
+<span class="n">table</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">op</span><span class="p">(</span><span class="s">&#39;regexp&#39;</span><span class="p">)(</span><span class="s">&#39;^[a-d]&#39;</span><span class="p">))</span></pre></div>
+</div>
+<p>And of course any valid MySQL statement can be executed as a string as well.</p>
+<p>Some limited direct support for MySQL extensions to SQL is currently
+available.</p>
+<blockquote>
+<ul>
+<li><p class="first">SELECT pragma:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">select</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">prefixes</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;HIGH_PRIORITY&#39;</span><span class="p">,</span> <span class="s">&#39;SQL_SMALL_RESULT&#39;</span><span class="p">])</span></pre></div>
+</div>
+</li>
+<li><p class="first">UPDATE with LIMIT:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">update</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">mysql_limit</span><span class="o">=</span><span class="mf">10</span><span class="p">)</span></pre></div>
+</div>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>If you have problems that seem server related, first check that you are
+using the most recent stable MySQL-Python package available.  The Database
+Notes page on the wiki at <a class="reference external" href="http://www.sqlalchemy.org">http://www.sqlalchemy.org</a> is a good resource for
+timely information affecting MySQL in SQLAlchemy.</p>
+</div>
+<div class="section" id="mysql-column-types">
+<h2>MySQL Column Types<a class="headerlink" href="#mysql-column-types" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSNumeric">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSNumeric</tt><big>(</big><em>precision=10</em>, <em>scale=2</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNumeric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Numeric" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Numeric"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Numeric</span></tt></a>, <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._NumericType</span></tt></p>
+<p>MySQL NUMERIC type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSNumeric.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>precision=10</em>, <em>scale=2</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNumeric.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a NUMERIC.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>precision</em> &#8211; Total digits in this number.  If scale and precision
+are both None, values are stored to limits allowed by the server.</li>
+<li><em>scale</em> &#8211; The number of digits after the decimal point.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSDecimal">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSDecimal</tt><big>(</big><em>precision=10</em>, <em>scale=2</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDecimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSNumeric" class="reference internal" href="#sqlalchemy.databases.mysql.MSNumeric"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSNumeric</span></tt></a></p>
+<p>MySQL DECIMAL type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSDecimal.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>precision=10</em>, <em>scale=2</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDecimal.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a DECIMAL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>precision</em> &#8211; Total digits in this number.  If scale and precision
+are both None, values are stored to limits allowed by the server.</li>
+<li><em>scale</em> &#8211; The number of digits after the decimal point.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSDouble">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSDouble</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDouble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Float" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Float"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Float</span></tt></a>, <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._NumericType</span></tt></p>
+<p>MySQL DOUBLE type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSDouble.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDouble.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a DOUBLE.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>precision</em> &#8211; Total digits in this number.  If scale and precision
+are both None, values are stored to limits allowed by the server.</li>
+<li><em>scale</em> &#8211; The number of digits after the decimal point.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSReal">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSReal</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSReal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSDouble" class="reference internal" href="#sqlalchemy.databases.mysql.MSDouble"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSDouble</span></tt></a></p>
+<p>MySQL REAL type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSReal.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=True</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSReal.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a REAL.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>precision</em> &#8211; Total digits in this number.  If scale and precision
+are both None, values are stored to limits allowed by the server.</li>
+<li><em>scale</em> &#8211; The number of digits after the decimal point.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSFloat">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSFloat</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=False</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSFloat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Float" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Float"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Float</span></tt></a>, <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._NumericType</span></tt></p>
+<p>MySQL FLOAT type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSFloat.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>precision=None</em>, <em>scale=None</em>, <em>asdecimal=False</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSFloat.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a FLOAT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>precision</em> &#8211; Total digits in this number.  If scale and precision
+are both None, values are stored to limits allowed by the server.</li>
+<li><em>scale</em> &#8211; The number of digits after the decimal point.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSInteger">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSInteger</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Integer" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Integer"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Integer</span></tt></a>, <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._NumericType</span></tt></p>
+<p>MySQL INTEGER type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSInteger.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSInteger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an INTEGER.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>display_width</em> &#8211; Optional, maximum display width for this number.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSBigInteger">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSBigInteger</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBigInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSInteger" class="reference internal" href="#sqlalchemy.databases.mysql.MSInteger"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSInteger</span></tt></a></p>
+<p>MySQL BIGINTEGER type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSBigInteger.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBigInteger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BIGINTEGER.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>display_width</em> &#8211; Optional, maximum display width for this number.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSMediumInteger">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSMediumInteger</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSInteger" class="reference internal" href="#sqlalchemy.databases.mysql.MSInteger"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSInteger</span></tt></a></p>
+<p>MySQL MEDIUMINTEGER type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSMediumInteger.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumInteger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a MEDIUMINTEGER</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>display_width</em> &#8211; Optional, maximum display width for this number.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSTinyInteger">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSTinyInteger</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSInteger" class="reference internal" href="#sqlalchemy.databases.mysql.MSInteger"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSInteger</span></tt></a></p>
+<p>MySQL TINYINT type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSTinyInteger.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyInteger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TINYINT.</p>
+<p>Note: following the usual MySQL conventions, TINYINT(1) columns
+reflected during Table(..., autoload=True) are treated as
+Boolean columns.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>display_width</em> &#8211; Optional, maximum display width for this number.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSSmallInteger">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSSmallInteger</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSSmallInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.SmallInteger" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.SmallInteger"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.SmallInteger</span></tt></a>, <a title="sqlalchemy.databases.mysql.MSInteger" class="reference internal" href="#sqlalchemy.databases.mysql.MSInteger"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSInteger</span></tt></a></p>
+<p>MySQL SMALLINTEGER type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSSmallInteger.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSSmallInteger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a SMALLINTEGER.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>display_width</em> &#8211; Optional, maximum display width for this number.</li>
+<li><em>unsigned</em> &#8211; a boolean, optional.</li>
+<li><em>zerofill</em> &#8211; Optional. If true, values will be stored as strings
+left-padded with zeros. Note that this does not effect the values
+returned by the underlying database API, which continue to be
+numeric.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSBit">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSBit</tt><big>(</big><em>length=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.TypeEngine" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.TypeEngine"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.TypeEngine</span></tt></a></p>
+<p>MySQL BIT type.</p>
+<p>This type is for MySQL 5.0.3 or greater for MyISAM, and 5.0.5 or greater for
+MyISAM, MEMORY, InnoDB and BDB.  For older versions, use a MSTinyInteger()
+type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSBit.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBit.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BIT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Optional, number of bits.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSDateTime">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSDateTime</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDateTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.DateTime" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.DateTime"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.DateTime</span></tt></a></p>
+<p>MySQL DATETIME type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSDateTime.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDateTime.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSDate">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSDate</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Date" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Date"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Date</span></tt></a></p>
+<p>MySQL DATE type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSDate.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSDate.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSTime">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSTime</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Time" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Time"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Time</span></tt></a></p>
+<p>MySQL TIME type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSTime.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTime.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSTimeStamp">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSTimeStamp</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTimeStamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.TIMESTAMP" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.TIMESTAMP"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.TIMESTAMP</span></tt></a></p>
+<p>MySQL TIMESTAMP type.</p>
+<p>To signal the orm to automatically re-select modified rows to retrieve the
+updated timestamp, add a <tt class="docutils literal"><span class="pre">server_default</span></tt> to your
+<tt class="xref docutils literal"><span class="pre">Column</span></tt> specification:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy.databases</span> <span class="kn">import</span> <span class="n">mysql</span>
+<span class="n">Column</span><span class="p">(</span><span class="s">&#39;updated&#39;</span><span class="p">,</span> <span class="n">mysql</span><span class="o">.</span><span class="n">MSTimeStamp</span><span class="p">,</span>
+       <span class="n">server_default</span><span class="o">=</span><span class="n">sql</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s">&#39;CURRENT_TIMESTAMP&#39;</span><span class="p">)</span>
+      <span class="p">)</span></pre></div>
+</div>
+<p>The full range of MySQL 4.1+ TIMESTAMP defaults can be specified in
+the the default:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">server_default</span><span class="o">=</span><span class="n">sql</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s">&#39;CURRENT TIMESTAMP ON UPDATE CURRENT_TIMESTAMP&#39;</span><span class="p">)</span></pre></div>
+</div>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSTimeStamp.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>timezone=False</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTimeStamp.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSYear">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSYear</tt><big>(</big><em>display_width=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSYear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.TypeEngine" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.TypeEngine"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.TypeEngine</span></tt></a></p>
+<p>MySQL YEAR type, for single byte storage of years 1901-2155.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSYear.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>display_width=None</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSYear.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSText">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSText</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._StringType</span></tt>, <a title="sqlalchemy.types.Text" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Text"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Text</span></tt></a></p>
+<p>MySQL TEXT type, for text up to 2^16 characters.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSText.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSText.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TEXT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>length</em> &#8211; Optional, if provided the server may optimize storage
+by substituting the smallest TEXT type sufficient to store
+<tt class="docutils literal"><span class="pre">length</span></tt> characters.</li>
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>national</em> &#8211; Optional. If true, use the server&#8217;s configured
+national character set.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSTinyText">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSTinyText</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSText" class="reference internal" href="#sqlalchemy.databases.mysql.MSText"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSText</span></tt></a></p>
+<p>MySQL TINYTEXT type, for text up to 2^8 characters.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSTinyText.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyText.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a TINYTEXT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>national</em> &#8211; Optional. If true, use the server&#8217;s configured
+national character set.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSMediumText">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSMediumText</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSText" class="reference internal" href="#sqlalchemy.databases.mysql.MSText"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSText</span></tt></a></p>
+<p>MySQL MEDIUMTEXT type, for text up to 2^24 characters.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSMediumText.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumText.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a MEDIUMTEXT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>national</em> &#8211; Optional. If true, use the server&#8217;s configured
+national character set.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSLongText">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSLongText</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSLongText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSText" class="reference internal" href="#sqlalchemy.databases.mysql.MSText"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSText</span></tt></a></p>
+<p>MySQL LONGTEXT type, for text up to 2^32 characters.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSLongText.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSLongText.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a LONGTEXT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>national</em> &#8211; Optional. If true, use the server&#8217;s configured
+national character set.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSString">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSString</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._StringType</span></tt>, <a title="sqlalchemy.types.String" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.String"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.String</span></tt></a></p>
+<p>MySQL VARCHAR type, for variable-length character data.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSString.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSString.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a VARCHAR.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>national</em> &#8211; Optional. If true, use the server&#8217;s configured
+national character set.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSChar">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSChar</tt><big>(</big><em>length</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSChar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._StringType</span></tt>, <a title="sqlalchemy.types.CHAR" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.CHAR"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.CHAR</span></tt></a></p>
+<p>MySQL CHAR type, for fixed-length character data.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSChar.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSChar.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an NCHAR.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>length</em> &#8211; Maximum data length, in characters.</li>
+<li><em>binary</em> &#8211; Optional, use the default binary collation for the
+national character set.  This does not affect the type of data
+stored, use a BINARY type for binary data.</li>
+<li><em>collation</em> &#8211; Optional, request a particular collation.  Must be
+compatible with the national character set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSNVarChar">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSNVarChar</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNVarChar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._StringType</span></tt>, <a title="sqlalchemy.types.String" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.String"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.String</span></tt></a></p>
+<p>MySQL NVARCHAR type.</p>
+<p>For variable-length character data in the server&#8217;s configured national
+character set.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSNVarChar.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNVarChar.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an NVARCHAR.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>length</em> &#8211; Maximum data length, in characters.</li>
+<li><em>binary</em> &#8211; Optional, use the default binary collation for the
+national character set.  This does not affect the type of data
+stored, use a BINARY type for binary data.</li>
+<li><em>collation</em> &#8211; Optional, request a particular collation.  Must be
+compatible with the national character set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSNChar">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSNChar</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNChar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._StringType</span></tt>, <a title="sqlalchemy.types.CHAR" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.CHAR"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.CHAR</span></tt></a></p>
+<p>MySQL NCHAR type.</p>
+<p>For fixed-length character data in the server&#8217;s configured national
+character set.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSNChar.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSNChar.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an NCHAR.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>length</em> &#8211; Maximum data length, in characters.</li>
+<li><em>binary</em> &#8211; Optional, use the default binary collation for the
+national character set.  This does not affect the type of data
+stored, use a BINARY type for binary data.</li>
+<li><em>collation</em> &#8211; Optional, request a particular collation.  Must be
+compatible with the national character set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSVarBinary">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSVarBinary</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSVarBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._BinaryType</span></tt></p>
+<p>MySQL VARBINARY type, for variable length binary data.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSVarBinary.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSVarBinary.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a VARBINARY.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Maximum data length, in characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSBinary">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSBinary</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._BinaryType</span></tt></p>
+<p>MySQL BINARY type, for fixed length binary data</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSBinary.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBinary.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BINARY.</p>
+<p>This is a fixed length type, and short values will be right-padded
+with a server-version-specific pad value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Maximum data length, in bytes.  If length is not
+specified, this will generate a BLOB.  This usage is deprecated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSBlob">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSBlob</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBlob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql._BinaryType</span></tt></p>
+<p>MySQL BLOB type, for binary data up to 2^16 bytes</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSBlob.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBlob.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BLOB.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Optional, if provided the server may optimize storage
+by substituting the smallest TEXT type sufficient to store
+<tt class="docutils literal"><span class="pre">length</span></tt> characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSTinyBlob">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSTinyBlob</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyBlob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSBlob" class="reference internal" href="#sqlalchemy.databases.mysql.MSBlob"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSBlob</span></tt></a></p>
+<p>MySQL TINYBLOB type, for binary data up to 2^8 bytes.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSTinyBlob.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSTinyBlob.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BLOB.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Optional, if provided the server may optimize storage
+by substituting the smallest TEXT type sufficient to store
+<tt class="docutils literal"><span class="pre">length</span></tt> characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSMediumBlob">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSMediumBlob</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumBlob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSBlob" class="reference internal" href="#sqlalchemy.databases.mysql.MSBlob"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSBlob</span></tt></a></p>
+<p>MySQL MEDIUMBLOB type, for binary data up to 2^24 bytes.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSMediumBlob.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSMediumBlob.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BLOB.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Optional, if provided the server may optimize storage
+by substituting the smallest TEXT type sufficient to store
+<tt class="docutils literal"><span class="pre">length</span></tt> characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSLongBlob">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSLongBlob</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSLongBlob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSBlob" class="reference internal" href="#sqlalchemy.databases.mysql.MSBlob"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSBlob</span></tt></a></p>
+<p>MySQL LONGBLOB type, for binary data up to 2^32 bytes.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSLongBlob.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>length=None</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSLongBlob.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a BLOB.  Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameter:</th><td class="field-body"><em>length</em> &#8211; Optional, if provided the server may optimize storage
+by substituting the smallest TEXT type sufficient to store
+<tt class="docutils literal"><span class="pre">length</span></tt> characters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSEnum">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSEnum</tt><big>(</big><em>*enums</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSEnum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSString" class="reference internal" href="#sqlalchemy.databases.mysql.MSString"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSString</span></tt></a></p>
+<p>MySQL ENUM type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSEnum.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>*enums</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSEnum.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an ENUM.</p>
+<p>Example:</p>
+<blockquote>
+Column(&#8216;myenum&#8217;, MSEnum(&#8220;foo&#8221;, &#8220;bar&#8221;, &#8220;baz&#8221;))</blockquote>
+<p>Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>enums</em> &#8211; The range of valid values for this ENUM.  Values will be
+quoted when generating the schema according to the quoting flag (see
+below).</li>
+<li><em>strict</em> &#8211; Defaults to False: ensure that a given value is in this
+ENUM&#8217;s range of permissible values when inserting or updating rows.
+Note that MySQL will not raise a fatal error if you attempt to store
+an out of range value- an alternate value will be stored instead.
+(See MySQL ENUM documentation.)</li>
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+<li><em>quoting</em> &#8211; <p>Defaults to &#8216;auto&#8217;: automatically determine enum value
+quoting.  If all enum values are surrounded by the same quoting
+character, then use &#8216;quoted&#8217; mode.  Otherwise, use &#8216;unquoted&#8217; mode.</p>
+<p>&#8216;quoted&#8217;: values in enums are already quoted, they will be used
+directly when generating the schema.</p>
+<p>&#8216;unquoted&#8217;: values in enums are not quoted, they will be escaped and
+surrounded by single quotes when generating the schema.</p>
+<p>Previous versions of this type always required manually quoted
+values to be supplied; future versions will always quote the string
+literals for you.  This is a transitional option.</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSSet">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSSet</tt><big>(</big><em>*values</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.databases.mysql.MSString" class="reference internal" href="#sqlalchemy.databases.mysql.MSString"><tt class="xref docutils literal"><span class="pre">sqlalchemy.databases.mysql.MSString</span></tt></a></p>
+<p>MySQL SET type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSSet.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>*values</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSSet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a SET.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Column</span><span class="p">(</span><span class="s">&#39;myset&#39;</span><span class="p">,</span> <span class="n">MSSet</span><span class="p">(</span><span class="s">&quot;&#39;foo&#39;&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;bar&#39;&quot;</span><span class="p">,</span> <span class="s">&quot;&#39;baz&#39;&quot;</span><span class="p">))</span></pre></div>
+</div>
+<p>Arguments are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><em>values</em> &#8211; The range of valid values for this SET.  Values will be
+used exactly as they appear when generating schemas.  Strings must
+be quoted, as in the example above.  Single-quotes are suggested for
+ANSI compatibility and are required for portability to servers with
+ANSI_QUOTES enabled.</li>
+<li><em>charset</em> &#8211; Optional, a column-level character set for this string
+value.  Takes precedence to &#8216;ascii&#8217; or &#8216;unicode&#8217; short-hand.</li>
+<li><em>collation</em> &#8211; Optional, a column-level collation for this string
+value.  Takes precedence to &#8216;binary&#8217; short-hand.</li>
+<li><em>ascii</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">latin1</span></tt>
+character set, generates ASCII in schema.</li>
+<li><em>unicode</em> &#8211; Defaults to False: short-hand for the <tt class="docutils literal"><span class="pre">ucs2</span></tt>
+character set, generates UNICODE in schema.</li>
+<li><em>binary</em> &#8211; Defaults to False: short-hand, pick the binary
+collation type that matches the column&#8217;s character set.  Generates
+BINARY in schema.  This does not affect the type of data stored,
+only the collation of character data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sqlalchemy.databases.mysql.MSBoolean">
+<em class="property">
+class </em><tt class="descclassname">sqlalchemy.databases.mysql.</tt><tt class="descname">MSBoolean</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBoolean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a title="sqlalchemy.types.Boolean" class="reference external" href="../sqlalchemy/types.html#sqlalchemy.types.Boolean"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types.Boolean</span></tt></a></p>
+<p>MySQL BOOLEAN type.</p>
+<dl class="method">
+<dt id="sqlalchemy.databases.mysql.MSBoolean.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sqlalchemy.databases.mysql.MSBoolean.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="mssql.html" title="previous chapter">SQL Server</a>
+        Next:
+        <a href="oracle.html" title="next chapter">Oracle</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

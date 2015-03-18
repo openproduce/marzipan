@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    Firebird
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.databases" href="index.html" />
+        <link rel="next" title="Informix" href="informix.html" />
+        <link rel="prev" title="Access" href="access.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/firebird.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.databases">sqlalchemy.databases</a>
+                » 
+    Firebird
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="access.html" title="previous chapter">Access</a>
+        Next:
+        <a href="informix.html" title="next chapter">Informix</a>
+</div>
+
+                <h2>
+                    
+    Firebird
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">Firebird</a><ul>
+<li><a class="reference external" href="#firebird-backend">Firebird backend</a><ul>
+<li><a class="reference external" href="#firebird-dialects">Firebird dialects</a></li>
+<li><a class="reference external" href="#pooling-connections">Pooling connections</a></li>
+<li><a class="reference external" href="#returning-support">RETURNING support</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.databases.firebird">
+<h1>Firebird<a class="headerlink" href="#module-sqlalchemy.databases.firebird" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="firebird-backend">
+<h2>Firebird backend<a class="headerlink" href="#firebird-backend" title="Permalink to this headline">¶</a></h2>
+<p>This module implements the Firebird backend, thru the <a class="reference external" href="http://sourceforge.net/projects/kinterbasdb">kinterbasdb</a>
+DBAPI module.</p>
+<div class="section" id="firebird-dialects">
+<h3>Firebird dialects<a class="headerlink" href="#firebird-dialects" title="Permalink to this headline">¶</a></h3>
+<p>Firebird offers two distinct <a class="reference external" href="http://mc-computing.com/Databases/Firebird/SQL_Dialect.html">dialects</a> (not to be confused with the
+SA <tt class="docutils literal"><span class="pre">Dialect</span></tt> thing):</p>
+<dl class="docutils">
+<dt>dialect 1</dt>
+<dd>This is the old syntax and behaviour, inherited from Interbase pre-6.0.</dd>
+<dt>dialect 3</dt>
+<dd>This is the newer and supported syntax, introduced in Interbase 6.0.</dd>
+</dl>
+<p>From the user point of view, the biggest change is in date/time
+handling: under dialect 1, there&#8217;s a single kind of field, <tt class="docutils literal"><span class="pre">DATE</span></tt>
+with a synonim <tt class="docutils literal"><span class="pre">DATETIME</span></tt>, that holds a <cite>timestamp</cite> value, that is a
+date with hour, minute, second. Under dialect 3 there are three kinds,
+a <tt class="docutils literal"><span class="pre">DATE</span></tt> that holds a date, a <tt class="docutils literal"><span class="pre">TIME</span></tt> that holds a <em>time of the
+day</em> value and a <tt class="docutils literal"><span class="pre">TIMESTAMP</span></tt>, equivalent to the old <tt class="docutils literal"><span class="pre">DATE</span></tt>.</p>
+<p>The problem is that the dialect of a Firebird database is a property
+of the database itself <a class="footnote-reference" href="#id2" id="id1">[1]</a> (that is, any single database has been
+created with one dialect or the other: there is no way to change the
+after creation). SQLAlchemy has a single instance of the class that
+controls all the connections to a particular kind of database, so it
+cannot easily differentiate between the two modes, and in particular
+it <strong>cannot</strong> simultaneously talk with two distinct Firebird databases
+with different dialects.</p>
+<p>By default this module is biased toward dialect 3, but you can easily
+tweak it to handle dialect 1 if needed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">types</span> <span class="k">as</span> <span class="n">sqltypes</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.databases.firebird</span> <span class="kn">import</span> <span class="n">FBDate</span><span class="p">,</span> <span class="n">colspecs</span><span class="p">,</span> <span class="n">ischema_names</span>
+
+<span class="c"># Adjust the mapping of the timestamp kind</span>
+<span class="n">ischema_names</span><span class="p">[</span><span class="s">&#39;TIMESTAMP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FBDate</span>
+<span class="n">colspecs</span><span class="p">[</span><span class="n">sqltypes</span><span class="o">.</span><span class="n">DateTime</span><span class="p">]</span> <span class="o">=</span> <span class="n">FBDate</span><span class="p">,</span></pre></div>
+</div>
+<p>Other aspects may be version-specific. You can use the <tt class="docutils literal"><span class="pre">server_version_info()</span></tt> method
+on the <tt class="docutils literal"><span class="pre">FBDialect</span></tt> class to do whatever is needed:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy.databases.firebird</span> <span class="kn">import</span> <span class="n">FBCompiler</span>
+
+<span class="k">if</span> <span class="n">engine</span><span class="o">.</span><span class="n">dialect</span><span class="o">.</span><span class="n">server_version_info</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="mf">0</span><span class="p">):</span>
+    <span class="c"># Change the name of the function ``length`` to use the UDF version</span>
+    <span class="c"># instead of ``char_length``</span>
+    <span class="n">FBCompiler</span><span class="o">.</span><span class="n">LENGTH_FUNCTION_NAME</span> <span class="o">=</span> <span class="s">&#39;strlen&#39;</span></pre></div>
+</div>
+</div>
+<div class="section" id="pooling-connections">
+<h3>Pooling connections<a class="headerlink" href="#pooling-connections" title="Permalink to this headline">¶</a></h3>
+<p>The default strategy used by SQLAlchemy to pool the database connections
+in particular cases may raise an <tt class="docutils literal"><span class="pre">OperationalError</span></tt> with a message
+<cite>&#8220;object XYZ is in use&#8221;</cite>. This happens on Firebird when there are two
+connections to the database, one is using, or has used, a particular table
+and the other tries to drop or alter the same table. To garantee DDL
+operations success Firebird recommend doing them as the single connected user.</p>
+<p>In case your SA application effectively needs to do DDL operations while other
+connections are active, the following setting may alleviate the problem:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">pool</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.databases.firebird</span> <span class="kn">import</span> <span class="n">dialect</span>
+
+<span class="c"># Force SA to use a single connection per thread</span>
+<span class="n">dialect</span><span class="o">.</span><span class="n">poolclass</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">SingletonThreadPool</span></pre></div>
+</div>
+</div>
+<div class="section" id="returning-support">
+<h3>RETURNING support<a class="headerlink" href="#returning-support" title="Permalink to this headline">¶</a></h3>
+<p>Firebird 2.0 supports returning a result set from inserts, and 2.1 extends
+that to deletes and updates.</p>
+<p>To use this pass the column/expression list to the <tt class="docutils literal"><span class="pre">firebird_returning</span></tt>
+parameter when creating the queries:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">raises</span> <span class="o">=</span> <span class="n">tbl</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">empl</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">sales</span> <span class="o">&gt;</span> <span class="mf">100</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">salary</span><span class="o">=</span><span class="n">empl</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">salary</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">),</span>
+                    <span class="n">firebird_returning</span><span class="o">=</span><span class="p">[</span><span class="n">empl</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">empl</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">salary</span><span class="p">])</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></pre></div>
+</div>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Well, that is not the whole story, as the client may still ask
+a different (lower) dialect...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="access.html" title="previous chapter">Access</a>
+        Next:
+        <a href="informix.html" title="next chapter">Informix</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

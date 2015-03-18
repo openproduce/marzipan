@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    PostgreSQL
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '../../',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/init.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+        <link rel="copyright" title="Copyright" href="../../copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="../../index.html" />
+        <link rel="up" title="sqlalchemy.databases" href="index.html" />
+        <link rel="next" title="SQLite" href="sqlite.html" />
+        <link rel="prev" title="Oracle" href="oracle.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="../../search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="../index.html">API Reference</a>
+                |
+                <a href="../../genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="../../_sources/reference/dialects/postgres.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="../../index.html">Table of Contents</a>
+                        » <a href="../index.html" title="API Reference">API Reference</a>
+                        » <a href="index.html" title="sqlalchemy.databases">sqlalchemy.databases</a>
+                » 
+    PostgreSQL
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="oracle.html" title="previous chapter">Oracle</a>
+        Next:
+        <a href="sqlite.html" title="next chapter">SQLite</a>
+</div>
+
+                <h2>
+                    
+    PostgreSQL
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">PostgreSQL</a><ul>
+<li><a class="reference external" href="#driver">Driver</a></li>
+<li><a class="reference external" href="#connecting">Connecting</a></li>
+<li><a class="reference external" href="#sequences-serial">Sequences/SERIAL</a></li>
+<li><a class="reference external" href="#insert-update-returning">INSERT/UPDATE...RETURNING</a></li>
+<li><a class="reference external" href="#indexes">Indexes</a></li>
+<li><a class="reference external" href="#transactions">Transactions</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="module-sqlalchemy.databases.postgres">
+<h1>PostgreSQL<a class="headerlink" href="#module-sqlalchemy.databases.postgres" title="Permalink to this headline">¶</a></h1>
+<p>Support for the PostgreSQL database.</p>
+<div class="section" id="driver">
+<h2>Driver<a class="headerlink" href="#driver" title="Permalink to this headline">¶</a></h2>
+<p>The psycopg2 driver is supported, available at <a class="reference external" href="http://pypi.python.org/pypi/psycopg2/">http://pypi.python.org/pypi/psycopg2/</a> .
+The dialect has several behaviors  which are specifically tailored towards compatibility 
+with this module.</p>
+<p>Note that psycopg1 is <strong>not</strong> supported.</p>
+</div>
+<div class="section" id="connecting">
+<h2>Connecting<a class="headerlink" href="#connecting" title="Permalink to this headline">¶</a></h2>
+<p>URLs are of the form <cite>postgres://user:password&#64;host:port/dbname[?key=value&amp;key=value...]</cite>.</p>
+<p>PostgreSQL-specific keyword arguments which are accepted by <a title="sqlalchemy.create_engine" class="reference external" href="../sqlalchemy/connections.html#sqlalchemy.create_engine"><tt class="xref docutils literal"><span class="pre">create_engine()</span></tt></a> are:</p>
+<ul class="simple">
+<li><em>server_side_cursors</em> - Enable the usage of &#8220;server side cursors&#8221; for SQL statements which support
+this feature.  What this essentially means from a psycopg2 point of view is that the cursor is 
+created using a name, e.g. <cite>connection.cursor(&#8216;some name&#8217;)</cite>, which has the effect that result rows
+are not immediately pre-fetched and buffered after statement execution, but are instead left 
+on the server and only retrieved as needed.    SQLAlchemy&#8217;s <a title="sqlalchemy.engine.base.ResultProxy" class="reference external" href="../sqlalchemy/connections.html#sqlalchemy.engine.base.ResultProxy"><tt class="xref docutils literal"><span class="pre">ResultProxy</span></tt></a>
+uses special row-buffering behavior when this feature is enabled, such that groups of 100 rows 
+at a time are fetched over the wire to reduce conversational overhead.</li>
+</ul>
+</div>
+<div class="section" id="sequences-serial">
+<h2>Sequences/SERIAL<a class="headerlink" href="#sequences-serial" title="Permalink to this headline">¶</a></h2>
+<p>PostgreSQL supports sequences, and SQLAlchemy uses these as the default means of creating
+new primary key values for integer-based primary key columns.   When creating tables, 
+SQLAlchemy will issue the <tt class="docutils literal"><span class="pre">SERIAL</span></tt> datatype for integer-based primary key columns, 
+which generates a sequence corresponding to the column and associated with it based on
+a naming convention.</p>
+<p>To specify a specific named sequence to be used for primary key generation, use the
+<a title="sqlalchemy.schema.Sequence" class="reference external" href="../sqlalchemy/schema.html#sqlalchemy.schema.Sequence"><tt class="xref docutils literal"><span class="pre">Sequence()</span></tt></a> construct:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Table</span><span class="p">(</span><span class="s">&#39;sometable&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> 
+        <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;some_id_seq&#39;</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="p">)</span></pre></div>
+</div>
+<p>Currently, when SQLAlchemy issues a single insert statement, to fulfill the contract of
+having the &#8220;last insert identifier&#8221; available, the sequence is executed independently
+beforehand and the new value is retrieved, to be used in the subsequent insert.  Note
+that when an <a title="sqlalchemy.sql.expression.insert" class="reference external" href="../sqlalchemy/expressions.html#sqlalchemy.sql.expression.insert"><tt class="xref docutils literal"><span class="pre">insert()</span></tt></a> construct is executed using 
+&#8220;executemany&#8221; semantics, the sequence is not pre-executed and normal PG SERIAL behavior
+is used.</p>
+<p>PostgreSQL 8.3 supports an <tt class="docutils literal"><span class="pre">INSERT...RETURNING</span></tt> syntax which SQLAlchemy supports 
+as well.  A future release of SQLA will use this feature by default in lieu of 
+sequence pre-execution in order to retrieve new primary key values, when available.</p>
+</div>
+<div class="section" id="insert-update-returning">
+<h2>INSERT/UPDATE...RETURNING<a class="headerlink" href="#insert-update-returning" title="Permalink to this headline">¶</a></h2>
+<p>The dialect supports PG 8.3&#8217;s <tt class="docutils literal"><span class="pre">INSERT..RETURNING</span></tt> and <tt class="docutils literal"><span class="pre">UPDATE..RETURNING</span></tt> syntaxes, 
+but must be explicitly enabled on a per-statement basis:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># INSERT..RETURNING</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">postgres_returning</span><span class="o">=</span><span class="p">[</span><span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col1</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col2</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">values</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+<span class="c"># UPDATE..RETURNING</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">postgres_returning</span><span class="o">=</span><span class="p">[</span><span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col1</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col2</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">where</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="o">==</span><span class="s">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></pre></div>
+</div>
+</div>
+<div class="section" id="indexes">
+<h2>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h2>
+<p>PostgreSQL supports partial indexes. To create them pass a postgres_where
+option to the Index constructor:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Index</span><span class="p">(</span><span class="s">&#39;my_index&#39;</span><span class="p">,</span> <span class="n">my_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">postgres_where</span><span class="o">=</span><span class="n">tbl</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mf">10</span><span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="transactions">
+<h2>Transactions<a class="headerlink" href="#transactions" title="Permalink to this headline">¶</a></h2>
+<p>The PostgreSQL dialect fully supports SAVEPOINT and two-phase commit operations.</p>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="oracle.html" title="previous chapter">Oracle</a>
+        Next:
+        <a href="sqlite.html" title="next chapter">SQLite</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="../../copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

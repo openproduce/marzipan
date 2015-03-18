@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "ui.py", line 29, in main
+    sale_editor.main()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1427, in main
+    if not self.input(c):
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1337, in input
+    self._get_customer()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1287, in _get_customer
+    self.sale.customer = _find_customer()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1020, in _find_customer
+    cd.main()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 113, in main
+    if not self.input(c):
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 922, in input
+    self.add_edit(True)
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1016, in add_edit
+    CustomerAddEditDialog(cust, self.frame.get('search').get_text()).main()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 113, in main
+    if not self.input(c):
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 807, in input
+    TabHistoryDialog(self.customer.id).main()
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 113, in main
+    if not self.input(c):
+  File "/home/openproduce/globalpay_test/marzipan/ui/dialogs.py", line 1549, in input
+    if not self._fill_or_focus_bad_widget():
+AttributeError: TabHistoryDialog instance has no attribute '_fill_or_focus_bad_widget'

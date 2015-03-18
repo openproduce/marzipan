@@ -1,0 +1,1781 @@
+#!/usr/bin/env python
+import datetime
+import time
+import curses
+import curses.panel
+import curses.ascii
+import decimal
+from threading import Thread
+import re
+import db
+import io
+import cc
+import match
+import money
+from widgets import *
+from keys import *
+import layout
+import tabutil
+
+import sys
+sys.path.append("..")
+import config
+
+class Dialog:
+    """set of frames with logic for user interaction."""
+
+    def __init__(self):
+        self.frames = []
+        self.frame = None
+        self.focus_index = 0
+        self.done = False
+        self.compose_keys = False
+        self.slurp_input = False
+
+    def __del__(self):
+        for f in self.frames:
+            layout.del_frame(f)
+            f.layout.panel = None
+        curses.panel.update_panels()
+        curses.doupdate()
+
+    def add_frame(self, frame):
+        self.frame = frame
+        self.frames.append(frame)
+        return frame
+
+    def _set_focus(self, index):
+        """ transfer input focus to index'th frame. """
+        for i, f in enumerate(self.frames):
+            if index != i:
+                f.set_focus(None)
+            else:
+                f.set_focus_first()
+        self.focus_index = index
+
+    def _draw_frames(self):
+        for f in self.frames:
+            f.show()
+        curses.panel.update_panels()
+        curses.doupdate()
+
+    def update(self):
+        pass
+
+    def _compose_key(self, c):
+        keys = {
+            ord('1'): curses.KEY_F1,
+            ord('2'): curses.KEY_F2,
+            ord('3'): curses.KEY_F3,
+            ord('4'): curses.KEY_F4,
+            ord('5'): curses.KEY_F5,
+            ord('6'): curses.KEY_F6,
+            ord('7'): curses.KEY_F7,
+            ord('8'): curses.KEY_F8,
+            ord('9'): curses.KEY_F9,
+        }
+        if keys.has_key(c):
+            return keys[c]
+        return None
+
+    def input(self, c):
+        if self.slurp_input:
+            if c == ord('\n'):
+                self.slurp_input = False
+        elif self.compose_keys:
+            self.compose_keys = False
+            c = self._compose_key(c)
+            if c is None:
+                return False
+            curses.ungetch(c)
+        elif c == ord('`'):
+            self.compose_keys = True
+        elif c == ord('%'): # card swipe
+            self.slurp_input = True
+        elif c == curses.KEY_RESIZE:
+            layout.resize()
+        else:
+            return False
+        return True
+
+    def main(self):
+        while not self.done:
+            self.update()
+            if self.done:
+                return self
+            if self.frames:
+                self._draw_frames()
+                c = self.frames[self.focus_index].layout.window.getch()
+                if not self.input(c):
+                    self.frames[self.focus_index].input(c)
+
+
+class UnitsDialog(Dialog):
+    """add and edit units in which items can be sold."""
+
+    def __init__(self):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        units = self.s.query(db.SaleUnit).all()
+        unit0 = None
+        unit0_name = ''
+        unit0_type = 0
+        unit0_type_text = ''
+        if units:
+            unit0 = units[0]
+            unit0_name = units[0].name
+            unit0_type = units[0].unit_type
+            unit0_type_text = db.UNIT_TYPE[units[0].unit_type]
+        self.add_frame(Frame([
+            Label(0, 0, 12, 'Unit name:'),
+            TextBox('unit_name', 1, 0, 20, unit0_name),
+            ListBox('units', 3, 0, 20, 5,
+                [(u, u.name) for u in units],
+                sel=unit0),
+            Label(0, 22, 12, 'Unit type:'),
+            Label(1, 22, 12, unit0_type_text, name='unit_type'),
+            ListBox('types', 3, 22, 20, 5,
+                [(k, db.UNIT_TYPE[k]) for k in db.UNIT_TYPE.keys()],
+                sel=unit0_type),
+            Button('add_edit', 9, 0, 10, 'Edit'),
+            Button('delete', 9, 12, 10, 'Delete'),
+            Button('ok', 9, 32, 10, 'OK')
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def update(self):
+        (name_tb, type_lbl, name_lst,
+         type_lst, add_edit, delete, ok) = [
+            self.frame.get(x) for x in ['unit_name',
+            'unit_type', 'units', 'types', 'add_edit', 'delete', 'ok']]
+        focus = self.frame.get_focus()
+        if name_tb.get_hit_enter():
+            self.frame.set_focus(type_lst)
+            name_tb.reset_hit_enter()
+            return
+        if focus == name_tb: # match lists to text box contents
+            units = self.s.query(db.SaleUnit).all()
+            name = name_tb.get_text()
+            found = False
+            for u in units:
+                if u.name == name:
+                    name_lst.set_selection(u)
+                    type_lst.set_selection(u.unit_type)
+                    found = True
+                    break
+            if not found:
+                add_edit.set_text('Add')
+            else:
+                add_edit.set_text('Edit')
+        elif focus == name_lst: # match others to unit sel box
+            u = name_lst.get_selection()
+            name_tb.set_text(u.name)
+            type_lbl.set_text(db.UNIT_TYPE[u.unit_type])
+            type_lst.set_selection(u.unit_type)
+            add_edit.set_text('Edit')
+        elif focus == type_lst:
+            t = type_lst.get_selection()
+            type_lbl.set_text(db.UNIT_TYPE[t])
+        elif focus == add_edit and add_edit.get_pushed():
+            (n, t) = (name_tb.get_text(), type_lst.get_selection())
+            if add_edit.get_text() == 'Add':
+                self.s.add(db.SaleUnit(n,t))
+                self.s.commit()
+                units = self.s.query(db.SaleUnit).all()
+                name_lst.set_labels([(u, u.name) for u in units])
+                add_edit.set_text('Add')
+            else:
+                u = name_lst.get_selection()
+                (u.name, u.unit_type) = (n, t)
+                self.s.commit()
+            self.frame.set_focus(name_tb)
+            add_edit.reset_pushed()
+        elif focus == delete and delete.get_pushed():
+            u = name_lst.get_selection()
+            self.s.delete(u)
+            units = self.s.query(db.SaleUnit).all()
+            name_lst.set_labels([(u, u.name) for u in units])
+            self.frame.set_focus(name_tb)
+            delete.reset_pushed()
+        elif focus == ok and ok.get_pushed():
+            self.done = True
+
+
+class PickClerkDialog(Dialog):
+    """pick store clerk from list."""
+
+    def __init__(self, sel_clerk=None):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.result = None
+        clerks = self.get_clerks()
+        clerk0 = None
+        clerk0_name = ''
+        if clerks:
+            clerk0 = clerks[0]
+            clerk0_name = clerks[0].name
+        if not sel_clerk:
+            sel_clerk = clerk0
+        self.add_frame(Frame([
+            Label(0, 0, 30, 'Select the current clerk.'),
+            Label(1, 0, 30, '(ENTER to pick, ESC to cancel)'),
+            ListBox('clerks', 2, 0, 30, 6,
+                [(c, c.name) for c in clerks],
+                sel=sel_clerk),
+            Label(9, 0, 14, 'F6: Manage...', color_id=HELP_COLOR),
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def get_result(self):
+        return self.result
+
+    def get_clerks(self):
+        return self.s.query(db.Clerk).filter(
+            db.Clerk.is_valid == True).all()
+
+    def update_clerks(self):
+        self.frame.get('clerks').set_labels(
+            [ (c, c.name) for c in self.get_clerks() ])
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == KEY_ESCAPE:
+            self.result = None
+            self.done = True
+        elif c == curses.KEY_F6:
+            ManageClerksDialog().main()
+            self.update_clerks()
+        else:
+            return False
+        return True
+
+    def update(self):
+        clerks = self.frame.get('clerks')
+        if clerks.get_hit_enter():
+            clerks.reset_hit_enter()
+            self.result = clerks.get_selection()
+            self.done = True
+
+
+class ManageClerksDialog(Dialog):
+    """add/edit/delete clerks."""
+
+    def __init__(self):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        clerks = self.get_clerks()
+        clerk0 = None
+        clerk0_name = ''
+        if clerks:
+            clerk0 = clerks[0]
+            clerk0_name = clerks[0].name
+        self.add_frame(Frame([
+            Label(0, 0, 33, 'Add, edit or delete clerk names.'),
+            Label(1, 0, 33, '(ESC to exit, TAB to switch)'),
+            Label(3, 0, 30, 'Clerk name:'),
+            TextBox('name', 4, 0, 20, ''),
+            Label(6, 0, 30, 'Pick clerk to edit or delete:'),
+            ListBox('clerks', 7, 0, 30, 6,
+                [(c, c.name) for c in clerks],
+                sel=clerk0),
+            Label(14, 0, 14, 'F6: Add', color_id=HELP_COLOR),
+            Label(14, 15, 14, 'F7: Edit', color_id=HELP_COLOR),
+            Label(14, 30, 14, 'F8: Delete', color_id=HELP_COLOR),
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def get_clerks(self):
+        return self.s.query(db.Clerk).filter(
+            db.Clerk.is_valid == True).all()
+
+    def update_clerks(self):
+        self.frame.get('clerks').set_labels(
+            [ (c, c.name) for c in self.get_clerks() ])
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            name = self.frame.get('name').get_text()
+            if name:
+                self.s.add(db.Clerk(name))
+                self.s.flush()
+                self.frame.get('name').set_text('')
+                self.update_clerks()
+        elif c == curses.KEY_F7:
+            name = self.frame.get('name').get_text()
+            clerk = self.frame.get('clerks').get_selection()
+            if name and clerk:
+                clerk.name = name
+                self.s.flush()
+                self.frame.get('name').set_text('')
+                self.update_clerks()
+        elif c == curses.KEY_F8:
+            clerk = self.frame.get('clerks').get_selection()
+            if clerk:
+                clerk.is_valid = False
+                self.s.flush()
+                self.update_clerks()
+                if not self.get_clerks():
+                    self.frame.set_focus('name')
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        pass
+
+    def update(self):
+        name = self.frame.get('name')
+        clerks = self.frame.get('clerks')
+        if clerks.get_hit_enter():
+            clerks.reset_hit_enter()
+            clerk = clerks.get_selection()
+            if clerk:
+                name.set_text(clerk.name)
+
+class PaymentDialog(Dialog):
+    """accept payment for sale."""
+
+    def __init__(self, sale):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.sale = sale
+        self.sale_done = False
+        self.card = None
+        assert sale is not None
+        cust_name = '?'
+        if self.sale.customer is not None:
+            cust_name = self.sale.customer.name
+        total = money.moneyfmt(self.sale.total, curr='$', sep='')
+        total_nod = money.moneyfmt(self.sale.total, curr='', sep='')
+        self.add_frame(Frame([
+            Label(0, 0, 30, 'Enter payment information.'),
+            Label(1, 0, 30, '(ESC to cancel, TAB to switch)'),
+            Label(2, 0, 30, 'Customer: %s'%(cust_name), name='customer'),
+            Label(3, 0, 30, 'Total due: %s'%(total), name='total'),
+            Label(4, 0, 30, '', name='alert', color_id=ALERT_COLOR),
+            Label(5, 0, 30, 'Payment method:'),
+
+		#second 6 used to be a 5. changed to accomodate link APC
+            ListBox('method', 6, 0, 30, 6, 
+                [(k, db.PAYMENT[k]) for k in sorted(db.PAYMENT.keys())],
+                sel=1),
+            Label(12, 0, 30, 'Amount tendered (d.dd):'), 
+            TextBox('paid', 13, 0, 30, total_nod, clear_on_insert=True),
+            Label(14, 0, 30, 'Change due: $0.00', name='change'),
+            Label(16, 0, 14, 'F6: No Rcpt', color_id=HELP_COLOR),
+            Label(16, 15, 14, 'F7: Print Rcpt', color_id=HELP_COLOR),
+            Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
+            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
+            ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def get_sale_done(self):
+        return self.sale_done
+
+    def _validate(self):
+        alert = self.frame.get('alert')
+        method = self.frame.get('method').get_selection()
+        paid = self.frame.get('paid').get_text()
+        is_void = db.PAYMENT[method] == 'void'
+        is_tab = db.PAYMENT[method] == 'tab'
+        if not paid or not re.match('^-?\d{0,6}(\.\d{0,2})?$', paid):
+            alert.set_text('execting amount like 1.25')
+            return self.frame.get('paid')
+        elif is_void and decimal.Decimal(paid):
+            alert.set_text('sale void but paid?')
+            return self.frame.get('method')
+        elif not is_void and (not paid or not decimal.Decimal(paid)):
+            alert.set_text('must be void if not paid')
+            return self.frame.get('paid')
+        elif not is_void and decimal.Decimal(paid) < self.sale.total and \
+             not is_tab and self.sale.total != decimal.Decimal('0.00'):
+            alert.set_text('whole total not paid')
+            return self.frame.get('paid')
+        elif is_tab and not self.sale.customer:
+            alert.set_text('need customer for tab')
+            return self.frame.get('method')
+	elif self.sale.has_tab_payment() and not self.sale.customer:
+            alert.set_text('need customer to pay tab')
+	    return self.frame.get('method')
+        elif is_tab and self.sale.has_tab_payment():
+            alert.set_text("can't pay tab by tab")
+            return self.frame.get('method')
+        elif is_tab and self.sale.customer.balance + self.sale.total > \
+             self.sale.customer.credit:
+            alert.set_text('customer credit exceeded')
+            return self.frame.get('method')
+        return None
+
+    def _fill(self):
+        self.sale.payment = self.frame.get('method').get_selection()
+        self.sale.is_void = db.PAYMENT[self.sale.payment] == 'void'
+        self.sale.time_ended = datetime.datetime.now()
+        if db.PAYMENT[self.sale.payment] == 'tab':
+            paid = self.frame.get('paid').get_text()
+            self.sale.customer.balance += decimal.Decimal(paid)
+	if self.sale.customer and self.sale.has_tab_payment():
+            self.sale.customer.balance -= self.sale.tab_payment_amount()
+        self.done = True
+        self.sale_done = True
+        self.s.commit()
+
+    def _finish_sale(self, want_receipt=False):
+        bad_widget = self._validate()
+        if bad_widget is not None:
+            self.frame.set_focus(bad_widget)
+            return False
+        pm_id = self.frame.get('method').get_selection()
+        if db.PAYMENT[pm_id] == 'debit/credit':
+            return self._pay_credit(want_receipt)
+
+        if db.PAYMENT[pm_id] == 'link':
+            return self._pay_link() #TODO make _pay_link()
+
+        self._fill()
+        return True
+
+    def _pay_credit(self, want_receipt):
+        if not self.card:
+            self._get_card()
+            if not self.card:
+                return False
+        paid = decimal.Decimal(self.frame.get('paid').get_text())
+        if paid < decimal.Decimal('0'):
+            self.frame.get('alert').set_text("can''t credit card account")
+            return False
+        self.frame.get('alert').set_text('authorizing card...')
+        self.frame.show()
+        curses.panel.update_panels()
+        curses.doupdate()
+        try:
+            if config.get('cc-processor') == 'ippay':
+                (xid, status) = io.send_ippay_request(paid, self.card)
+            if config.get('cc-processor') == 'tnbci':
+                (xid, status) = io.send_tnbci_request(paid, self.card)
+            
+        except io.CCError, e:
+            self.frame.get('alert').set_text(str(e))
+            return False
+        self.frame.get('alert').set_text(status)
+        self.frame.show()
+        curses.panel.update_panels()
+        curses.doupdate()
+        if status != 'APPROVED':
+            return False
+
+        self.sale.cc_trans = xid
+        self.sale.cc_name = '' if self.card.account_name == '?'\
+                               else self.card.account_name
+        self.sale.cc_last4 = self.card.number[-4:]
+        self._fill()
+        io.print_card_receipt(self.sale, paid, merchant_copy=True)
+        TearDialog('merchant receipt').main()
+        if want_receipt:
+            io.print_card_receipt(self.sale, paid, merchant_copy=False)
+        #TearDialog('customer receipt').main()
+        return True
+
+    def _pay_link(self):
+	# stub for now. 
+	try:
+            self.link
+	except:
+            self._get_link_info()
+            try:
+                self.link
+            except:
+                return False
+        #if not self.link:
+            #self._get_link_info()
+            #if not self.link:
+                #return False
+	self.sale.cc_trans = self.link
+	self.sale.cc_name = 'link customer'
+        self._fill()
+
+	return True
+
+    def _get_card(self, in_swipe=False):
+        cd = CCInfoDialog(in_swipe)
+        cd.main()
+        self.card = cd.get_result()
+
+    def _get_link_info(self):
+	ld = LinkDialog()
+	ld.main()
+	self.link = ld.get_result()  
+
+    def input(self, c):
+	#all credit cards start with a percent sign 
+        if c == ord('%'): 
+            cc_method = filter(lambda (k,v): v == 'debit/credit',
+                db.PAYMENT.items())[0][0]
+            self.frame.get('method').set_selection(cc_method)
+            self._get_card(in_swipe=True)
+        elif Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            self._finish_sale(want_receipt=False)
+        elif c == curses.KEY_F7:
+            if self._finish_sale(want_receipt=True):
+                io.print_receipt(self.sale)
+                #TearDialog('sale receipt').main()
+        elif c == curses.KEY_F8:
+            if self.sale.customer is None:
+                self.frame.get('alert').set_text('need customer to e-mail')
+            elif not self.sale.customer.email:
+                self.frame.get('alert').set_text('customer e-mail not set')
+            elif self._finish_sale():
+                self.frame.get('alert').set_text('sending e-mail...')
+                self.frame.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                if not io.email_receipt(
+                    self.sale.customer.email, self.sale):
+                    self.frame.get('alert').set_text('error sending e-mail!')
+                    self.frame.show()
+                    curses.panel.update_panels()
+                    curses.doupdate()
+                    io.print_receipt(self.sale)
+                    #TearDialog('sale receipt').main()
+                    self.done = True
+        elif c == curses.KEY_F9:
+            self.sale.customer = _find_customer()
+            cust_name = '?'
+            if self.sale.customer is not None:
+                cust_name = self.sale.customer.name
+            self.frame.get('customer').set_text('Customer: %s'%(cust_name))
+        elif c == KEY_ESCAPE:
+            self.done = True
+            self.sale_done = False
+        else:
+            return False
+        return True
+
+    def update(self):
+        (method, paid) = [
+            self.frame.get(x) for x in [
+                'method', 'paid' ]]
+
+        if self.frame.get_focus() != method and\
+           db.PAYMENT[method.get_selection()] == 'void':
+           paid.set_text('0.00')
+        if self.frame.get_focus() == paid:
+            paid_text = paid.get_text()
+            if paid_text and\
+               re.match('^\d{0,6}(\.\d{0,2})?$', paid_text) and\
+               paid_text != '.':
+                amount = decimal.Decimal(paid_text)
+                if amount >= self.sale.total:
+                    self.frame.get('change').set_text('Change due: %s'%(
+                        money.moneyfmt(amount - self.sale.total,
+                                       curr='$', sep='')))
+        if method.get_hit_enter():
+            method.reset_hit_enter()
+            pm_id = method.get_selection()
+            if db.PAYMENT[pm_id] == 'debit/credit':
+                self._get_card()
+            if db.PAYMENT[pm_id] == 'link':
+                self._get_link_info()
+
+
+
+class TearDialog(Dialog):
+    """prompt to wait for receipt then tear."""
+    def __init__(self, clue):
+        Dialog.__init__(self)
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'Wait for %s, then tear.'%(clue)),
+            Label(1, 0, 40, 'Press any key to continue...')
+            ], layout.Center()))
+
+    def input(self, c):
+        if not Dialog.input(self, c):
+            self.done = True
+        return True
+
+
+class CCInfoDialog(Dialog):
+    """enter credit card payment information."""
+    def __init__(self, in_swipe=False):
+        Dialog.__init__(self)
+        self.card = cc.Card()
+        self.result = None
+        self.in_swipe = in_swipe
+        self.magstripe = []
+        r_margin = 10
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'Swipe or key card number.'),
+            Label(1, 0, 40, '(ESC to cancel.)'),
+            Label(2, 0, 30, '', name='alert', color_id=ALERT_COLOR),
+            Label(3, 0, 40, 'Name: ?', name='name'),
+            Label(4, 0, r_margin-1, 'Card #:'),
+            Label(5, 0, r_margin-1, '(just #s)'),
+            TextBox('number', 4, r_margin, 30, ''),
+            Label(6, 0, r_margin-1, 'Exp. MM/YY:'),
+            TextBox('month', 6, r_margin, 4, ''),
+            TextBox('year', 6, r_margin+8, 8, ''),
+            Label(8, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
+            ], layout.Center()))
+
+    def get_result(self):
+        return self.result
+
+    def _finish_entry(self):
+        number = self.frame.get('number')
+        month = self.frame.get('month')
+        year = self.frame.get('year')
+        if not re.match('^\d{16}$', number.get_text()):
+            self.frame.get('alert').set_text('expecting 16-digit card #')
+            self.frame.set_focus(number)
+        elif not re.match('^\d+$', month.get_text()) or\
+             int(month.get_text()) < 1 or\
+             int(month.get_text()) > 12:
+            self.frame.get('alert').set_text('expecting month 1-12')
+            self.frame.set_focus(month)
+        elif not re.match('^\d+$', year.get_text()):
+            self.frame.get('alert').set_text('invalid year')
+            self.frame.set_focus(year)
+        else:
+            self.card.account_name = self.frame.get('name').get_text().strip()
+            self.card.number = number.get_text().strip()
+            self.card.exp_month = int(month.get_text())
+            self.card.exp_year = int(year.get_text())
+
+    def input(self, c):
+        if self.in_swipe:
+            if c == ord('\n'):
+                try:
+                    self.card = cc.parse_magstripe(self.magstripe)
+                    self.frame.get('name').set_text(self.card.account_name)
+                    self.frame.get('number').set_text(self.card.number)
+                    self.frame.get('month').set_text("%02d"%(self.card.exp_month))
+                    self.frame.get('year').set_text("%02d"%(self.card.exp_year))
+                except cc.BadSwipeError, e:
+                    self.frame.get('alert').set_text(str(e))
+                self.in_swipe = False
+            self.magstripe.append(c)
+        elif c == ord('%') and not self.in_swipe:
+            self.in_swipe = True
+        elif Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            self._finish_entry()
+            self.result = self.card
+            self.done = True
+        elif c == KEY_ESCAPE:
+            self.result = None
+            self.done = True
+        else:
+            return False
+        return True
+
+
+class LinkDialog(Dialog):
+    """enter link card transaction number."""
+    def __init__(self):
+        Dialog.__init__(self)
+        self.link = None
+        self.result = None
+    	r_margin = 10
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'Please enter transaction ID.'),
+            Label(1, 0, 40, '(ESC to cancel.)'),
+            Label(2, 0, 30, '', name='alert', color_id=ALERT_COLOR),
+            Label(3, 0, 40, 'Txn ID: ?', name='name'),
+            TextBox('number', 4, r_margin, 30, ''),
+            Label(6, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
+            ], layout.Center()))
+
+    def get_result(self):
+        return self.result
+
+    def _finish_entry(self):
+        number = self.frame.get('number')
+	self.link = number
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6 or c == KEY_RETURN:
+            self._finish_entry()
+            self.result = self.link
+            self.done = True
+
+        elif c == KEY_ESCAPE:
+            self.result = None
+            self.done = True
+        else:
+            return False
+        return True
+
+
+def _get_units(s):
+    units = s.query(db.SaleUnit).all()
+    unit0 = None
+    unit0_name = ''
+    if units:
+        unit0 = units[0]
+        unit0_name = units[0].name
+    return (unit0, unit0_name, units)
+
+class PriceEditDialog(Dialog):
+    """edit a price."""
+    DEFAULT_TAX = '.0200'
+
+    def __init__(self, price=None):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        (unit0, unit0_name, units) = _get_units(self.s)
+        if price is None:
+            price = db.Price(unit0,
+                decimal.Decimal('0.00'),
+                decimal.Decimal(PriceEditDialog.DEFAULT_TAX),
+                False)
+        self.price = price
+        unit_cost = money.moneyfmt(price.unit_cost)
+        r_margin = 12
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'Edit price:'),
+            Label(1, 0, 40, '(ESC to cancel.)'),
+            Label(2, 0, 40, '', name='alert'),
+            Label(3, 0, r_margin-1, 'Cost:'),
+            TextBox('unit_cost', 3, r_margin, 40, unit_cost),
+            Label(4, 0, r_margin-1, '(per)'),
+            ListBox('unit', 4, r_margin, 20, 4,
+                [(u, u.name) for u in units],
+                sel=price.sale_unit),
+            Label(9, 0, r_margin-1, 'Tax:'),
+            TextBox('tax', 9, r_margin, 40, str(price.tax)),
+            CheckBox('is_tax_flat', 10, r_margin, 30, 'Tax is additive',
+                state=price.is_tax_flat),
+            Label(12, 0, 14, 'F6: Save', color_id=HELP_COLOR),
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def _validate(self):
+        cost = self.frame.get('unit_cost').get_text()
+        tax = self.frame.get('tax').get_text()
+        alert = self.frame.get('alert')
+        if cost == "" or not re.match('^\d{0,6}(\.?\d{0,4})$', cost):
+            alert.set_text('specify `price\' like dddddd.dddd')
+            return self.frame.get('unit_cost')
+        elif not re.match('^0?\.\d{0,4}$', tax):
+            alert.set_text('specify tax as 0.dddd or .dddd')
+            return self.frame.get('tax')
+        return None
+
+    def _fill(self):
+        self.price.sale_unit =\
+            self.frame.get('unit').get_selection()
+        self.price.unit_cost =\
+            decimal.Decimal(self.frame.get('unit_cost').get_text())
+        self.price.tax =\
+            decimal.Decimal(self.frame.get('tax').get_text())
+        self.price.is_tax_flat =\
+            self.frame.get('is_tax_flat').get_state()
+
+    def get_result(self):
+        return self.price
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            w = self._validate()
+            if w is not None:
+                self.frame.set_focus(w)
+            else:
+                self._fill()
+                self.done = True
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True
+
+
+class ItemAddEditDialog(Dialog):
+    """add or edit an item."""
+
+    def __init__(self, item=None, text=""):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        (unit0, unit0_name, units) = _get_units(self.s)
+        self.adding_item = False
+        cost = "<not set>"
+        if item is None:
+            self.adding_item = True
+            self.price = None
+            item = db.Item('')
+            text = text.strip()
+            if re.match('^\d{4,5}$', text):
+                item.plu = text
+            elif re.match('^\d{6,}$', text):
+                item.barcode = text
+            else:
+                item.name = text
+            item.size = decimal.Decimal('1.0')
+            item.size_unit = unit0
+        else:
+            self.price = item.price
+            cost = money.moneyfmt(self.price.unit_cost, curr='$', sep='')
+        self.item = item
+        r_margin = 10
+        self.add_frame(Frame([
+            Label(0, 0, 40, "Edit item details."),
+            Label(1, 0, 40, "(ESC to cancel, TAB to switch)"),
+            Label(2, 0, 40, "", name='alert', color_id=ALERT_COLOR),
+            Label(3, 0, r_margin-1, 'Name:'),
+            TextBox('name', 3, r_margin, 40, item.name),
+            Label(4, 0, r_margin-1, 'Pkg size:'),
+            TextBox('size', 4, r_margin, 40, str(item.size)),
+            Label(5, 0, r_margin-1, '   (unit)'),
+            ListBox('unit', 5, r_margin, 20, 4,
+                [(u, u.name) for u in units],
+                sel=item.size_unit),
+            Label(10, 0, r_margin-1, 'Barcode:'),
+            TextBox('barcode', 10, r_margin, 40, item.barcode),
+            Label(11, 0, r_margin-1, 'PLU:'),
+            TextBox('plu', 11, r_margin, 40, item.plu),
+            Label(13, 0, 20, 'Price:    %s'%(cost), name='price'),
+            Button('new_price',  14, r_margin, 10, 'New...'),
+            Button('edit_price', 14, r_margin+12, 10, 'Edit...'),
+            Button('same_price', 14, r_margin+24, 10, 'Same as...'),
+            Label(16, 0, 14, 'F6: Save', color_id=HELP_COLOR),
+            Label(16, 15, 18, 'F7: Edit Units...', color_id=HELP_COLOR)
+            ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def _validate(self):
+        alert = self.frame.get('alert')
+        plu = self.frame.get('plu').get_text()
+        size = self.frame.get('size').get_text()
+        barcode = self.frame.get('barcode').get_text()
+        if self.frame.get('name').get_text() == "":
+            alert.set_text('`name\' must not be empty')
+            return self.frame.get('name')
+        elif not re.match('^\d{0,6}(\.\d{0,4})?$', size):
+            alert.set_text('expecting size like d.d')
+            return self.frame.get('size')
+        elif not re.match('^\d{4,5}$|^$', plu):
+            alert.set_text('expecting plu to be 4 or 5 digit')
+            return self.frame.get('plu')
+        elif not re.match('^.{0,16}$', barcode):
+            alert.set_text('barcode must be < 17 chars')
+            return self.frame.get('barcode')
+        elif self.price is None:
+            alert.set_text('price is not set')
+            return self.frame.get('new_price')
+        return None
+
+    def _fill(self):
+        self.item.name = self.frame.get('name').get_text()
+        self.item.size = decimal.Decimal(self.frame.get('size').get_text())
+        self.item.size_unit =\
+            self.frame.get('unit').get_selection()
+        self.item.plu = self.frame.get('plu').get_text()
+        self.item.barcode = self.frame.get('barcode').get_text()
+        self.item.price = self.price
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            bad_widget = self._validate()
+            if bad_widget is not None:
+                self.frame.set_focus(bad_widget)
+            else:
+                self._fill()
+                self.s.add(self.item)
+                self.s.commit()
+                self.done = True
+        elif c == curses.KEY_F7:
+            self._edit_units()
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True
+
+    def update(self):
+        (new_price, edit_price, same_price) = [
+            self.frame.get(x) for x in [
+                'new_price', 'edit_price', 'same_price' ] ]
+        if new_price.get_pushed():
+            new_price.reset_pushed()
+            p = PriceEditDialog()
+            p.main()
+            self.price = p.get_result()
+            self._update_price()
+        elif edit_price.get_pushed():
+            edit_price.reset_pushed()
+            p = PriceEditDialog(self.price)
+            p.main()
+            self.price = p.get_result()
+            self._update_price()
+        elif same_price.get_pushed():
+            same_price.reset_pushed()
+            itd = ItemSearchDialog(layout.Center(), has_cancel=True)
+            itd.main()
+            i = itd.get_result()
+            if i is not None:
+                self.price = i.price
+                self._update_price()
+
+    def _update_price(self):
+        cost = ''
+        if self.price is not None:
+            cost = money.moneyfmt(self.price.unit_cost, curr='$', sep='')
+        self.frame.get('price').set_text('Price:    %s'%cost)
+
+    def _edit_units(self):
+        UnitsDialog().main()
+
+        units = self.s.query(db.SaleUnit).all()
+        unit_list = self.frame.get('unit')
+        unit_list.set_labels([(u, u.name) for u in units])
+        unit0 = None
+        if units:
+            unit0 = units[0]
+        unit_list.set_selection(unit0)
+        self.frame.set_focus(self.frame.get('name'))
+
+
+class CustomerAddEditDialog(Dialog):
+    """add/edit customer information."""
+    def __init__(self, customer=None, name=""):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        postal = ['','','','']
+        if customer is None:
+            self.adding_customer = True
+            customer = db.Customer()
+            customer.name = name
+            customer.code = db.new_customer_code()
+        else:
+            self.adding_customer = False
+            postal = customer.postal.split('\n', 4)
+        self.customer = customer
+        r_margin = 10
+        try:
+           self.add_frame(Frame([
+               Label(0, 0, 40, 'Edit customer information.'),
+               Label(1, 0, 40, '(ESC to cancel, UP/DOWN/TAB to switch.)'),
+               Label(2, 0, 40, '', name='alert', color_id=ALERT_COLOR),
+               Label(3, 0, r_margin-1, 'Account#:'),
+               Label(3, r_margin, 40, customer.code, name='id'),
+               Label(4, 0, r_margin-1, 'Name:'),
+               TextBox('name', 4, r_margin, 40, customer.name),
+               Label(5, 0, r_margin-1, 'E-mail:'),
+               TextBox('email', 5, r_margin, 40, customer.email),
+               Label(6, 0, r_margin-1, 'Telephone:'),
+               TextBox('tel', 6, r_margin, 40, customer.tel),
+               Label(7, 0, r_margin-1, 'Postal:'),
+               TextBox('postal_1', 7, r_margin, 40, postal[0]),
+               TextBox('postal_2', 8, r_margin, 40, postal[1]),
+               TextBox('postal_3', 9, r_margin, 40, postal[2]),
+               TextBox('postal_4', 10, r_margin, 40, postal[3]),
+               Label(11, 0, r_margin-1, 'Limit:'),
+               TextBox('credit', 11, r_margin, 40, str(customer.credit)),
+               Label(12, 0, r_margin-1, 'Balance:'),
+               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
+               Label(14, 0, 14, 'F6: Save', color_id=HELP_COLOR),
+               Label(14, 15, 14, 'F7: Print card', color_id=HELP_COLOR),
+               Label(14, 30, 18, 'F9: Tab history', color_id=HELP_COLOR),
+               ], layout.Center()))
+        except IndexError:
+            import sys
+            print >>sys.stderr, len(postal)
+            print >>sys.stderr, postal
+            raise
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def _validate(self):
+        name = self.frame.get('name').get_text()
+        email = self.frame.get('email').get_text()
+        tel = self.frame.get('tel').get_text()
+        balance = self.frame.get('balance').get_text()
+        credit = self.frame.get('credit').get_text()
+        alert = self.frame.get('alert')
+        if not re.match('\S+', name):
+            alert.set_text('expect name to be non-empty')
+            return self.frame.get('name')
+        elif not re.match('^[-\w\.%+]+@([-\w]+\.?)+$|^$', email):
+            alert.set_text('expect e-mail like words@words')
+            return self.frame.get('email')
+        elif not re.match('^[-\d+ ]*$', tel):
+            alert.set_text('only expect digits, -, + in tel')
+            return self.frame.get('tel')
+        elif not re.match('^\d{0,6}(\.\d{0,2})?$', credit):
+            alert.set_text('expect credit like dddddd.dd')
+            return self.frame.get('credit')
+        elif not re.match('^[-+]?\d{0,6}(\.\d{0,2})?$', balance):
+            alert.set_text('expect balance like [-+]dddddd.dd')
+            return self.frame.get('balance')
+        return None
+
+    def _fill(self):
+        self.customer.name = self.frame.get('name').get_text()
+        self.customer.email = self.frame.get('email').get_text()
+        self.customer.tel = self.frame.get('tel').get_text()
+        self.customer.postal = '\n'.join(
+            [self.frame.get(x).get_text() for x in [
+                'postal_1','postal_2','postal_3','postal_4']])
+        self.customer.balance = decimal.Decimal(
+            self.frame.get('balance').get_text())
+        self.customer.credit = decimal.Decimal(
+            self.frame.get('credit').get_text())
+
+    def _fill_or_focus_bad_widget(self):
+        bad_widget = self._validate()
+        if bad_widget is not None:
+            self.frame.set_focus(bad_widget)
+            return True
+        self._fill()
+        return False
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            if not self._fill_or_focus_bad_widget():
+                if self.adding_customer:
+                    self.s.add(self.customer)
+                self.s.commit()
+                self.done = True
+        elif c == curses.KEY_F7:
+            if not self._fill_or_focus_bad_widget():
+                io.print_customer_card(self.customer)
+                TearDialog('customer code').main()
+        elif c == curses.KEY_F9:
+            TabHistoryDialog(self.customer.id).main()
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True
+
+
+class SearchDialog(Dialog):
+    """incremental search for database object using textbox contents
+       to filter result list.  include buttons to add/edit/delete or
+       accept ('ok') search result."""
+
+    def __init__(self, obj_name, has_cancel, layout, search=""):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.result = None
+        self.search_edited = False
+        self.has_cancel = has_cancel
+        self.make_index()
+        self.find_match_set(search)
+        widgets = [ Label(0, 0, 40, 'Search for %s.'%(obj_name)) ]
+        h = 0
+        if self.has_cancel:
+            widgets.append(Label(1, 0, 40, '(ENTER to accept, ESC to cancel.)'))
+            h = 2
+        widgets.extend([
+            #Label(h+1, 0, 10, 'Look for:'),
+            #Label(h+3, 0, 10, 'Matches:'),
+            Searcher('search', h+1, 0, 50, 5, self.get_labels()),
+            Label(h+9, 0, 14,  'F6: Add...', color_id=HELP_COLOR),
+            Label(h+9, 15, 14, 'F7: Edit...', color_id=HELP_COLOR),
+            Label(h+9, 30, 14, 'F8: Delete', color_id=HELP_COLOR),
+            ])
+        self.add_frame(Frame(widgets, layout))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def get_result(self):
+        return self.result
+
+    def get_selection(self):
+        return self.frame.get('search').get_selection()
+
+    def get_labels(self):
+        return [(o, o.name) for o in self.match_set]
+
+    def make_index(self):
+        pass
+
+    def find_match_set(self, search):
+        self.match_set = []
+
+    def clear(self):
+        search = self.frame.get('search')
+        self.make_index()
+        search.set_text('')
+        self.find_match_set('')
+        self.frame.set_focus(search)
+
+    def add_edit(self, edit):
+        pass
+
+    def notify(self, c):
+        search = self.frame.get('search')
+        if self.frame.get_focus() == search and\
+           c != curses.KEY_UP and c != curses.KEY_DOWN and\
+           c != KEY_TAB and c != curses.KEY_ENTER and\
+           c != KEY_RETURN:
+            self.search_edited = True
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            pass
+        elif c == curses.KEY_F6:
+            self.add_edit(False)
+            self.clear()
+        elif c == curses.KEY_F7:
+            self.add_edit(True)
+            self.clear()
+        elif c == curses.KEY_F8:
+            db_obj = self.get_selection()
+            if db_obj is not None:
+                self.s.delete(db_obj)
+            self.clear()
+        elif c == KEY_ESCAPE and self.has_cancel:
+            self.result = None
+            self.done = True
+        else:
+            self.notify(c)
+            return False
+        return True
+
+    def update(self):
+        search = self.frame.get('search')
+        if self.search_edited:
+            self.find_match_set(search.get_text())
+            self.search_edited = False
+        if search.get_hit_enter():
+            search.reset_hit_enter()
+            if self.match_set:
+                search.set_text(self.match_set[0].name)
+                self.s.commit()
+                self.result = self.get_selection()
+                self.done = True
+            return
+
+
+class CustomerSearchDialog(SearchDialog):
+    """find customers."""
+    def __init__(self, layout, search=""):
+        SearchDialog.__init__(self, 'customer', True, layout)
+
+    def __del__(self):
+        SearchDialog.__del__(self)
+
+    def make_index(self):
+        self.customers = self.s.query(db.Customer).all()
+        self.codes = {}
+        self.phones = {}
+        self.emails = {}
+        self.names = match.Index()
+        for cust in self.customers:
+            self.codes[cust.code] = cust
+            ph_digs = re.sub('[^\d]', '', cust.tel)
+            if ph_digs:
+                self.phones[ph_digs] = cust
+            if cust.email:
+                self.emails[cust.email] = cust
+            self.names.add_item(cust.name, cust)
+
+    def find_match_set(self, search_text):
+        self.match_set = []
+        if search_text == "":
+            self.match_set = self.customers
+        else:
+            digs = re.sub('[^\d]', '', search_text)
+            # no check digit in db
+            code_digs = digs[:12] if digs else ''
+            ids = {}
+            for k in self.codes.keys():
+                if code_digs and k.startswith(code_digs):
+                    cust = self.codes[k]
+                    if not ids.has_key(cust.id):
+                        self.match_set.append(cust)
+                        ids[cust.id] = True
+            for k in self.emails.keys():
+                if search_text and k.startswith(search_text):
+                    cust = self.emails[k]
+                    if not ids.has_key(cust.id):
+                        self.match_set.append(cust)
+                        ids[cust.id] = True
+            for k in self.phones.keys():
+                if digs and k.startswith(digs):
+                    cust = self.phones[k]
+                    if not ids.has_key(cust.id):
+                        self.match_set.append(cust)
+                        ids[cust.id] = True
+            self.match_set.extend(filter(
+                lambda x: not ids.has_key(x.id),
+                self.names.match(search_text)))
+        if self.frame:
+            self.frame.get('search').set_labels(self.get_labels())
+
+    def add_edit(self, edit):
+        cust = None
+        if edit:
+            cust = self.get_selection()
+        CustomerAddEditDialog(cust, self.frame.get('search').get_text()).main()
+
+def _find_customer():
+    cd = CustomerSearchDialog(layout.Center())
+    cd.main()
+    return cd.get_result()
+
+
+class ItemSearchDialog(SearchDialog):
+    """find items."""
+
+    def __init__(self, layout, has_cancel=False, search=""):
+        SearchDialog.__init__(self, 'item', has_cancel, layout, search)
+
+    def __del__(self):
+        SearchDialog.__del__(self)
+
+    def make_index(self):
+        self.items = self.s.query(db.Item).all()
+        self.barcodes = {}
+        self.plus = {}
+        self.names = match.Index()
+        for item in self.items:
+            if item.plu:
+                self.plus[item.plu] = item
+            if item.barcode:
+                self.barcodes[item.barcode] = item
+            try:
+               self.names.add_item(item.name, item)
+            except UnicodeEncodeError:
+               import sys
+               print >>sys.stderr, self
+               print >>sys.stderr, item.barcode
+               raise
+
+    def find_match_set(self, search_text):
+        self.match_set = []
+        if search_text == "":
+            self.match_set = self.items
+        else:
+            digs = re.sub('[^\d]', '', search_text)
+            ids = {}
+            for k in self.barcodes.keys():
+                if digs and k.startswith(digs):
+                    item = self.barcodes[k]
+                    if not ids.has_key(item.id):
+                        self.match_set.append(self.barcodes[k])
+                        ids[item.id] = True
+            for k in self.plus.keys():
+                if digs and k.startswith(digs):
+                    item = self.plus[k]
+                    if not ids.has_key(item.id):
+                        self.match_set.append(self.plus[k])
+                        ids[item.id] = True
+            self.match_set.extend(filter(
+                lambda x: x.id not in ids,
+                self.names.match(search_text)))
+        if self.frame:
+            self.frame.get('search').set_labels(self.get_labels())
+
+    def get_labels(self):
+        def size_unit(i):
+            if i.size_unit.name != 'each' and i.size_unit.name != 'count':
+                return ' [%.1f %s]'%(i.size, i.size_unit)
+            return ''
+        return [(i, '%s%s'%(i.name, size_unit(i)))
+                for i in self.match_set]
+
+    def update(self):
+        if self.barcode_match():
+            self.s.commit()
+            self.result = self.get_selection()
+            self.done = True
+        elif not self.done:
+            SearchDialog.update(self)
+
+    def barcode_match(self):
+        search = self.frame.get('search')
+        search_text = search.get_text()
+        if search_text and re.match('^\d{6,}$', search_text) and\
+           search.get_hit_enter() and len(self.match_set) == 1:
+            return True
+        return False
+
+    def add_edit(self, edit):
+        item = None
+        if edit:
+            item = self.get_selection()
+        ItemAddEditDialog(item, self.frame.get('search').get_text()).main()
+
+
+_current_clerk = None # clerk is persistent across sales
+
+class SaleDialog(Dialog):
+    """sell people stuff; the main UI."""
+    ITEM_LIST_WIDTH=52
+    DEFAULT_TAX=decimal.Decimal('.0200')
+
+    MEASURE_FRAME=0
+    SEARCH_FRAME=1
+    STATUS_FRAME=2
+    ITEMS_FRAME=3
+    TOTAL_FRAME=4
+
+    def __init__(self):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.barcode_matched = False
+        self.measure = self.add_frame(Frame([
+            Label(0, 0, 12, "Quantity"),
+            BigNumberBox('qty', 1, 0, 5, "1", clear_on_insert=True),
+            Label(6, 0, 12, "Cost", name="unit"),
+            BigNumberBox('cost', 7, 0, 5, "0.00", clear_on_insert=True),
+            ], layout.Fixed(0, 0)))
+        self.status = self.add_frame(Frame([
+            Label(0, 0, 14,  "F1: Clerk", color_id=HELP_COLOR),
+            Label(0, 15, 14, "F2: Customer", color_id=HELP_COLOR),
+            Label(0, 30, 14, "F3: Sale", color_id=HELP_COLOR),
+            Label(0, 60, 14, "F9: Review", color_id=HELP_COLOR),
+            Label(0, 45, 14, "F5: Pay", color_id=HELP_COLOR),
+            ], layout.BottomEdge(0), border=False))
+        self.total = self.add_frame(Frame([
+            Label(0, 0, 20, 'Clerk: ?', name='clerk'),
+            Label(1, 0, 20, 'Customer: ?', name='customer'),
+			Label(2, 0, 20, 'Tab: ?', name='tab'),
+            Label(3, 0, 20, '', name='clock'),
+            Label(5, 0, 20, 'Total'),
+            BigNumberBox('total', 5, 0, 5, '0.00'),
+            ], layout.BottomEdge(1, 2), border=False))
+        self.total.layout.panel.bottom()
+        curses.panel.update_panels()
+        self._make_search()
+        self.search.frame.layout.pack()
+        self.items = self.add_frame(Frame([
+            ListBox('items', 0, 0,
+                layout.columns-self.total.layout.width-8,
+                (layout.lines-self.search.frame.layout.height-2)/2,
+                [], label_height=2),
+            ],
+            layout.FillRightDown(self.total.layout.width+4,
+                                 self.search.frame.height,
+                                 fill_to_bottom=True),
+            border=False))
+        self.frames = [
+            self.measure,
+            self.search.frame,
+            self.status,
+            self.items,
+            self.total
+        ]
+        self._reset()
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def _reset(self):
+        self.sale_items = []
+        self.sale = db.Sale(_current_clerk, None)
+        self.item_to_buy = None
+        self.measure.get('qty').set_text('1')
+        self.measure.get('cost').set_text('0.00')
+        self.search.frame.get('search').set_text('')
+        self.items.get('items').set_labels([])
+        self.total.get('total').set_text('0.00')
+        self.total.get('customer').set_text('Customer: ?')
+        self.total.get('tab').set_text('Tab: ?')
+        self._set_focus(SaleDialog.SEARCH_FRAME)
+
+    def _make_item_list_labels(self):
+        labels = []
+        # "1.05 apples - golden delicious"
+        # "$4.99 ($1.59/lb)"),
+        for si in self.sale_items:
+            name = 'other/grocery'
+            qty = si.quantity
+            unit = ''
+            unit_cost = money.moneyfmt(si.unit_cost, curr='$', sep='')
+            tax = ''
+            total = money.moneyfmt(si.total, curr='$', sep='')
+            if si.item:
+                name = si.item.name
+                unit = ''.join(['/',si.item.price.sale_unit.name])
+                tax = str(si.item.price.tax)
+            s = "%s x %s [%.2f %s]\n%5s (%s%s)"%(qty, name, si.item.size, si.item.size_unit, total, unit_cost, unit)
+            labels.append((si, s))
+        item_list = self.items.get('items')
+        item_list.set_labels(labels)
+        item_list.scroll.end()
+
+    def _update_total(self, change):
+        self.sale.total += change
+        self.total.get('total').set_text(
+            money.moneyfmt(self.sale.total, curr='', sep=''))
+        io.write_cui_pipe("total %s\n"%(self.sale.total))
+
+    def _buy(self):
+        qty = decimal.Decimal(self.measure.get('qty').get_text())
+        unit_cost = decimal.Decimal(self.measure.get('cost').get_text())
+        tax_frac = decimal.Decimal('.0000')
+        is_tax_flat = False
+        if self.item_to_buy is not None:
+            tax_frac = self.item_to_buy.price.tax
+            is_tax_flat = self.item_to_buy.price.is_tax_flat
+        (cost, tax, total) = money.cost(qty, unit_cost,
+                                        tax_frac, is_tax_flat)
+        #self.s.add(db.SaleItem(self.sale, self.item_to_buy,
+        #    qty, unit_cost, cost, tax, total))
+        #self.s.flush()
+        #self.s.commit()
+        self.sale_items.append(db.SaleItem(self.sale, self.item_to_buy,
+            qty, unit_cost, cost, tax, total))
+        self._update_total(total)
+        self._make_item_list_labels()
+        self.measure.get('qty').set_text('1')
+
+    def update(self):
+        qty = self.measure.get('qty')
+        cost = self.measure.get('cost')
+        if (qty.get_hit_enter() and cost.get_text()) or\
+           cost.get_hit_enter() or self.barcode_matched:
+            self.barcode_matched = False
+            cost.reset_hit_enter()
+            qty.reset_hit_enter()
+            qty_text = qty.get_text()
+            amt = decimal.Decimal('1')
+            try:
+                amt = decimal.Decimal(qty_text)
+            except:
+                qty.set_text('1')
+                self.measure.set_focus(qty)
+                return
+
+            if qty_text and amt < decimal.Decimal('1000'):
+                self._buy()
+                self.search.frame.get('search').set_text('')
+                self._set_focus(SaleDialog.SEARCH_FRAME)
+            else:
+               qty.set_text('1')
+               self.measure.set_focus(qty)
+
+    def _get_clerk(self):
+        global _current_clerk
+        cd = PickClerkDialog(_current_clerk)
+        cd.main()
+        _current_clerk = cd.get_result()
+        if _current_clerk is not None:
+            self.total.get('clerk').set_text('Clerk: '+_current_clerk.name)
+        else:
+            self.total.get('clerk').set_text('Clerk: ?')
+        self.sale.clerk = _current_clerk
+
+    def _get_customer(self):
+        self.sale.customer = _find_customer()
+        if self.sale.customer is not None:
+            self.total.get('customer').set_text('Customer: %s'%(
+                self.sale.customer.name))
+            self.total.get('tab').set_text( 'Tab: %.2f' % (
+                self.sale.customer.balance) )
+        else:
+            self.total.get('customer').set_text('Customer: ?')
+            self.total.get('tab').set_text('Tab: ?')
+
+    def _pay(self):
+        self.sale.items = self.sale_items
+        pd = PaymentDialog(self.sale)
+        pd.main()
+        for i in self.sale_items:
+            self.s.add(i)
+        self.s.commit()
+        if pd.get_sale_done():
+            self._reset()
+            io.write_cui_pipe("paid\n")
+
+    def _del_item(self, items_list, si):
+        self._update_total(-si.total)
+        self.sale_items.remove(si)
+        #self.sale.items.remove(si)
+        items_list.delete_label(si)
+        self.measure.get('cost').set_text('0.00')
+        self.measure.get('qty').set_text('1')
+        #self.s.delete(si)
+        #self.s.flush()
+        #self.s.commit()
+
+    def input(self, c):
+        if Dialog.input(self, c):
+            return True
+        in_items_frame = self.focus_index == SaleDialog.ITEMS_FRAME
+        in_measure_frame = self.focus_index == SaleDialog.MEASURE_FRAME
+        if c == curses.KEY_F1:
+            self._get_clerk()
+        elif c == curses.KEY_F2:
+            self._get_customer()
+        elif c == curses.KEY_F3:
+            if in_items_frame:
+                self._set_focus(self.old_focus_index)
+            elif self.items.get('items').labels:
+                self.old_focus_index = self.focus_index
+                self._set_focus(SaleDialog.ITEMS_FRAME)
+        elif c == curses.KEY_F5:
+            self._pay()
+        elif in_measure_frame and c == KEY_ESCAPE:
+            self.search.frame.get('search').set_text('')
+            self._set_focus(SaleDialog.SEARCH_FRAME)
+        elif self.focus_index == SaleDialog.SEARCH_FRAME and c == ord('-'):
+            items_list = self.items.get('items')
+            if items_list.labels:
+                self._del_item(items_list, items_list.labels[-1].key)
+                items_list.scroll.end()
+        elif in_items_frame and (c == curses.KEY_DC or c == ord('-')):
+            items_list = self.items.get('items')
+            si = items_list.get_selection()
+            if si is not None:
+                self._del_item(items_list, si)
+                if not items_list.labels:
+                    self._set_focus(self.old_focus_index)
+        elif in_items_frame and (c == KEY_ESCAPE or c == KEY_TAB):
+            self._set_focus(self.old_focus_index)
+        elif c == curses.KEY_F9:
+            TransactionSelectionDialog().main()
+        else:
+            return False
+        return True
+
+    def _make_search(self):
+        self.search = ItemSearchDialog(
+            layout.FillRightDown(self.measure.layout.width, 0))
+
+    def main(self):
+        while not self.done:
+            self.search.update()
+            if self.search.done:
+                self.item_to_buy = self.search.get_result()
+                if self.search.barcode_match():
+                    self.barcode_matched = True
+                name = ''
+                if self.item_to_buy is not None:
+                    name = self.item_to_buy.name
+                    if self.item_to_buy.id == 807:  # tab payment
+                        if self.sale.customer is None:
+                            # Need to choose a customer
+                            self._get_customer()
+                        self.measure.get('qty').set_text(str(self.sale.customer.balance))
+                    self.measure.get('cost').set_text(
+                        str(self.item_to_buy.price.unit_cost))
+                    self.measure.get('unit').set_text(''.join([
+                        'Cost (',
+                        self.item_to_buy.price.sale_unit.name, ')']))
+                else:
+                    self.measure.get('cost').set_text('0')
+                self._make_search()
+                self.frames[SaleDialog.SEARCH_FRAME] = self.search.frame
+                self.search.frame.get('search').set_text(name)
+                self._set_focus(SaleDialog.MEASURE_FRAME)
+            self.update()
+            if self.done:
+                return
+            self._draw_frames()
+            c = self.frames[self.focus_index].layout.window.getch()
+            if not self.input(c):
+                if self.focus_index == SaleDialog.SEARCH_FRAME:
+                    self.search.input(c)
+                self.frames[self.focus_index].input(c)
+
+
+class SaleAsyncUpdater(Thread):
+    """thread to asynchronously update clock and scale readout"""
+
+    def __init__(self, sale_dialog):
+        Thread.__init__(self)
+        self.sale_dialog = sale_dialog
+        self.last_time_update = 0
+
+    def run(self):
+        try:
+            while 1:
+                if int(time.time()) > self.last_time_update:
+                    clock_label = self.sale_dialog.total.get('clock')
+                    clock_label.set_text(
+                        datetime.datetime.now().strftime(
+                        '%m/%d/%y %H:%M:%S'))
+                    (y, x) = curses.getsyx()
+                    clock_label.show()
+                    self.sale_dialog.total.layout.panel.bottom()
+                    curses.panel.update_panels()
+                    self.sale_dialog.total.layout.window.noutrefresh()
+                    curses.setsyx(y, x)
+                    curses.doupdate()
+                    self.last_time_update = int(time.time())
+                time.sleep(0.250)
+        except:
+            pass
+
+def _void_mark(sale):
+    if sale.is_void:
+        return "X"
+    else:
+        return " "
+
+class TabHistoryDialog(Dialog):
+    '''Show tab history since last zeroed.'''
+    def __init__(self, customer_id):
+        Dialog.__init__(self)
+        self.customer_id = customer_id
+        self.s = db.get_session()
+        self.setup_frame()
+
+    def setup_frame(self):
+        text, self.tab_history = tabutil.show_tab_history(self.customer_id, return_log=True)
+        history_lines = ( "%-65s" % line  for line in text.split('\n') )
+        self.add_frame( Frame(
+            [   Label(0, 0, 70, "Tab Changes:"),
+                ListBox("tablog", 1, 0, 65, 20,
+                    [ (n,line)  for (n,line) in enumerate(history_lines) ],
+                    sel=1),
+                Label(21, 0, 18, "F9: Print history", color_id=HELP_COLOR),
+            ]
+        , layout.Center()) )
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def input(self, c):
+        if Dialog.input(self,c):
+            pass    # really pass
+        elif c == curses.KEY_F9:
+#            if not self._fill_or_focus_bad_widget():
+            customer = tabutil.find_customer_by_id(self.customer_id)
+            io.print_tabhistory(customer, self.tab_history)
+            TearDialog('tab history').main()
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True
+
+class TransactionSelectionDialog(Dialog):
+    '''choose transaction to examine'''
+    def __init__(self):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.setup_frame()
+
+    def setup_frame(self):
+        self.sales = db.get_sales(self.s, 50)
+        self.add_frame(Frame([
+            Label(0, 0, 60, "Recent transactions:"),
+            ListBox("transaction", 1, 0, 50, 15,
+                [ (sale, "%1s $%5.2f\t%s" % (_void_mark(sale), sale.total, sale.time_ended)) for sale in self.sales ],
+#                [ (sale.id, "%s $% 3.2f\t%s" % (_void_mark(sale), money.moneyfmt(sale.total,curr='$',sep=''), sale.time_started)) for sale in self.sales ],
+                sel=1),
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def input(self, c):
+        if Dialog.input(self,c):
+            pass    # really pass
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True
+
+    def update(self):
+        transaction = self.frame.get("transaction")
+        if transaction.get_hit_enter():
+            sale = transaction.get_selection()
+            td = TransactionDialog(sale)
+            td.main()
+            if td.get_result():
+                self.done = True
+            else:
+                transaction.reset_hit_enter()
+            self.s.commit()
+#            self.frames.pop()
+#            self.setup_frame()
+
+class TransactionDialog(Dialog):
+    '''list/void/reprint selected transaction'''
+    def __init__(self, sale):
+        Dialog.__init__(self)
+        self.s = db.get_session()
+        self.result = False     # Did I make changes?
+        self.sale = sale
+        self.sale_items = self.s.query(db.SaleItem).filter(
+                db.SaleItem.sale_id == sale.id).all()
+        self.sale.items = self.sale_items
+        try:
+            customer_name = self.sale.customer.name
+        except AttributeError:
+            customer_name = ""
+        total = money.moneyfmt(self.sale.total, curr='$', sep='')
+        void_color = HELP_COLOR if self.sale.is_void else FRAME_BG
+        void_str = "VOID" if self.sale.is_void else ""
+        void_toggle = "UNVOID" if self.sale.is_void else "VOID"
+        self.add_frame(Frame([
+            Label(0,0, 50, "Transaction %d" % sale.id, color_id=void_color),
+            Label(1,0, 50, void_str, color_id=void_color),
+            Label(2,0, 50, "Time: %s" % sale.time_ended),
+            Label(3,0, 50, "Customer: %s" % customer_name),
+            Label(4,0, 50, "Paid by: %s" % db.PAYMENT[sale.payment]),
+            Label(5,0, 50, "TOTAL: %s" % total),
+            ListBox("bought_items", 7,0, 50, 10,
+                [ (si.id, "$%6s:  %2d x %s" % (si.cost, si.quantity, si.item.name))  for si in self.sale_items ]),
+            Label(18,  0, 25, "F6: %s transaction" % void_toggle, color_id=HELP_COLOR),
+            Label(18, 26, 25, "F7: REPRINT receipt", color_id=HELP_COLOR),
+        ], layout.Center()))
+
+    def __del__(self):
+        Dialog.__del__(self)
+
+    def get_result(self):
+        return self.result
+
+    def input(self, c):
+        if Dialog.input(self,c):
+            pass    # really pass
+        elif c == curses.KEY_F6:    # void transaction
+            if self.sale.is_void:
+                if self.sale.has_tab_payment():
+                    self.sale.customer.balance -= self.sale.tab_payment_amount()
+                elif db.PAYMENT[self.sale.payment] == 'tab':
+                    self.sale.customer.balance += self.sale.total
+                self.sale.is_void = 0
+            else:
+                if self.sale.has_tab_payment():
+                    self.sale.customer.balance += self.sale.tab_payment_amount()
+                elif db.PAYMENT[self.sale.payment] == 'tab':
+                    self.sale.customer.balance -= self.sale.total
+                self.sale.is_void = 1
+            self.done = True
+            self.result = True
+        elif c == curses.KEY_F7:    # reprint receipt
+            io.print_receipt(self.sale)
+            if db.PAYMENT[self.sale.payment] == 'debit/credit':
+                io.print_card_receipt(self.sale, self.sale.total, merchant_copy=False)
+            #TearDialog('sale receipt').main()
+            self.done = True
+        elif c == KEY_ESCAPE:
+            self.done = True
+        else:
+            return False
+        return True

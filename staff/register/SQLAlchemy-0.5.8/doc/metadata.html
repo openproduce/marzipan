@@ -1,0 +1,623 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        <title>
+    Database Meta Data
+ &mdash; SQLAlchemy 0.5.8 Documentation</title>
+        
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/docs.css" type="text/css" />
+
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+          URL_ROOT:    '',
+          VERSION:     '0.5.8',
+          COLLAPSE_MODINDEX: false,
+          FILE_SUFFIX: '.html'
+      };
+    </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/init.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+        <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="top" title="SQLAlchemy 0.5.8 Documentation" href="index.html" />
+        <link rel="next" title="API Reference" href="reference/index.html" />
+        <link rel="prev" title="Database Engines" href="dbengine.html" />
+    
+
+    </head>
+    <body>
+        
+
+
+
+
+        <h1>SQLAlchemy 0.5.8 Documentation</h1>
+
+        <div id="search">
+        Search:
+        <form class="search" action="search.html" method="get">
+          <input type="text" name="q" size="18" /> <input type="submit" value="Search" />
+          <input type="hidden" name="check_keywords" value="yes" />
+          <input type="hidden" name="area" value="default" />
+        </form>
+        </div>
+
+        <div class="versionheader">
+            Version: <span class="versionnum">0.5.8</span> Last Updated: 01/16/2010 15:44:42
+        </div>
+        <div class="clearboth"></div>
+
+        <div class="topnav">
+            <div id="pagecontrol">
+                <a href="reference/index.html">API Reference</a>
+                |
+                <a href="genindex.html">Index</a>
+            
+                <div class="sourcelink">(<a href="_sources/metadata.txt">view source)</div>
+            </div>
+            
+            <div class="navbanner">
+                <a class="totoc" href="index.html">Table of Contents</a>
+                » 
+    Database Meta Data
+ 
+                
+                
+<div class="prevnext">
+        Previous:
+        <a href="dbengine.html" title="previous chapter">Database Engines</a>
+        Next:
+        <a href="reference/index.html" title="next chapter">API Reference</a>
+</div>
+
+                <h2>
+                    
+    Database Meta Data
+ 
+                </h2>
+            </div>
+                <ul>
+<li><a class="reference external" href="">Database Meta Data</a><ul>
+<li><a class="reference external" href="#describing-databases-with-metadata">Describing Databases with MetaData</a><ul>
+<li><a class="reference external" href="#defining-foreign-keys">Defining Foreign Keys</a></li>
+<li><a class="reference external" href="#accessing-tables-and-columns">Accessing Tables and Columns</a></li>
+<li><a class="reference external" href="#binding-metadata-to-an-engine-or-connection">Binding MetaData to an Engine or Connection</a></li>
+<li><a class="reference external" href="#reflecting-tables">Reflecting Tables</a><ul>
+<li><a class="reference external" href="#overriding-reflected-columns">Overriding Reflected Columns</a></li>
+<li><a class="reference external" href="#reflecting-all-tables-at-once">Reflecting All Tables at Once</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#specifying-the-schema-name">Specifying the Schema Name</a></li>
+<li><a class="reference external" href="#on-update-and-on-delete">ON UPDATE and ON DELETE</a></li>
+<li><a class="reference external" href="#other-options">Other Options</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#creating-and-dropping-database-tables">Creating and Dropping Database Tables</a></li>
+<li><a class="reference external" href="#column-insert-update-defaults">Column Insert/Update Defaults</a><ul>
+<li><a class="reference external" href="#pre-executed-python-functions">Pre-Executed Python Functions</a></li>
+<li><a class="reference external" href="#pre-executed-and-inline-sql-expressions">Pre-executed and Inline SQL Expressions</a></li>
+<li><a class="reference external" href="#ddl-level-defaults">DDL-Level Defaults</a></li>
+<li><a class="reference external" href="#triggered-columns">Triggered Columns</a></li>
+<li><a class="reference external" href="#defining-sequences">Defining Sequences</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#defining-constraints-and-indexes">Defining Constraints and Indexes</a><ul>
+<li><a class="reference external" href="#unique-constraint">UNIQUE Constraint</a></li>
+<li><a class="reference external" href="#check-constraint">CHECK Constraint</a></li>
+<li><a class="reference external" href="#indexes">Indexes</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#adapting-tables-to-alternate-metadata">Adapting Tables to Alternate Metadata</a></li>
+</ul>
+</li>
+</ul>
+
+            <div class="clearboth"></div>
+        </div>
+        
+        <div class="document">
+            <div class="body">
+                
+<div class="section" id="database-meta-data">
+<span id="metadata-toplevel"></span><h1>Database Meta Data<a class="headerlink" href="#database-meta-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="describing-databases-with-metadata">
+<h2>Describing Databases with MetaData<a class="headerlink" href="#describing-databases-with-metadata" title="Permalink to this headline">¶</a></h2>
+<p>The core of SQLAlchemy&#8217;s query and object mapping operations are supported by <strong>database metadata</strong>, which is comprised of Python objects that describe tables and other schema-level objects.  These objects can be created by explicitly naming the various components and their properties, using the Table, Column, ForeignKey, Index, and Sequence objects imported from <tt class="docutils literal"><span class="pre">sqlalchemy.schema</span></tt>.  There is also support for <strong>reflection</strong> of some entities, which means you only specify the <em>name</em> of the entities and they are recreated from the database automatically.</p>
+<p>A collection of metadata entities is stored in an object aptly named <tt class="docutils literal"><span class="pre">MetaData</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span></pre></div>
+</div>
+<p>To represent a Table, use the <tt class="docutils literal"><span class="pre">Table</span></tt> class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">users</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">16</span><span class="p">),</span> <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;email_address&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;email&#39;</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;password&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">),</span> <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">user_prefs</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;user_prefs&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&quot;users.user_id&quot;</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">40</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_value&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">100</span><span class="p">))</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>The specific datatypes for each Column, such as Integer, String, etc. are described in <a title="" class="reference external" href="reference/sqlalchemy/types.html#module-sqlalchemy.types"><tt class="xref docutils literal"><span class="pre">sqlalchemy.types</span></tt></a>, and exist within the module <tt class="docutils literal"><span class="pre">sqlalchemy.types</span></tt> as well as the global <tt class="docutils literal"><span class="pre">sqlalchemy</span></tt> namespace.</p>
+<div class="section" id="defining-foreign-keys">
+<span id="metadata-foreignkeys"></span><h3>Defining Foreign Keys<a class="headerlink" href="#defining-foreign-keys" title="Permalink to this headline">¶</a></h3>
+<p>Foreign keys are most easily specified by the <tt class="docutils literal"><span class="pre">ForeignKey</span></tt> object within a <tt class="docutils literal"><span class="pre">Column</span></tt> object.  For a composite foreign key, i.e. a foreign key that contains multiple columns referencing multiple columns to a composite primary key, an explicit syntax is provided which allows the correct table CREATE statements to be generated:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># a table with a composite primary key</span>
+<span class="n">invoices</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;invoices&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;invoice_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;ref_num&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c"># a table with a composite foreign key referencing the parent table</span>
+<span class="n">invoice_items</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;invoice_items&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;item_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;item_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;invoice_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;ref_num&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">ForeignKeyConstraint</span><span class="p">([</span><span class="s">&#39;invoice_id&#39;</span><span class="p">,</span> <span class="s">&#39;ref_num&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;invoices.invoice_id&#39;</span><span class="p">,</span> <span class="s">&#39;invoices.ref_num&#39;</span><span class="p">])</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>Above, the <tt class="docutils literal"><span class="pre">invoice_items</span></tt> table will have <tt class="docutils literal"><span class="pre">ForeignKey</span></tt> objects automatically added to the <tt class="docutils literal"><span class="pre">invoice_id</span></tt> and <tt class="docutils literal"><span class="pre">ref_num</span></tt> <tt class="docutils literal"><span class="pre">Column</span></tt> objects as a result of the additional <tt class="docutils literal"><span class="pre">ForeignKeyConstraint</span></tt> object.</p>
+</div>
+<div class="section" id="accessing-tables-and-columns">
+<h3>Accessing Tables and Columns<a class="headerlink" href="#accessing-tables-and-columns" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="docutils literal"><span class="pre">MetaData</span></tt> object supports some handy methods, such as getting a list of Tables in the order (or reverse) of their dependency:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">table_iterator</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span>
+<span class="go">users</span>
+<span class="go">user_prefs</span></pre></div>
+</div>
+<p>And <tt class="docutils literal"><span class="pre">Table</span></tt> provides an interface to the table&#8217;s properties as well as that of its columns:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">employees</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;employees&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;name&#39;</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_dept&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&quot;departments.department_id&quot;</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c"># access the column &quot;EMPLOYEE_ID&quot;:</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">employee_id</span>
+
+<span class="c"># or just</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span>
+
+<span class="c"># via string</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="p">[</span><span class="s">&#39;employee_id&#39;</span><span class="p">]</span>
+
+<span class="c"># iterate through all columns</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">c</span>
+
+<span class="c"># get the table&#39;s primary key columns</span>
+<span class="k">for</span> <span class="n">primary_key</span> <span class="ow">in</span> <span class="n">employees</span><span class="o">.</span><span class="n">primary_key</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">primary_key</span>
+
+<span class="c"># get the table&#39;s foreign key objects:</span>
+<span class="k">for</span> <span class="n">fkey</span> <span class="ow">in</span> <span class="n">employees</span><span class="o">.</span><span class="n">foreign_keys</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">fkey</span>
+
+<span class="c"># access the table&#39;s MetaData:</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">metadata</span>
+
+<span class="c"># access the table&#39;s bound Engine or Connection, if its MetaData is bound:</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">bind</span>
+
+<span class="c"># access a column&#39;s name, type, nullable, primary key, foreign key</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span><span class="o">.</span><span class="n">name</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span><span class="o">.</span><span class="n">type</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span><span class="o">.</span><span class="n">nullable</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span><span class="o">.</span><span class="n">primary_key</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_dept</span><span class="o">.</span><span class="n">foreign_key</span>
+
+<span class="c"># get the &quot;key&quot; of a column, which defaults to its name, but can</span>
+<span class="c"># be any user-defined string:</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">key</span>
+
+<span class="c"># access a column&#39;s table:</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_id</span><span class="o">.</span><span class="n">table</span> <span class="ow">is</span> <span class="n">employees</span>
+
+<span class="c"># get the table related by a foreign key</span>
+<span class="n">fcolumn</span> <span class="o">=</span> <span class="n">employees</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">employee_dept</span><span class="o">.</span><span class="n">foreign_key</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">table</span></pre></div>
+</div>
+</div>
+<div class="section" id="binding-metadata-to-an-engine-or-connection">
+<span id="metadata-binding"></span><h3>Binding MetaData to an Engine or Connection<a class="headerlink" href="#binding-metadata-to-an-engine-or-connection" title="Permalink to this headline">¶</a></h3>
+<p>A <tt class="docutils literal"><span class="pre">MetaData</span></tt> object can be associated with an <tt class="docutils literal"><span class="pre">Engine</span></tt> or an individual <tt class="docutils literal"><span class="pre">Connection</span></tt>; this process is called <strong>binding</strong>.  The term used to describe &#8220;an engine or a connection&#8221; is often referred to as a <strong>connectable</strong>.  Binding allows the <tt class="docutils literal"><span class="pre">MetaData</span></tt> and the elements which it contains to perform operations against the database directly, using the connection resources to which it&#8217;s bound.   Common operations which are made more convenient through binding include being able to generate SQL constructs which know how to execute themselves, creating <tt class="docutils literal"><span class="pre">Table</span></tt> objects which query the database for their column and constraint information, and issuing CREATE or DROP statements.</p>
+<p>To bind <tt class="docutils literal"><span class="pre">MetaData</span></tt> to an <tt class="docutils literal"><span class="pre">Engine</span></tt>, use the <tt class="docutils literal"><span class="pre">bind</span></tt> attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite://&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="c"># create MetaData</span>
+<span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+<span class="c"># bind to an engine</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="n">engine</span></pre></div>
+</div>
+<p>Once this is done, the <tt class="docutils literal"><span class="pre">MetaData</span></tt> and its contained <tt class="docutils literal"><span class="pre">Table</span></tt> objects can access the database directly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">meta</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>  <span class="c"># issue CREATE statements for all tables</span>
+
+<span class="c"># describe a table called &#39;users&#39;, query the database for its columns</span>
+<span class="n">users_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># generate a SELECT statement and execute</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">users_table</span><span class="o">.</span><span class="n">select</span><span class="p">()</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span></pre></div>
+</div>
+<p>Note that the feature of binding engines is <strong>completely optional</strong>.  All of the operations which take advantage of &#8220;bound&#8221; <tt class="docutils literal"><span class="pre">MetaData</span></tt> also can be given an <tt class="docutils literal"><span class="pre">Engine</span></tt> or <tt class="docutils literal"><span class="pre">Connection</span></tt> explicitly with which to perform the operation.   The equivalent &#8220;non-bound&#8221; of the above would be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">meta</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>  <span class="c"># issue CREATE statements for all tables</span>
+
+<span class="c"># describe a table called &#39;users&#39;,  query the database for its columns</span>
+<span class="n">users_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+
+<span class="c"># generate a SELECT statement and execute</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">users_table</span><span class="o">.</span><span class="n">select</span><span class="p">())</span></pre></div>
+</div>
+</div>
+<div class="section" id="reflecting-tables">
+<h3>Reflecting Tables<a class="headerlink" href="#reflecting-tables" title="Permalink to this headline">¶</a></h3>
+<p>A <tt class="docutils literal"><span class="pre">Table</span></tt> object can be created without specifying any of its contained attributes, using the argument <tt class="docutils literal"><span class="pre">autoload=True</span></tt> in conjunction with the table&#8217;s name and possibly its schema (if not the databases &#8220;default&#8221; schema).  (You can also specify a list or set of column names to autoload as the kwarg include_columns, if you only want to load a subset of the columns in the actual database.)  This will issue the appropriate queries to the database in order to locate all properties of the table required for SQLAlchemy to use it effectively, including its column names and datatypes, foreign and primary key constraints, and in some cases its default-value generating attributes.   To use <tt class="docutils literal"><span class="pre">autoload=True</span></tt>, the table&#8217;s <tt class="docutils literal"><span class="pre">MetaData</span></tt> object need be bound to an <tt class="docutils literal"><span class="pre">Engine</span></tt> or <tt class="docutils literal"><span class="pre">Connection</span></tt>, or alternatively the <tt class="docutils literal"><span class="pre">autoload_with=&lt;some</span> <span class="pre">connectable&gt;</span></tt> argument can be passed.  Below we illustrate autoloading a table and then iterating through the names of its columns:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;messages&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">messages</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="go">[&#39;message_id&#39;, &#39;message_name&#39;, &#39;date&#39;]</span></pre></div>
+</div>
+<p>Note that if a reflected table has a foreign key referencing another table, the related <tt class="docutils literal"><span class="pre">Table</span></tt> object  will be automatically created within the <tt class="docutils literal"><span class="pre">MetaData</span></tt> object if it does not exist already.  Below, suppose table <tt class="docutils literal"><span class="pre">shopping_cart_items</span></tt> references a table <tt class="docutils literal"><span class="pre">shopping_carts</span></tt>.  After reflecting, the <tt class="docutils literal"><span class="pre">shopping</span> <span class="pre">carts</span></tt> table is present:</p>
+<div class="highlight-pycon+sql"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">shopping_cart_items</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;shopping_cart_items&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s">&#39;shopping_carts&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+<span class="go">True</span></pre></div>
+</div>
+<p>To get direct access to &#8216;shopping_carts&#8217;, simply instantiate it via the <tt class="docutils literal"><span class="pre">Table</span></tt> constructor.  <tt class="docutils literal"><span class="pre">Table</span></tt> uses a special constructor that will return the already created <tt class="docutils literal"><span class="pre">Table</span></tt> instance if it&#8217;s already present:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">shopping_carts</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;shopping_carts&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span></pre></div>
+</div>
+<p>Of course, it&#8217;s a good idea to use <tt class="docutils literal"><span class="pre">autoload=True</span></tt> with the above table regardless.  This is so that if it hadn&#8217;t been loaded already, the operation will load the table.  The autoload operation only occurs for the table if it hasn&#8217;t already been loaded; once loaded, new calls to <tt class="docutils literal"><span class="pre">Table</span></tt> will not re-issue any reflection queries.</p>
+<div class="section" id="overriding-reflected-columns">
+<h4>Overriding Reflected Columns<a class="headerlink" href="#overriding-reflected-columns" title="Permalink to this headline">¶</a></h4>
+<p>Individual columns can be overridden with explicit values when reflecting tables; this is handy for specifying custom datatypes, constraints such as primary keys that may not be configured within the database, etc.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mytable</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>   <span class="c"># override reflected &#39;id&#39; to have primary key</span>
+<span class="gp">... </span><span class="n">Column</span><span class="p">(</span><span class="s">&#39;mydata&#39;</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">(</span><span class="mf">50</span><span class="p">)),</span>    <span class="c"># override reflected &#39;mydata&#39; to be Unicode</span>
+<span class="gp">... </span><span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="reflecting-all-tables-at-once">
+<h4>Reflecting All Tables at Once<a class="headerlink" href="#reflecting-all-tables-at-once" title="Permalink to this headline">¶</a></h4>
+<p>The <tt class="docutils literal"><span class="pre">MetaData</span></tt> object can also get a listing of tables and reflect the full set.  This is achieved by using the <tt class="docutils literal"><span class="pre">reflect()</span></tt> method.  After calling it, all located tables are present within the <tt class="docutils literal"><span class="pre">MetaData</span></tt> object&#8217;s dictionary of tables:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">reflect</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">someengine</span><span class="p">)</span>
+<span class="n">users_table</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="s">&#39;users&#39;</span><span class="p">]</span>
+<span class="n">addresses_table</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="s">&#39;addresses&#39;</span><span class="p">]</span></pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">metadata.reflect()</span></tt> is also a handy way to clear or drop all tables in a database:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">reflect</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">someengine</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">reversed</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">sorted_tables</span><span class="p">):</span>
+    <span class="n">someengine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="specifying-the-schema-name">
+<h3>Specifying the Schema Name<a class="headerlink" href="#specifying-the-schema-name" title="Permalink to this headline">¶</a></h3>
+<p>Some databases support the concept of multiple schemas.  A <tt class="docutils literal"><span class="pre">Table</span></tt> can reference this by specifying the <tt class="docutils literal"><span class="pre">schema</span></tt> keyword argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">financial_info</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;financial_info&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">100</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">schema</span><span class="o">=</span><span class="s">&#39;remote_banks&#39;</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>Within the <tt class="docutils literal"><span class="pre">MetaData</span></tt> collection, this table will be identified by the combination of <tt class="docutils literal"><span class="pre">financial_info</span></tt> and <tt class="docutils literal"><span class="pre">remote_banks</span></tt>.  If another table called <tt class="docutils literal"><span class="pre">financial_info</span></tt> is referenced without the <tt class="docutils literal"><span class="pre">remote_banks</span></tt> schema, it will refer to a different <tt class="docutils literal"><span class="pre">Table</span></tt>.  <tt class="docutils literal"><span class="pre">ForeignKey</span></tt> objects can reference columns in this table using the form <tt class="docutils literal"><span class="pre">remote_banks.financial_info.id</span></tt>.</p>
+</div>
+<div class="section" id="on-update-and-on-delete">
+<h3>ON UPDATE and ON DELETE<a class="headerlink" href="#on-update-and-on-delete" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">ON</span> <span class="pre">UPDATE</span></tt> and <tt class="docutils literal"><span class="pre">ON</span> <span class="pre">DELETE</span></tt> clauses to a table create are specified within the <tt class="docutils literal"><span class="pre">ForeignKeyConstraint</span></tt> object, using the <tt class="docutils literal"><span class="pre">onupdate</span></tt> and <tt class="docutils literal"><span class="pre">ondelete</span></tt> keyword arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">foobar</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;foobar&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;lala&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">40</span><span class="p">)),</span>
+    <span class="n">ForeignKeyConstraint</span><span class="p">([</span><span class="s">&#39;lala&#39;</span><span class="p">],[</span><span class="s">&#39;hoho.lala&#39;</span><span class="p">],</span> <span class="n">onupdate</span><span class="o">=</span><span class="s">&quot;CASCADE&quot;</span><span class="p">,</span> <span class="n">ondelete</span><span class="o">=</span><span class="s">&quot;CASCADE&quot;</span><span class="p">))</span></pre></div>
+</div>
+<p>Note that these clauses are not supported on SQLite, and require <tt class="docutils literal"><span class="pre">InnoDB</span></tt> tables when used with MySQL.  They may also not be supported on other databases.</p>
+</div>
+<div class="section" id="other-options">
+<h3>Other Options<a class="headerlink" href="#other-options" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">Tables</span></tt> may support database-specific options, such as MySQL&#8217;s <tt class="docutils literal"><span class="pre">engine</span></tt> option that can specify &#8220;MyISAM&#8221;, &#8220;InnoDB&#8221;, and other backends for the table:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">addresses</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;engine_email_addresses&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;address_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;remote_user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="n">users</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">user_id</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;email_address&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">)),</span>
+    <span class="n">mysql_engine</span><span class="o">=</span><span class="s">&#39;InnoDB&#39;</span>
+<span class="p">)</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="creating-and-dropping-database-tables">
+<h2>Creating and Dropping Database Tables<a class="headerlink" href="#creating-and-dropping-database-tables" title="Permalink to this headline">¶</a></h2>
+<p>Creating and dropping individual tables can be done via the <tt class="docutils literal"><span class="pre">create()</span></tt> and <tt class="docutils literal"><span class="pre">drop()</span></tt> methods of <tt class="docutils literal"><span class="pre">Table</span></tt>; these methods take an optional <tt class="docutils literal"><span class="pre">bind</span></tt> parameter which references an <tt class="docutils literal"><span class="pre">Engine</span></tt> or a <tt class="docutils literal"><span class="pre">Connection</span></tt>.  If not supplied, the <tt class="docutils literal"><span class="pre">Engine</span></tt> bound to the <tt class="docutils literal"><span class="pre">MetaData</span></tt> will be used, else an error is raised:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="s">&#39;sqlite:///:memory:&#39;</span>
+
+<span class="n">employees</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;employees&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;name&#39;</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;employee_dept&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&quot;departments.department_id&quot;</span><span class="p">))</span>
+<span class="p">)</span>
+<a href='#' class='sql_link'>sql</a><span class="n">employees</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+<div class='popup_sql'>CREATE TABLE employees(
+employee_id SERIAL NOT NULL PRIMARY KEY,
+employee_name VARCHAR(60) NOT NULL,
+employee_dept INTEGER REFERENCES departments(department_id)
+)</div></pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">drop()</span></tt> method:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><a href='#' class='sql_link'>sql</a><span class="n">employees</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+<div class='popup_sql'>DROP TABLE employee</div></pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">create()</span></tt> and <tt class="docutils literal"><span class="pre">drop()</span></tt> methods also support an optional keyword argument <tt class="docutils literal"><span class="pre">checkfirst</span></tt> which will issue the database&#8217;s appropriate pragma statements to check if the table exists before creating or dropping:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">employees</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">employees</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">checkfirst</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></pre></div>
+</div>
+<p>Entire groups of Tables can be created and dropped directly from the <tt class="docutils literal"><span class="pre">MetaData</span></tt> object with <tt class="docutils literal"><span class="pre">create_all()</span></tt> and <tt class="docutils literal"><span class="pre">drop_all()</span></tt>.  These methods always check for the existence of each table before creating or dropping.  Each method takes an optional <tt class="docutils literal"><span class="pre">bind</span></tt> keyword argument which can reference an <tt class="docutils literal"><span class="pre">Engine</span></tt> or a <tt class="docutils literal"><span class="pre">Connection</span></tt>.  If no engine is specified, the underlying bound <tt class="docutils literal"><span class="pre">Engine</span></tt>,  if any, is used:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="s">&#39;sqlite:///:memory:&#39;</span><span class="p">)</span>
+
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+<span class="n">users</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">16</span><span class="p">),</span> <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;email_address&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">60</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="s">&#39;email&#39;</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;password&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">),</span> <span class="n">nullable</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">user_prefs</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;user_prefs&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;user_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s">&quot;users.user_id&quot;</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_name&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">40</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;pref_value&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">100</span><span class="p">))</span>
+<span class="p">)</span>
+
+<a href='#' class='sql_link'>sql</a><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+<div class='popup_sql'>PRAGMA table_info(users){}
+CREATE TABLE users(
+        user_id INTEGER NOT NULL PRIMARY KEY,
+        user_name VARCHAR(16) NOT NULL,
+        email_address VARCHAR(60),
+        password VARCHAR(20) NOT NULL
+)
+PRAGMA table_info(user_prefs){}
+CREATE TABLE user_prefs(
+        pref_id INTEGER NOT NULL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(user_id),
+        pref_name VARCHAR(40) NOT NULL,
+        pref_value VARCHAR(100)
+)</div></pre></div>
+</div>
+</div>
+<div class="section" id="column-insert-update-defaults">
+<h2>Column Insert/Update Defaults<a class="headerlink" href="#column-insert-update-defaults" title="Permalink to this headline">¶</a></h2>
+<p>SQLAlchemy includes several constructs which provide default values provided during INSERT and UPDATE statements.  The defaults may be provided as Python constants, Python functions, or SQL expressions, and the SQL expressions themselves may be &#8220;pre-executed&#8221;, executed inline within the insert/update statement itself, or can be created as a SQL level &#8220;default&#8221; placed on the table definition itself.  A &#8220;default&#8221; value by definition is only invoked if no explicit value is passed into the INSERT or UPDATE statement.</p>
+<div class="section" id="pre-executed-python-functions">
+<h3>Pre-Executed Python Functions<a class="headerlink" href="#pre-executed-python-functions" title="Permalink to this headline">¶</a></h3>
+<p>The &#8220;default&#8221; keyword argument on Column can reference a Python value or callable which is invoked at the time of an insert:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># a function which counts upwards</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mf">0</span>
+<span class="k">def</span> <span class="nf">mydefault</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">i</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mf">1</span>
+    <span class="k">return</span> <span class="n">i</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&quot;mytable&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="c"># function-based default</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">mydefault</span><span class="p">),</span>
+
+    <span class="c"># a scalar default</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">10</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;default&quot;</span><span class="p">)</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>Similarly, the &#8220;onupdate&#8221; keyword does the same thing for update statements:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&quot;mytable&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+    <span class="c"># define &#39;last_updated&#39; to be populated with datetime.now()</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;last_updated&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">onupdate</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">),</span>
+<span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="pre-executed-and-inline-sql-expressions">
+<h3>Pre-executed and Inline SQL Expressions<a class="headerlink" href="#pre-executed-and-inline-sql-expressions" title="Permalink to this headline">¶</a></h3>
+<p>The &#8220;default&#8221; and &#8220;onupdate&#8221; keywords may also be passed SQL expressions, including select statements or direct function calls:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&quot;mytable&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+    <span class="c"># define &#39;create_date&#39; to default to now()</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;create_date&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
+
+    <span class="c"># define &#39;key&#39; to pull its default from the &#39;keyvalues&#39; table</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="n">keyvalues</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">keyvalues</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">type</span><span class="o">=</span><span class="s">&#39;type1&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">1</span><span class="p">))</span>
+
+    <span class="c"># define &#39;last_modified&#39; to use the current_timestamp SQL function on update</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;last_modified&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">onupdate</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">current_timestamp</span><span class="p">())</span>
+    <span class="p">)</span></pre></div>
+</div>
+<p>The above SQL functions are usually executed &#8220;inline&#8221; with the INSERT or UPDATE statement being executed.  In some cases, the function is &#8220;pre-executed&#8221; and its result pre-fetched explicitly.  This happens under the following circumstances:</p>
+<ul class="simple">
+<li>the column is a primary key column</li>
+<li>the database dialect does not support a usable <tt class="docutils literal"><span class="pre">cursor.lastrowid</span></tt> accessor (or equivalent); this currently includes PostgreSQL, Oracle, and Firebird.</li>
+<li>the statement is a single execution, i.e. only supplies one set of parameters and doesn&#8217;t use &#8220;executemany&#8221; behavior</li>
+<li>the <tt class="docutils literal"><span class="pre">inline=True</span></tt> flag is not set on the <tt class="docutils literal"><span class="pre">Insert()</span></tt> or <tt class="docutils literal"><span class="pre">Update()</span></tt> construct.</li>
+</ul>
+<p>For a statement execution which is not an executemany, the returned <tt class="docutils literal"><span class="pre">ResultProxy</span></tt> will contain a collection accessible via <tt class="docutils literal"><span class="pre">result.postfetch_cols()</span></tt> which contains a list of all <tt class="docutils literal"><span class="pre">Column</span></tt> objects which had an inline-executed default.  Similarly, all parameters which were bound to the statement, including all Python and SQL expressions which were pre-executed, are present in the <tt class="docutils literal"><span class="pre">last_inserted_params()</span></tt> or <tt class="docutils literal"><span class="pre">last_updated_params()</span></tt> collections on <tt class="docutils literal"><span class="pre">ResultProxy</span></tt>.  The <tt class="docutils literal"><span class="pre">last_inserted_ids()</span></tt> collection contains a list of primary key values for the row inserted.</p>
+</div>
+<div class="section" id="ddl-level-defaults">
+<h3>DDL-Level Defaults<a class="headerlink" href="#ddl-level-defaults" title="Permalink to this headline">¶</a></h3>
+<p>A variant on a SQL expression default is the <tt class="docutils literal"><span class="pre">server_default</span></tt>, which gets placed in the CREATE TABLE statement during a <tt class="docutils literal"><span class="pre">create()</span></tt> operation:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">20</span><span class="p">),</span> <span class="n">server_default</span><span class="o">=</span><span class="s">&#39;abc&#39;</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;created_at&#39;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">server_default</span><span class="o">=</span><span class="n">text</span><span class="p">(</span><span class="s">&quot;sysdate&quot;</span><span class="p">))</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>A create call for the above table will produce:</p>
+<div class="highlight-python"><pre>CREATE TABLE test (
+    abc varchar(20) default 'abc',
+    created_at datetime default sysdate
+)</pre>
+</div>
+<p>The behavior of <tt class="docutils literal"><span class="pre">server_default</span></tt> is similar to that of a regular SQL default; if it&#8217;s placed on a primary key column for a database which doesn&#8217;t have a way to &#8220;postfetch&#8221; the ID, and the statement is not &#8220;inlined&#8221;, the SQL expression is pre-executed; otherwise, SQLAlchemy lets the default fire off on the database side normally.</p>
+</div>
+<div class="section" id="triggered-columns">
+<h3>Triggered Columns<a class="headerlink" href="#triggered-columns" title="Permalink to this headline">¶</a></h3>
+<p>Columns with values set by a database trigger or other external process may be called out with a marker:</p>
+<div class="highlight-python"><pre>t = Table('test', meta,
+    Column('abc', String(20), server_default=FetchedValue())
+    Column('def', String(20), server_onupdate=FetchedValue())
+)</pre>
+</div>
+<p>These markers do not emit a <tt class="docutils literal"><span class="pre">``default``</span></tt> clause when the table is created, however they do set the same internal flags as a static <tt class="docutils literal"><span class="pre">server_default</span></tt> clause, providing hints to higher-level tools that a &#8220;post-fetch&#8221; of these rows should be performed after an insert or update.</p>
+</div>
+<div class="section" id="defining-sequences">
+<h3>Defining Sequences<a class="headerlink" href="#defining-sequences" title="Permalink to this headline">¶</a></h3>
+<p>A table with a sequence looks like:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&quot;cartitems&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&quot;cart_id&quot;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;cart_id_seq&#39;</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&quot;description&quot;</span><span class="p">,</span> <span class="n">String</span><span class="p">(</span><span class="mf">40</span><span class="p">)),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&quot;createdate&quot;</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">())</span>
+<span class="p">)</span></pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">Sequence</span></tt> object works a lot like the <tt class="docutils literal"><span class="pre">default</span></tt> keyword on <tt class="docutils literal"><span class="pre">Column</span></tt>, except that it only takes effect on a database which supports sequences.  When used with a database that does not support sequences, the <tt class="docutils literal"><span class="pre">Sequence</span></tt> object has no effect; therefore it&#8217;s safe to place on a table which is used against multiple database backends.  The same rules for pre- and inline execution apply.</p>
+<p>When the <tt class="docutils literal"><span class="pre">Sequence</span></tt> is associated with a table, CREATE and DROP statements issued for that table will also issue CREATE/DROP for the sequence object as well, thus &#8220;bundling&#8221; the sequence object with its parent table.</p>
+<p>The flag <tt class="docutils literal"><span class="pre">optional=True</span></tt> on <tt class="docutils literal"><span class="pre">Sequence</span></tt> will produce a sequence that is only used on databases which have no &#8220;autoincrementing&#8221; capability.  For example, PostgreSQL supports primary key generation using the SERIAL keyword, whereas Oracle has no such capability.  Therefore, a <tt class="docutils literal"><span class="pre">Sequence</span></tt> placed on a primary key column with <tt class="docutils literal"><span class="pre">optional=True</span></tt> will only be used with an Oracle backend but not PostgreSQL.</p>
+<p>A sequence can also be executed standalone, using an <tt class="docutils literal"><span class="pre">Engine</span></tt> or <tt class="docutils literal"><span class="pre">Connection</span></tt>, returning its next value in a database-independent fashion:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">seq</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="s">&#39;some_sequence&#39;</span><span class="p">)</span>
+<span class="n">nextid</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="defining-constraints-and-indexes">
+<h2>Defining Constraints and Indexes<a class="headerlink" href="#defining-constraints-and-indexes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="unique-constraint">
+<h3>UNIQUE Constraint<a class="headerlink" href="#unique-constraint" title="Permalink to this headline">¶</a></h3>
+<p>Unique constraints can be created anonymously on a single column using the <tt class="docutils literal"><span class="pre">unique</span></tt> keyword on <tt class="docutils literal"><span class="pre">Column</span></tt>.  Explicitly named unique constraints and/or those with multiple columns are created via the <tt class="docutils literal"><span class="pre">UniqueConstraint</span></tt> table-level construct.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">mytable</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+
+    <span class="c"># per-column anonymous unique constraint</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col1&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col2&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col3&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+
+    <span class="c"># explicit/composite unique constraint.  &#39;name&#39; is optional.</span>
+    <span class="n">UniqueConstraint</span><span class="p">(</span><span class="s">&#39;col2&#39;</span><span class="p">,</span> <span class="s">&#39;col3&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;uix_1&#39;</span><span class="p">)</span>
+    <span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="check-constraint">
+<h3>CHECK Constraint<a class="headerlink" href="#check-constraint" title="Permalink to this headline">¶</a></h3>
+<p>Check constraints can be named or unnamed and can be created at the Column or Table level, using the <tt class="docutils literal"><span class="pre">CheckConstraint</span></tt> construct.  The text of the check constraint is passed directly through to the database, so there is limited &#8220;database independent&#8221; behavior.  Column level check constraints generally should only refer to the column to which they are placed, while table level constraints can refer to any columns in the table.</p>
+<p>Note that some databases do not actively support check constraints such as MySQL and SQLite.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">mytable</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+
+    <span class="c"># per-column CHECK constraint</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col1&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">CheckConstraint</span><span class="p">(</span><span class="s">&#39;col1&gt;5&#39;</span><span class="p">)),</span>
+
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col2&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col3&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+
+    <span class="c"># table level CHECK constraint.  &#39;name&#39; is optional.</span>
+    <span class="n">CheckConstraint</span><span class="p">(</span><span class="s">&#39;col2 &gt; col3 + 5&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;check1&#39;</span><span class="p">)</span>
+    <span class="p">)</span></pre></div>
+</div>
+</div>
+<div class="section" id="indexes">
+<h3>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h3>
+<p>Indexes can be created anonymously (using an auto-generated name &#8220;ix_&amp;lt;column label&amp;gt;&#8221;) for a single column using the inline <tt class="docutils literal"><span class="pre">index</span></tt> keyword on <tt class="docutils literal"><span class="pre">Column</span></tt>, which also modifies the usage of <tt class="docutils literal"><span class="pre">unique</span></tt> to apply the uniqueness to the index itself, instead of adding a separate UNIQUE constraint.  For indexes with specific names or which encompass more than one column, use the <tt class="docutils literal"><span class="pre">Index</span></tt> construct, which requires a name.</p>
+<p>Note that the <tt class="docutils literal"><span class="pre">Index</span></tt> construct is created <strong>externally</strong> to the table which it corresponds, using <tt class="docutils literal"><span class="pre">Column</span></tt> objects and not strings.</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="n">meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+<span class="n">mytable</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;mytable&#39;</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span>
+    <span class="c"># an indexed column, with index &quot;ix_mytable_col1&quot;</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col1&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+    <span class="c"># a uniquely indexed column with index &quot;ix_mytable_col2&quot;</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col2&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col3&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col4&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col5&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="n">Column</span><span class="p">(</span><span class="s">&#39;col6&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">),</span>
+    <span class="p">)</span>
+
+<span class="c"># place an index on col3, col4</span>
+<span class="n">Index</span><span class="p">(</span><span class="s">&#39;idx_col34&#39;</span><span class="p">,</span> <span class="n">mytable</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col3</span><span class="p">,</span> <span class="n">mytable</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col4</span><span class="p">)</span>
+
+<span class="c"># place a unique index on col5, col6</span>
+<span class="n">Index</span><span class="p">(</span><span class="s">&#39;myindex&#39;</span><span class="p">,</span> <span class="n">mytable</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col5</span><span class="p">,</span> <span class="n">mytable</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col6</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">Index</span></tt> objects will be created along with the CREATE statements for the table itself.  An index can also be created on its own independently of the table:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="c"># create a table</span>
+<span class="n">sometable</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+
+<span class="c"># define an index</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">Index</span><span class="p">(</span><span class="s">&#39;someindex&#39;</span><span class="p">,</span> <span class="n">sometable</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">col5</span><span class="p">)</span>
+
+<span class="c"># create the index, will use the table&#39;s bound connectable if the ``bind`` keyword argument not specified</span>
+<span class="n">i</span><span class="o">.</span><span class="n">create</span><span class="p">()</span></pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="adapting-tables-to-alternate-metadata">
+<h2>Adapting Tables to Alternate Metadata<a class="headerlink" href="#adapting-tables-to-alternate-metadata" title="Permalink to this headline">¶</a></h2>
+<p>A <tt class="docutils literal"><span class="pre">Table</span></tt> object created against a specific <tt class="docutils literal"><span class="pre">MetaData</span></tt> object can be re-created against a new MetaData using the <tt class="docutils literal"><span class="pre">tometadata</span></tt> method:</p>
+<div class="highlight-python+sql"><div class="highlight"><pre><span class="c"># create two metadata</span>
+<span class="n">meta1</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span><span class="s">&#39;sqlite:///querytest.db&#39;</span><span class="p">)</span>
+<span class="n">meta2</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+<span class="c"># load &#39;users&#39; from the sqlite engine</span>
+<span class="n">users_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s">&#39;users&#39;</span><span class="p">,</span> <span class="n">meta1</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c"># create the same Table object for the plain metadata</span>
+<span class="n">users_table_2</span> <span class="o">=</span> <span class="n">users_table</span><span class="o">.</span><span class="n">tometadata</span><span class="p">(</span><span class="n">meta2</span><span class="p">)</span></pre></div>
+</div>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        
+            <div class="bottomnav">
+                
+<div class="prevnext">
+        Previous:
+        <a href="dbengine.html" title="previous chapter">Database Engines</a>
+        Next:
+        <a href="reference/index.html" title="next chapter">API Reference</a>
+</div>
+
+                <div class="doc_copyright">
+                    &copy; <a href="copyright.html">Copyright</a> 2007, 2008, 2009, the SQLAlchemy authors and contributors.
+                    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.2.
+                </div>
+            </div>
+        
+
+
+
+
+
+
+    </body>
+</html>
+
+
+

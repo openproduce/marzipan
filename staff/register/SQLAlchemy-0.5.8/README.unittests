@@ -1,0 +1,179 @@
+=====================
+SQLALCHEMY UNIT TESTS
+=====================
+
+SQLAlchemy unit tests by default run using Python's built-in sqlite3 
+module.  If running on Python 2.4, pysqlite must be installed.
+
+As of 0.5.5, unit tests are run using nose.  Documentation and
+downloads for nose are available at:
+
+http://somethingaboutorange.com/mrl/projects/nose/0.11.1/index.html
+
+
+SQLAlchemy implements a nose plugin that must be present when tests are run.
+This plugin is available when SQLAlchemy is installed via setuptools.
+
+SETUP
+-----
+
+All that's required is for SQLAlchemy to be installed via setuptools.
+For example, to create a local install in a source distribution directory:
+
+    $ export PYTHONPATH=.
+    $ python setup.py develop -d .
+
+The above will create a setuptools "development" distribution in the local
+path, which allows the Nose plugin to be available when nosetests is run.
+The plugin is enabled using the "with-sqlalchemy=True" configuration
+in setup.cfg.
+
+RUNNING ALL TESTS
+-----------------
+To run all tests:
+
+    $ nosetests
+
+Assuming all tests pass, this is a very unexciting output.  To make it more 
+intersesting:
+
+    $ nosetests -v
+
+RUNNING INDIVIDUAL TESTS
+-------------------------
+Any test module can be run directly by specifying its module name:
+
+    $ nosetests test.orm.test_mapper
+
+To run a specific test within the module, specify it as module:ClassName.methodname:
+
+    $ nosetests test.orm.test_mapper:MapperTest.test_utils
+
+
+COMMAND LINE OPTIONS
+--------------------
+Help is available via --help:
+
+    $ nosetests --help
+
+The --help screen is a combination of common nose options and options which 
+the SQLAlchemy nose plugin adds.  The most commonly SQLAlchemy-specific 
+options used are '--db' and '--dburi'.
+
+
+DATABASE TARGETS
+----------------
+
+Tests will target an in-memory SQLite database by default.  To test against
+another database, use the --dburi option with any standard SQLAlchemy URL:
+
+    --dburi=postgres://user:password@localhost/test
+
+Use an empty database and a database user with general DBA privileges.  The
+test suite will be creating and dropping many tables and other DDL, and
+preexisting tables will interfere with the tests
+
+If you'll be running the tests frequently, database aliases can save a lot of
+typing.  The --dbs option lists the built-in aliases and their matching URLs:
+
+    $ nosetests --dbs
+    Available --db options (use --dburi to override)
+               mysql    mysql://scott:tiger@127.0.0.1:3306/test
+              oracle    oracle://scott:tiger@127.0.0.1:1521
+            postgres    postgres://scott:tiger@127.0.0.1:5432/test
+    [...]
+
+To run tests against an aliased database:
+
+    $ nosetests --db=postgres
+
+To customize the URLs with your own users or hostnames, make a simple .ini
+file called `test.cfg` at the top level of the SQLAlchemy source distribution
+or a `.satest.cfg` in your home directory:
+
+    [db]
+    postgres=postgres://myuser:mypass@localhost/mydb
+
+Your custom entries will override the defaults and you'll see them reflected
+in the output of --dbs.
+
+
+CONFIGURING LOGGING
+-------------------
+SQLAlchemy logs its activity and debugging through Python's logging package.
+Any log target can be directed to the console with command line options, such
+as:
+
+    $ nosetests test.orm.unitofwork --log-info=sqlalchemy.orm.mapper \
+      --log-debug=sqlalchemy.pool --log-info=sqlalchemy.engine
+
+This would log mapper configuration, connection pool checkouts, and SQL
+statement execution.
+
+
+BUILT-IN COVERAGE REPORTING
+------------------------------
+Coverage is tracked using Nose's coverage plugin.   See the nose 
+documentation for details.  Basic usage is:
+
+    $ nosetests test.sql.test_query --with-coverage
+
+BIG COVERAGE TIP !!!  There is an issue where existing .pyc files may
+store the incorrect filepaths, which will break the coverage system.  If
+coverage numbers are coming out as low/zero, try deleting all .pyc files.
+
+TESTING NEW DIALECTS
+--------------------
+You can use the SQLAlchemy test suite to test any new database dialect in
+development.  All possible database features will be exercised by default.
+Test decorators are provided that can exclude unsupported tests for a
+particular dialect.  You'll see them all over the source, feel free to add
+your dialect to them or apply new decorations to existing tests as required.
+
+It's fine to start out with very broad exclusions, e.g. "2-phase commit is not
+supported on this database" and later refine that as needed "2-phase commit is
+not available until server version 8".
+
+To be considered for inclusion in the SQLAlchemy distribution, a dialect must
+be integrated with the standard test suite.  Dialect-specific tests can be
+placed in the 'dialects/' directory.  Comprehensive testing of
+database-specific column types and their proper reflection are a very good
+place to start.
+
+When working through the tests, start with 'engine' and 'sql' tests.  'engine'
+performs a wide range of transaction tests that might deadlock on a brand-new
+dialect- try disabling those if you're having problems and revisit them later.
+
+Once the 'sql' tests are passing, the 'orm' tests should pass as well, modulo
+any adjustments needed for SQL features the ORM uses that might not be
+available in your database.  But if an 'orm' test requires changes to your
+dialect or the SQLAlchemy core to pass, there's a test missing in 'sql'!  Any
+time you can spend boiling down the problem to it's essential sql roots and
+adding a 'sql' test will be much appreciated.
+
+The test suite is very effective at illuminating bugs and inconsistencies in
+an underlying DB-API (or database!) implementation.  Workarounds are almost
+always possible.  If you hit a wall, join us on the mailing list or, better,
+IRC!
+
+
+TIPS
+----
+PostgreSQL: The tests require an 'alt_schema' and 'alt_schema_2' to be present in
+the testing database.
+
+PostgreSQL: When running the tests on postgres, postgres can get slower and
+slower each time you run the tests.  This seems to be related to the constant
+creation/dropping of tables.  Running a "VACUUM FULL" on the database will
+speed it up again.
+
+MSSQL: Tests that involve multiple connections require Snapshot Isolation
+ability implented on the test database in order to prevent deadlocks that will
+occur with record locking isolation. This feature is only available with
+MSSQL 2005 and greater. For example::
+
+    ALTER DATABASE MyDatabase
+    SET ALLOW_SNAPSHOT_ISOLATION ON
+    
+    ALTER DATABASE MyDatabase
+    SET READ_COMMITTED_SNAPSHOT ON
