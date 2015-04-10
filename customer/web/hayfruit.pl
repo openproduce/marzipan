@@ -8,7 +8,7 @@ $platform = "mysql";
 $database = "register_tape";
 $host = "localhost";
 $port = "3306";
-$user = "root";
+$user = "marzipan";
 $pw = "";
 
 $dsn = "dbi:mysql:$database:localhost:3306";

@@ -32,7 +32,7 @@ hours.append(0)
 if (date < start_date):
     print "Content-type: text/html\n\n<p> Sorry, we don't have hourly data before August 2, 2009 </p>"
 else:
-    db = sql.connect("localhost", "root", "", "register_tape")
+    db = sql.connect("localhost", "marzipan", "", "register_tape")
     c = db.cursor()
     # the values being put into the sql query are ints, doing db.escape_string(date.day) causes an error b/c of this
     query = '''select hour(time_ended), sum(si.total) from sales as s, sale_items  as si 

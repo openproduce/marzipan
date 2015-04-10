@@ -5,7 +5,7 @@ use DBD::mysql;
 
 my $dbh = DBI->connect("dbi:mysql:op_bank:localhost:3306", 'op_bank', '')
     or die "couldn't connect to database";
-my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'root', '')
+my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'marzipan', '')
     or die "couldn't connect to database";
 my %q = map { split /=/, $_ } split /\&/, $ENV{'QUERY_STRING'};
 

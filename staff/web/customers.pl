@@ -19,7 +19,7 @@ print "Content-type: text/html\n\n";
 		"11" => "November",
 		"12" => "December");
 
-my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'root', '')
+my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'marzipan', '')
     or die "couldn't connect to database";
 my $dbh = $dbh_marzipan;
 
