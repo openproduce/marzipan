@@ -1,6 +1,5 @@
 #!/usr/bin/env/python
 import sys
-sys.path.insert(0, "/home/openproduce/marzipan/SQLAlchemy-0.5.8/lib")
 import os
 import signal
 import config

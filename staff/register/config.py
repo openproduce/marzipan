@@ -35,7 +35,7 @@ _options = {
     'db-user':
         _Option(True, 'mysql db username', None, True, 'marzipan'),
     'db-passwd':
-        _Option(True, 'mysql db password', None, True, 'marzipan'),
+        _Option(True, 'mysql db password', None, True, ''),
     'db-name-reg':
         _Option(True, 'mysql db name - register tape', None, True, 'register_tape'),
     'db-name-inv':

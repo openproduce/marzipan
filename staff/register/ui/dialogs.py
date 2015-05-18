@@ -12,7 +12,7 @@ from threading import Thread
 import re
 import os
 import db
-import io
+import formerly_io
 import cc
 import match
 import money
@@ -1222,7 +1222,7 @@ class SaleDialog(Dialog):
         self.sale.total += change
         self.total.get('total').set_text(
             money.moneyfmt(self.sale.total, curr='', sep=''))
-        io.write_cui_pipe("total %s\n"%(self.sale.total))
+        formerly_io.write_cui_pipe("total %s\n"%(self.sale.total))
         self.total.get('nr_items').set_text( "Items: %d" % len(self.sale_items) )
         self.total.get('taxless').set_text(
             "Taxless total: %s" % money.moneyfmt( decimal.Decimal(sum(si.cost  for si in self.sale_items)) , curr='', sep=''))
