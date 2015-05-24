@@ -14,23 +14,23 @@
         $ mysql -u root -p
         mysql> CREATE DATABASE register_tape;
         mysql> CREATE DATABASE inventory;
-        mysql> CREATE USER "marzipan" IDENTIFIED BY "testpass";
-        mysql> GRANT ALL PRIVILEGES ON "register_tape" TO "marzipan"@"localhost";
-        mysql> GRANT ALL PRIVILEGES ON "inventory" TO "marzipan"@"localhost";
+        mysql> CREATE USER 'marzipan' IDENTIFIED BY 'testpass';
+        mysql> GRANT ALL PRIVILEGES ON register_tape.* TO marzipan@localhost;
+        mysql> GRANT ALL PRIVILEGES ON inventory.* TO marzipan@localhost;
         mysql> quit
         Bye
         $ 
 
 * Unzip sample data files:
-        $ bunzip2 sample-data/op-register_tape-20150316.sql.bz2
-        $ bunzip2 sample-data/op-inventory-20150316.sql.bz2
+        $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
+        $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
 
 * Load data (THIS IS REAL DATA!)
 
         $ mysql -u marzipan -p testpass;
         mysql> use register_tape;
-        mysql> source sample-data/op-register_tape-20150316.sql;
-        mysql> source sample-data/op-inventory-20150316.sql;
+        mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> source sample-data/op-inventory-20150316.sql
         mysql> quit
         Bye
         $ 
@@ -42,4 +42,3 @@
 
         $ cd marzipan-prep
         $ python staff/register/ui.py
-
