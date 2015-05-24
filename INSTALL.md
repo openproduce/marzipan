@@ -15,8 +15,8 @@
         mysql> CREATE DATABASE register_tape;
         mysql> CREATE DATABASE inventory;
         mysql> CREATE USER "marzipan" IDENTIFIED BY "testpass";
-        mysql> GRANT ALL ON "register_tape" TO "marzipan"@"localhost";
-        mysql> GRANT ALL ON "inventory" TO "marzipan"@"localhost";
+        mysql> GRANT ALL PRIVILEGES ON "register_tape" TO "marzipan"@"localhost";
+        mysql> GRANT ALL PRIVILEGES ON "inventory" TO "marzipan"@"localhost";
         mysql> quit
         Bye
         $ 
