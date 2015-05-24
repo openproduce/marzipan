@@ -1,0 +1,31 @@
+/* Catalog colors for item levels */
+.na { color: #aaa; }
+.bad { background-color: #f33; }
+.mid { background-color: #ffff00; }
+.good { background-color: #00ff00; }
+.out { background-color: #f77; }
+.low { background-color: #ff7; }
+.fixed { background-color: #fff; position:fixed; top:30px;}
+
+.td { line-height: 14px; height: 14px; border-top: 1px solid #bbb; }
+.tr { line-height: 14px; height: 14px; border-top: 1px solid #bbb; }
+.td_rborder { border-right: 1px solid #bbb;}
+
+/* Colors for textboxes when user hits enter */
+.submitting {border:2px solid; border-color: #d00; }
+.complete {border:2px solid; border-color: #0d0;}
+.default {border:2px solid; border-color: #ddd; }
+
+th { text-align: left;}
+div.key span {padding: 4px;}
+
+table.sortable thead { background-color:#ddd; color:#333; font-weight: bold; cursor: default; }
+.color-row:nth-child(even) { background-color: #E0E0E0; };
+
+select { width:80px;}
+* { font-family: sans-serif; font-size: 12px; }
+.spec { background-color: #ccc; }
+td,tr { line-height: 14px; height: 14px; border-bottom: 1px solid #bbb;}
+
+
+

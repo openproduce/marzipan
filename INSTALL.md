@@ -21,7 +21,7 @@
         $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
 
 * Set up the databases and database users:
-$ mysql -u root -p < scripts/setup.sql
+        $ mysql -u root -p < scripts/setup.sql
 
 * Unzip sample data files:
         $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
@@ -60,9 +60,12 @@ $ mysql -u root -p < scripts/setup.sql
         $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
         $ sudo apt-get install mysql-server
+        $ sudo apt-get install libmysqlclient-dev
         $ sudo apt-get install git
+        $ sudo apt-get install python-dev
         $ sudo apt-get install python-pip
         $ sudo pip install SQLAlchemy
+        $ sudo pip install MySQL-python
 
 * Install Database:
         $ mysql -u root -p

@@ -4,3 +4,4 @@ error
 *.swp
 *.swo
 web/staff/.htpasswd
+web/staff/op_tools/db_config.py
