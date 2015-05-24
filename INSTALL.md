@@ -1,5 +1,16 @@
 # Installing the register point-of-sale application:
 
+* PACKAGES
+** sudo apt-get install git
+** sudo apt-get install mysql-client
+** sudo apt-get install mysql-server
+** sudo apt-get install python-pip
+** sudo apt-get install python-dev
+** sudo apt-get install python-mysqldb
+** sudo apt-get install libcurl4-openssl-dev
+** sudo pip install pycurl
+** sudo apt-get install texlive
+* edit register/config.py and change the 'receipt-printer' option from 'tsp100' to whatever your postscript printer is
 * Install SQL Alchemy (the copy of it in this tree will eventually be
   removed).  The most recent version is 1.0.4.
 
