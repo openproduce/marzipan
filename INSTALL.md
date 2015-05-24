@@ -15,15 +15,15 @@
         mysql> CREATE DATABASE register_tape;
         mysql> CREATE DATABASE inventory;
         mysql> CREATE USER "marzipan" IDENTIFIED BY "testpass";
-        mysql> GRANT ALL ON "register_tape" TO "marzipan"@"localhost";
-        mysql> GRANT ALL ON "inventory" TO "marzipan"@"localhost";
+        mysql> GRANT ALL PRIVILEGES ON "register_tape" TO "marzipan"@"localhost";
+        mysql> GRANT ALL PRIVILEGES ON "inventory" TO "marzipan"@"localhost";
         mysql> quit
         Bye
         $ 
 
 * Unzip sample data files:
-        $ bzip2 -d sample-data/op-register_tape-20150316.sql.bz2
-        $ bzip2 -d sample-data/op-inventory-20150316.sql.bz2
+        $ bunzip2 sample-data/op-register_tape-20150316.sql.bz2
+        $ bunzip2 sample-data/op-inventory-20150316.sql.bz2
 
 * Load data (THIS IS REAL DATA!)
 
