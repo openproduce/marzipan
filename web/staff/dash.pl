@@ -3,9 +3,10 @@
 use DBI;
 use DBD::mysql;
 
-my $dbh = DBI->connect("dbi:mysql:op_bank:localhost:3306", 'op_bank', '')
-    or die "couldn't connect to database";
-my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'marzipan', '')
+$DB_USER="marzipan";
+$DB_PASSWORD="";
+
+my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", $DB_USER, $DB_PASSWORD)
     or die "couldn't connect to database";
 my %q = map { split /=/, $_ } split /\&/, $ENV{'QUERY_STRING'};
 
@@ -38,16 +39,6 @@ sub browse_checks {
 </head>
 <body>
 EOF
-=cut
-    my $sth = $dbh->prepare("set session time_zone = 'America/Chicago'");
-    $sth->execute();
-    my $sth = $dbh->prepare("select NOW(), import_time, ledger_balance, available_balance from summary where available_balance is not null order by id desc limit 1");
-    $sth->execute();
-    while (my @row = $sth->fetchrow_array()) {
-		print "<table><tr><th>Page loaded $row[0]<br/>Imported $row[1]</th><th></th></tr><tr><td> Ledger Balance:</td><td>\$$row[2]</td></tr><tr><td>Available Balance:</td><td style='background-color: #f99;'>\$$row[3]</td></tr></table>\n";
-	}
-=cut
-
 
 
 	$sth = $dbh_marzipan->prepare(qq{
@@ -225,39 +216,3 @@ EOF
 	print "</tr>\n";
 	print "</table>\n";
 }
-=cut
-
-    my $sth = $dbh->prepare("select xact_date, check_number, description, amount from ledger WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= xact_date order by xact_date asc");
-    $sth->execute();
-	print "<table border='0' cellspacing='0'>\n";
-	print "<tr><th>Date</th><th>Check #</th><th>Description</th><th>\$ Amount</th></tr>\n";
-    while (my @row = $sth->fetchrow_array()) {
-		print "<tr>";
-		my $i = 0;
-		foreach my $column (@row) {
-			$i++;
-			print "<td" . ($i == 4 ? " class='right' " : "" ) . ">$column</td>";
-		}
-		print "</tr>\n";
-    }
-	print "</table>\n";
-    my $sth = $dbh->prepare("select xact_date, check_number, amount from ledger where check_number is not null order by xact_date desc limit 10");
-    $sth->execute();
-    while (my @row = $sth->fetchrow_array()) {
-        print qq|<img class="check" src="?p=check&no=$row[1]&f=front" alt="check $row[1]" />\n|;
-    }
-    print "</body></html>\n";
-}
-
-sub view_check {
-    my ($check_number, $face) = @_;
-    my $img = $face eq 'front' ? 'front_image' : 'back_image';
-    my $sth = $dbh->prepare("select $img from checks where check_number=?");
-    $sth->execute($check_number);
-
-    my $data = ($sth->fetchrow_array())[0];
-    print "Content-type: image/jpeg\n\n";
-    print $data;
-}
-=cut
-

@@ -3,3 +3,4 @@ error
 *~
 *.swp
 *.swo
+web/staff/.htpasswd
