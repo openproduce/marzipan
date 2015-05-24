@@ -63,6 +63,34 @@
         $ sudo apt-get install python-pip
         $ sudo pip install SQLAlchemy
 
+* Install Database:
+        $ mysql -u root -p
+        mysql> CREATE DATABASE register_tape;
+        mysql> CREATE DATABASE inventory;
+        mysql> CREATE USER 'marzipan' IDENTIFIED BY 'YOUR.STAFF.PASSWORD';
+        mysql> GRANT ALL PRIVILEGES ON register_tape.* TO marzipan@localhost;
+        mysql> GRANT ALL PRIVILEGES ON inventory.* TO marzipan@localhost;
+        mysql> FLUSH PRIVILEGES;
+        mysql> quit
+        Bye
+        $ 
+
+* Unzip sample data files:
+        $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
+        $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
+
+* Load data (THIS IS REAL DATA!)
+
+        $ mysql -u marzipan -p
+        mysql> use register_tape
+        mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> use inventory
+        mysql> source sample-data/op-inventory-20150316.sql
+        mysql> quit
+        Bye
+        $ 
+
+
 * Create the marzipan web root:
 
         $ cd /var/www
