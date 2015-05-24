@@ -1,0 +1,29 @@
+<html>
+<title>Open Produce Latenight Sales </title>
+<head>
+<!--[if IE]>
+<script type="text/javascript" src="excanvas.js"></script>
+<![endif]-->
+<script type="text/javascript"
+	src="http://danvk.org/dygraphs/dygraph-combined.js"></script>
+</head>
+<body>
+<h2>Sales between 11pm-4am </h2>
+<div id="graph"
+  style="width:600px; height:300px;"></div>
+<script type="text/javascript">
+  daily = document.getElementById("daily");
+  g4 = new Dygraph(
+    document.getElementById("graph"),
+    "latenight_sales.csv",
+    {
+      rollPeriod: 1,
+      showRoller: true,
+  
+    }
+  );
+</script>
+<img src="cgi-bin/op_tools/sales_graph.py?graph=sales" alt="sales">
+<img src="cgi-bin/op_tools/sales_graph.py?graph=customers" alt="customers">
+</body>
+</html>
