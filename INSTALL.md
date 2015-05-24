@@ -56,11 +56,40 @@
 
         $ sudo apt-get update
         $ sudo apt-get install apache2
+        $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
         $ sudo apt-get install mysql-server
         $ sudo apt-get install git
         $ sudo apt-get install python-pip
         $ sudo pip install SQLAlchemy
+
+* Install Database:
+        $ mysql -u root -p
+        mysql> CREATE DATABASE register_tape;
+        mysql> CREATE DATABASE inventory;
+        mysql> CREATE USER 'marzipan' IDENTIFIED BY 'YOUR.STAFF.PASSWORD';
+        mysql> GRANT ALL PRIVILEGES ON register_tape.* TO marzipan@localhost;
+        mysql> GRANT ALL PRIVILEGES ON inventory.* TO marzipan@localhost;
+        mysql> FLUSH PRIVILEGES;
+        mysql> quit
+        Bye
+        $ 
+
+* Unzip sample data files:
+        $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
+        $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
+
+* Load data (THIS IS REAL DATA!)
+
+        $ mysql -u marzipan -p
+        mysql> use register_tape
+        mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> use inventory
+        mysql> source sample-data/op-inventory-20150316.sql
+        mysql> quit
+        Bye
+        $ 
+
 
 * Create the marzipan web root:
 
@@ -69,13 +98,21 @@
         $ mv marzipan-prep marzipan
         $ chown www-data.www-data marzipan
 
-* Configure Apache HTTP:
+* Create a `.htpasswd` file for staff web authorization:
+
+        $ htpasswd -c /var/www/marzipan/web/staff/.htpasswd YOUR.STAFF.USERNAME
+
+* Configure and restart Apache HTTP:
 
         $ cp /var/www/marzipan/sample-config/apache-config-example.conf \
              /etc/apache2/sites-available/marzipan.conf
 
-  Now make `/etc/apache2/sites-available/marzipan.conf` look something like this:
+  Edit `/etc/apache2/sites-available/marzipan.conf` in the obvious way
+  -- search for "YOUR." as a prefix for things you'll want to change.
+  Then run:
 
+        $ sudo a2enmod cgi
+        $ sudo a2ensite marzipan
+        $ sudo service apache2 restart
 
-
-
+* Test the site by visiting http://YOUR.SITE/ !
