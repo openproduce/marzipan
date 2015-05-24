@@ -17,6 +17,7 @@
         mysql> CREATE USER 'marzipan' IDENTIFIED BY 'testpass';
         mysql> GRANT ALL PRIVILEGES ON register_tape.* TO marzipan@localhost;
         mysql> GRANT ALL PRIVILEGES ON inventory.* TO marzipan@localhost;
+        mysql> FLUSH PRIVILEGES;
         mysql> quit
         Bye
         $ 
@@ -27,9 +28,10 @@
 
 * Load data (THIS IS REAL DATA!)
 
-        $ mysql -u marzipan -p testpass;
-        mysql> use register_tape;
+        $ mysql -u marzipan -p
+        mysql> use register_tape
         mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> use inventory
         mysql> source sample-data/op-inventory-20150316.sql
         mysql> quit
         Bye
