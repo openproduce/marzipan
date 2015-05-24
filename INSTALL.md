@@ -10,7 +10,7 @@
         $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
 
 * Set up the databases and database users:
-$ mysql -u root -p < scripts/setup.sql
+        $ mysql -u root -p < scripts/setup.sql
 
 * Unzip sample data files:
         $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
