@@ -14,10 +14,10 @@ def print_headers():
     print '''<html><head>
     <title>Open Produce Item Manager</title>
 
-    <link rel="stylesheet" type="text/css" href="../../tools.css" />
-    <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>
-    <script type="text/javascript" src="../../sorttable.js"></script>
-    <script type="text/javascript" src="../../fix_table_headers.js"></script>
+    <link rel="stylesheet" type="text/css" href="../assets/tools.css" />
+    <script type="text/javascript" src="../assets/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../assets/sorttable.js"></script>
+    <script type="text/javascript" src="../assets/fix_table_headers.js"></script>
 <script type="text/javascript">
 function uncheckAllMulti(){
     $('.multi').each(function (){

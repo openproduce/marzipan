@@ -16,8 +16,8 @@ def print_headers(key_handlers,select_handlers,itemid=0):
     print '''<html><head>
     <title>Open Produce Item #%d Info</title>''' % itemid
     print '''
-    <link rel="stylesheet" type="text/css" href="../../tools.css" />
-    <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>\n
+    <link rel="stylesheet" type="text/css" href="../assets/tools.css" />
+    <script type="text/javascript" src="../assets/jquery-1.3.2.min.js"></script>\n
     <script type="text/javascript"> '''
     print '''var itemid = %d;''' % itemid  # now itemid is a variable in the javascript space so we can just use that instead of passing things around
 
