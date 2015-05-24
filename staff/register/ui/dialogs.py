@@ -381,13 +381,13 @@ class PaymentDialog(Dialog):
         curses.doupdate()
         try:
             if config.get('cc-processor') == 'ippay':
-                (xid, status) = io.send_ippay_request(paid, self.card)
+                (xid, status) = formerly_io.send_ippay_request(paid, self.card)
             if config.get('cc-processor') == 'tnbci':
-                (xid, status) = io.send_tnbci_request(paid, self.card)
+                (xid, status) = formerly_io.send_tnbci_request(paid, self.card)
             if config.get('cc-processor') == 'globalpay':
-                (xid, status) = io.send_globalpay_request(paid, self.card, self.sale)
+                (xid, status) = formerly_io.send_globalpay_request(paid, self.card, self.sale)
 
-        except io.CCError, e:
+        except formerly_io.CCError, e:
             self.frame.get('alert').set_text(str(e))
             return False
         except ValueError:
@@ -420,10 +420,10 @@ class PaymentDialog(Dialog):
         else:
             self.sale.cc_brand = 'Mastercard'
         self._fill()
-        io.print_card_receipt(self.sale, paid, merchant_copy=True)
+        formerly_io.print_card_receipt(self.sale, paid, merchant_copy=True)
         TearDialog('merchant receipt').main()
         if want_receipt:
-            io.print_card_receipt(self.sale, paid, merchant_copy=False)
+            formerly_io.print_card_receipt(self.sale, paid, merchant_copy=False)
         #TearDialog('customer receipt').main()
         return True
 
@@ -477,7 +477,7 @@ class PaymentDialog(Dialog):
             self._finish_sale(want_receipt=False)
         elif c == curses.KEY_F7:
             if self._finish_sale(want_receipt=True):
-                io.print_receipt(self.sale)
+                formerly_io.print_receipt(self.sale)
                 #TearDialog('sale receipt').main()
         elif c == curses.KEY_F8:
             if self.sale.customer is None:
@@ -489,13 +489,13 @@ class PaymentDialog(Dialog):
                 self.frame.show()
                 curses.panel.update_panels()
                 curses.doupdate()
-                if not io.email_receipt(
+                if not formerly_io.email_receipt(
                     self.sale.customer.email, self.sale):
                     self.frame.get('alert').set_text('error sending e-mail!')
                     self.frame.show()
                     curses.panel.update_panels()
                     curses.doupdate()
-                    io.print_receipt(self.sale)
+                    formerly_io.print_receipt(self.sale)
                     #TearDialog('sale receipt').main()
                     self.done = True
 #        elif c == curses.KEY_F9:
@@ -801,7 +801,7 @@ class CustomerAddEditDialog(Dialog):
                 self.done = True
         elif c == curses.KEY_F7:
             if not self._fill_or_focus_bad_widget():
-                io.print_customer_card(self.customer)
+                formerly_io.print_customer_card(self.customer)
                 TearDialog('customer code').main()
         elif c == curses.KEY_F9:
             TabHistoryDialog(self.customer.id).main()
@@ -1307,7 +1307,7 @@ class SaleDialog(Dialog):
         if pd.get_sale_done():
             self.reindex()
             self._reset()
-            io.write_cui_pipe("paid\n")
+            formerly_io.write_cui_pipe("paid\n")
 
     def _del_item(self, items_list, si):
         self._update_total(-si.total)
@@ -1500,7 +1500,7 @@ class TabHistoryProcessingDialog(Dialog):
         elif c == curses.KEY_F9:
             if not self._fill_or_focus_bad_widget():
                 customer = tabutil.find_customer_by_id(self.customer_id)
-                io.print_tab_history(customer, self.tab_history)
+                formerly_io.print_tab_history(customer, self.tab_history)
                 TearDialog('tab history').main()
         elif c == KEY_ESCAPE:
             self.done = True
@@ -1548,7 +1548,7 @@ class TabHistoryDialog(Dialog):
         elif c == curses.KEY_F9:
             if not self._fill_or_focus_bad_widget():
                 customer = tabutil.find_customer_by_id(self.customer_id)
-                io.print_tab_history(customer, self.tab_history)
+                formerly_io.print_tab_history(customer, self.tab_history)
                 TearDialog('tab history').main()
         elif c == KEY_ESCAPE:
             self.done = True
@@ -1655,9 +1655,9 @@ class TransactionDialog(Dialog):
             self.done = True
             self.result = True
         elif c == curses.KEY_F7:    # reprint receipt
-            io.print_receipt(self.sale)
+            formerly_io.print_receipt(self.sale)
             if db.PAYMENT[self.sale.payment] == 'debit/credit':
-                io.print_card_receipt(self.sale, self.sale.total, merchant_copy=False)
+                formerly_io.print_card_receipt(self.sale, self.sale.total, merchant_copy=False)
             #TearDialog('sale receipt').main()
             self.done = True
         elif c == KEY_ESCAPE:
