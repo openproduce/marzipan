@@ -21,7 +21,7 @@ code and non-anonymized sample data.
 Installing Marzipan
 ----------------
 
-See the INSTALL.md file, coming soon.
+See INSTALL.md.
 
 
 Need more information?
