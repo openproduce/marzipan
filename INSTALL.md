@@ -1,4 +1,4 @@
-# Preliminary install notes:
+# Installing the register point-of-sale application:
 
 * Install SQL Alchemy (the copy of it in this tree will eventually be
   removed).  The most recent version is 1.0.4.
@@ -7,7 +7,7 @@
 
 * Get the source code:
 
-        git clone git@github.com:OpenTechStrategies/marzipan-prep.git
+        $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
 
 * Set up the databases and database users:
 
@@ -43,4 +43,39 @@
   work in there):
 
         $ cd marzipan-prep
-        $ python staff/register/ui.py
+        $ python register/ui.py
+
+# Installing the web tools:
+
+  These instructions should work on Ubuntu or Debian GNU/Linux.
+
+* Make sure you have Python 2.7.x installed.
+  (It probably is by default, but check with `python --version`.)
+
+* Install other needed packages:
+
+        $ sudo apt-get update
+        $ sudo apt-get install apache2
+        $ sudo apt-get install mysql-common
+        $ sudo apt-get install mysql-server
+        $ sudo apt-get install git
+        $ sudo apt-get install python-pip
+        $ sudo pip install SQLAlchemy
+
+* Create the marzipan web root:
+
+        $ cd /var/www
+        $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
+        $ mv marzipan-prep marzipan
+        $ chown www-data.www-data marzipan
+
+* Configure Apache HTTP:
+
+        $ cp /var/www/marzipan/sample-config/apache-config-example.conf \
+             /etc/apache2/sites-available/marzipan.conf
+
+  Now make `/etc/apache2/sites-available/marzipan.conf` look something like this:
+
+
+
+
