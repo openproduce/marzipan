@@ -10,17 +10,7 @@
         $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
 
 * Set up the databases and database users:
-
-        $ mysql -u root -p
-        mysql> CREATE DATABASE register_tape;
-        mysql> CREATE DATABASE inventory;
-        mysql> CREATE USER 'marzipan' IDENTIFIED BY 'testpass';
-        mysql> GRANT ALL PRIVILEGES ON register_tape.* TO marzipan@localhost;
-        mysql> GRANT ALL PRIVILEGES ON inventory.* TO marzipan@localhost;
-        mysql> FLUSH PRIVILEGES;
-        mysql> quit
-        Bye
-        $ 
+$ mysql -u root -p < scripts/setup.sql
 
 * Unzip sample data files:
         $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
