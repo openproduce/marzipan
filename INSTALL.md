@@ -22,8 +22,8 @@
         $ 
 
 * Unzip sample data files:
-        $ bzip2 -d sample-data/op-register_tape-20150316.sql.bz2
-        $ bzip2 -d sample-data/op-inventory-20150316.sql.bz2
+        $ bunzip2 sample-data/op-register_tape-20150316.sql.bz2
+        $ bunzip2 sample-data/op-inventory-20150316.sql.bz2
 
 * Load data (THIS IS REAL DATA!)
 
