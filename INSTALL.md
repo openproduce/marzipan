@@ -56,6 +56,7 @@
 
         $ sudo apt-get update
         $ sudo apt-get install apache2
+        $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
         $ sudo apt-get install mysql-server
         $ sudo apt-get install git
@@ -69,13 +70,21 @@
         $ mv marzipan-prep marzipan
         $ chown www-data.www-data marzipan
 
-* Configure Apache HTTP:
+* Create a `.htpasswd` file for staff web authorization:
+
+        $ htpasswd -c /var/www/marzipan/web/staff/.htpasswd YOUR.STAFF.USERNAME
+
+* Configure and restart Apache HTTP:
 
         $ cp /var/www/marzipan/sample-config/apache-config-example.conf \
              /etc/apache2/sites-available/marzipan.conf
 
-  Now make `/etc/apache2/sites-available/marzipan.conf` look something like this:
+  Edit `/etc/apache2/sites-available/marzipan.conf` in the obvious way
+  -- search for "YOUR." as a prefix for things you'll want to change.
+  Then run:
 
+        $ sudo a2enmod cgi
+        $ sudo a2ensite marzipan
+        $ sudo service apache2 reload
 
-
-
+* Test the site by visiting http://YOUR.SITE/ !
