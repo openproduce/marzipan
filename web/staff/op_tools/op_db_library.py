@@ -36,10 +36,18 @@ from sqlalchemy.orm import relation, backref
 from sqlalchemy.orm import sessionmaker
 from decimal import Decimal, ROUND_HALF_EVEN
 
+from db_config import register_tape_db_config, inventory_db_config
+
+
+def format_db_url (config):
+    base = "mysql://%s:%s@%s" % (config['db_user'], config['db_pass'], config['db_host'])
+    if config['db_port']:
+        base = base + ":%s" % (config['db_port'])
+    return base + "/" + config['db_name']
 
 # Locations of databases. format is 'mysql://user:passwd@host/db
-register_tape_loc = "mysql://root:@localhost/register_tape"
-inventory_loc = "mysql://root:@localhost/inventory"
+register_tape_loc = format_db_url(register_tape_db_config)
+inventory_loc = format_db_url(inventory_db_config)
 
 # Constants from the web server
 ITEM_INFO_PAGE = "item_info.py"           # location of the item_info.py page
