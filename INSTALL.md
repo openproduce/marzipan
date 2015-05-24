@@ -85,6 +85,6 @@
 
         $ sudo a2enmod cgi
         $ sudo a2ensite marzipan
-        $ sudo service apache2 reload
+        $ sudo service apache2 restart
 
 * Test the site by visiting http://YOUR.SITE/ !
