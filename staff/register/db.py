@@ -608,7 +608,7 @@ _inventory_tables = [
         Special,
         TaxCategory,
     ]
-# List of classes backed by the register-tape database
+# List of classes backed by the register_tape database
 _registertape_tables = [ Clerk, Customer, Sale, SaleItem, TabLog ]
 
 _inv_engine = None
