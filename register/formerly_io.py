@@ -97,11 +97,13 @@ def _print_tex_file(fname):
     except:
         pass
     dev_null = file('/dev/null')
-    os.chdir('/tmp')
+    os.chdir(os.path.realpath(os.path.dirname(fname)))
     subprocess.call(['latex', fname], stdout=dev_null, stderr=dev_null)
     try:
-        os.stat(fname+'.dvi')
+        dvi_file = fname + ".dvi"
+        os.stat(dvi_file)
     except:
+
         os.chdir(cwd)
         return False
     subprocess.call(['dvips', fname], stdout=dev_null, stderr=dev_null)
