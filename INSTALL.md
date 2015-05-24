@@ -49,9 +49,12 @@
         $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
         $ sudo apt-get install mysql-server
+        $ sudo apt-get install libmysqlclient-dev
         $ sudo apt-get install git
+        $ sudo apt-get install python-dev
         $ sudo apt-get install python-pip
         $ sudo pip install SQLAlchemy
+        $ sudo pip install MySQL-python
 
 * Install Database:
         $ mysql -u root -p
