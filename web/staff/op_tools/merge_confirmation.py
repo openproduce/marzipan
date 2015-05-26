@@ -15,8 +15,8 @@ def print_headers():
 <html>
  <head>
   <title>Open Produce Item Merger </title>
-  <link rel="stylesheet" type="text/css" href="../../tools.css" /> 
-  <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>\n
+  <link rel="stylesheet" type="text/css" href="../../common/tools.css" /> 
+  <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>\n
   <script type="text/javascript">
     function merge(old_item, into_item) {
       $.post("merge_items.py", {old : old_item, into : into_item, barcodes : $('#m_barcodes').attr('checked'), 

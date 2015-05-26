@@ -15,10 +15,10 @@ def print_headers():
     print '''<html><head>
     <title>Open Produce Price Manager</title>
 
-    <link rel="stylesheet" type="text/css" href="../../tools.css" />
-    <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>\n
-    <script type="text/javascript" src="../../sorttable.js"></script>\n
-    <script type="text/javascript" src="../../fix_table_headers.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../common/tools.css" />
+    <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>\n
+    <script type="text/javascript" src="../../common/sorttable.js"></script>\n
+    <script type="text/javascript" src="../../common/fix_table_headers.js"></script>
 <script type="text/javascript">'''
     # The following is just to remove whitespace and &nbsp's from stuff
     print '''
