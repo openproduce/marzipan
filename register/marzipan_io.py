@@ -384,7 +384,7 @@ def send_tnbci_request(amount, card):
     return (xid, status)
 
 def _parse_globalpay_response(resp):
-#This is not used. It is provided in case the WSDL stuff in io.send_globalpay_request stops working 
+#This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
     m = re.search('<Message>(.*)</Message>', resp)
     if m:
         print "global said: %s" % m.group(1)
