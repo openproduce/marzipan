@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+
+########################################################################################
+#                                                                                      #
+#                              *** IMPORTANT NOTE ***                                  #
+#                                                                                      #
+# You must copy this file to config.py and change the placeholder values to your       #
+# secrets before running the application.  To find the values that need to be          #
+# changed, please search for the string "CHANGE_THIS."                                 #
+#                                                                                      #
+########################################################################################
+
 import sys
 import os
 import getopt
@@ -13,6 +24,45 @@ class _Option:
         self.value = value
 
 _options = {
+    # here are the values that need to be changed:
+    'db-user':
+        _Option(True, 'mysql db username', None, True, 'CHANGE_THIS_USERNAME'), 
+    'db-passwd':
+        _Option(True, 'mysql db password', None, True, 'CHANGE_THIS_PASSWORD'),
+    # if you are using the sample data, it assumes the names of these databases
+    # will be register_tape and inventory.  
+    'db-name-reg':
+        _Option(True, 'mysql db name - register tape', None, True, 'CHANGE_THIS_REGISTER_DATABASE_NAME'),
+    'db-name-inv':
+        _Option(True, 'mysql db name - inventory', None, True, 'CHANGE_THIS_INVENTORY_DATABASE_NAME'),
+    'globalpay-login':
+        _Option(True, 'globalpay login', None, True, 'CHANGE_THIS_LOGIN_NAME'),
+    'globalpay-password':
+        _Option(True, 'globalpay password', None, True, 'CHANGE_THIS_PASSWORD'),            
+    'globalpay-url':
+        # this url is something like "https://api.globalpay.com/GlobalPay/foo.asmx"
+        _Option(True, 'globalpay url', None, True, 'CHANGE_THIS_GLOBALPAY_URL'),        
+    'ippay-terminalid':
+        _Option(True, 'ippay terminal id', None, True, 'CHANGE_THIS_TERMINAL_ID'),
+    'ippay-url':
+        # this url is something like "https://gateway9.jetpay.com/jetpay"
+        _Option(True, 'ippay url', None, True, 'CHANGE_THIS_IPPAY_URL'),
+    'smtp-server':
+        # this url is something like "mail.example.com"
+        _Option(True, 'smtp server', None, True, 'CHANGE_THIS_MAIL_SERVER_URL'),
+    'receipt-printer':
+        _Option(True, 'receipt printer name', None, True, 'CHANGE_THIS_PRINTER_ID'),
+    'label-printer':
+        _Option(True, 'label printer name', None, True, 'CHANGE_THIS_LABEL_PRINTER_ID'),
+    'cc-processor':
+        # a company name from the list below
+        _Option(True, 'ippay, tnbci, or globalpay', None, True, 'CHANGE_THIS_CREDIT_CARD_PROCESSOR'),
+    'tnbci-url':
+        # this url is something like 'https://secure.tnbcigateway.com/api/bar.php'
+        _Option(True, 'tnbci url', None, True, 'CHANGE_THIS_TNBCI_URL'),
+
+    # these are other options that might be interesting, but don't need to be
+    # changed.
     'help':
         _Option(True, 'dump usage info', 'h', False, None),
 
@@ -29,44 +79,9 @@ _options = {
         _Option(True, 'path to mysql shell', None, True, 'mysql'),
     'db-mysql-admin':
         _Option(True, 'mysql admin user', None, True, 'root'),
-
     'db-host':
         _Option(True, 'mysql db hostname', None, True, 'localhost'),
-    'db-user':
-        _Option(True, 'mysql db username', None, True, 'marzipan'),
-    'db-passwd':
-        _Option(True, 'mysql db password', None, True, ''),
-    'db-name-reg':
-        _Option(True, 'mysql db name - register tape', None, True, 'register_tape'),
-    'db-name-inv':
-        _Option(True, 'mysql db name - inventory', None, True, 'inventory'),
         
-    'globalpay-login':
-        _Option(True, 'globalpay login', None, True, 'open9738'),
-    'globalpay-password':
-        _Option(True, 'globalpay password', None, True, 'Aimedaca1'),            
-    'globalpay-url':
-        _Option(True, 'globalpay url', None, True, 'https://api.globalpay.com/GlobalPay/transact.asmx'),        
-
-    'ippay-terminalid':
-        _Option(True, 'ippay terminal id', None, True, 'OPENPRODU001'),
-#    'ippay-url':
-#        _Option(True, 'ippay url', None, True, 'https://test1.jetpay.com/jetpay'),
-    'ippay-url':
-        _Option(True, 'ippay url', None, True, 'https://gateway17.jetpay.com/jetpay'),
-    'smtp-server':
-        _Option(True, 'smtp server', None, True, 'mail.parallactic.com'),
-    'receipt-printer':
-        _Option(True, 'receipt printer name', None, True, 'tsp100'),
-    'label-printer':
-        _Option(True, 'label printer name', None, True, 'QL-500'),
-    'cc-processor':
-        _Option(True, 'ippay, tnbci, or globalpay', None, True, 'globalpay'),
-    'tnbci-url':
-        _Option(True, 'tnbci url', None, True, 'https://secure.tnbcigateway.com/api/transact.php'),
-#        _Option(True, 'tnbci url', None, True, 'https://www.gmail.com'),
-#        _Option(True, 'tnbci url', None, True, 'http://localhost:9001'),
-
 }
 
 def usage():

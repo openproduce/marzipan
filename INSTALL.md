@@ -1,16 +1,17 @@
 # Installing the register point-of-sale application:
 
-* PACKAGES
-** sudo apt-get install git
-** sudo apt-get install mysql-client
-** sudo apt-get install mysql-server
-** sudo apt-get install python-pip
-** sudo apt-get install python-dev
-** sudo apt-get install python-mysqldb
-** sudo apt-get install libcurl4-openssl-dev
-** sudo pip install pycurl
-** sudo apt-get install texlive
-* edit register/config.py and change the 'receipt-printer' option from 'tsp100' to whatever your postscript printer is
+* PACKAGES  
+  - sudo apt-get install git  
+  - sudo apt-get install mysql-client  
+  - sudo apt-get install mysql-server  
+  - sudo apt-get install python-pip  
+  - sudo apt-get install python-dev  
+  - sudo apt-get install python-mysqldb  
+  - sudo apt-get install libcurl4-openssl-dev  
+  - sudo pip install pycurl  
+  - sudo apt-get install texlive  
+
+
 * Install SQL Alchemy (the copy of it in this tree will eventually be
   removed).  The most recent version is 1.0.4.
 
@@ -20,10 +21,12 @@
 
         $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
 
-* Set up the databases and database users:
+* Set up the databases and database users.  Note that as currently written this script will drop an existing database, so do not run it if your database exists and has data you want to keep!  If your databases don't exist yet this will create them.
+
         $ mysql -u root -p < scripts/setup.sql
 
 * Unzip sample data files:
+
         $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
         $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
 
@@ -37,6 +40,8 @@
         mysql> quit
         Bye
         $ 
+
+* Copy register/config.py.tmpl to register/config.py and, in register/config.py, change the secrets (in all caps) to their values for your application.
 
 * Run the cash register interface.  Do this in a terminal that can
   respond to terminal control codes, such as an xterm (e.g., don't use
