@@ -68,6 +68,7 @@
         $ sudo pip install MySQL-python
 
 * Install Database:
+
         $ mysql -u root -p
         mysql> CREATE DATABASE register_tape;
         mysql> CREATE DATABASE inventory;
