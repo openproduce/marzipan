@@ -51,6 +51,36 @@
         $ cd marzipan-prep
         $ python register/ui.py
 
+* Make the computer boot directly into text mode, if desired.  Edit
+  /etc/default/grub and change the line that reads
+  
+        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+
+        to
+
+        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash text"
+
+        Then run 'update-grub' and reboot.
+ 
+        $ sudo vi /etc/default/grub
+        $ sudo update-grub
+
+        You can then reboot, or wait until you complete the next step.
+
+* Make the computer's TTY1, 2, and 3 run the POS instead of prompting for
+  login:  Edit /etc/init/tty1.conf and replace the line
+
+        exec /sbin/getty -8 -38400 tty1
+
+        with
+
+        exec /sbin/getty -8 -n -l /home/openproduce/marzipan-prep/register/launch.sh 38400 tty1
+
+  Now do the same for tty2 and tty3 if desired.
+
+  Next reboot.  You should find ALT-F1 through ALT-F3 run concurrent copies of
+  the register, and ALT-F4 etc are available for administrative login.
+
 # Installing the web tools:
 
   These instructions should work on Ubuntu or Debian GNU/Linux.
