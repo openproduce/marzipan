@@ -43,6 +43,14 @@
 
 * Copy register/config.py.tmpl to register/config.py and, in register/config.py, change the secrets (in all caps) to their values for your application.
 
+* Set up your receipt printer (strongly recommended) and label printer (optional).  You'll want to set the name of the queue in the "receipt-printer" section of register/config.py
+
+  For the popular Star Micronics TSP100 and other SM receipt printers, instructions are here:
+
+  http://www.starmicronics.com/absolutefm/absolutefm/attachments/168/application%20note%20-%20installing%20star%20printers%20on%20ubuntu-kubuntu%2010%2004%20%20ethernet%20%20usb.pdf
+
+  http://wiki.koha-community.org/wiki/TSP100_thermal_receipt_printers_on_Ubuntu_12.04
+
 * Run the cash register interface.  Do this in a terminal that can
   respond to terminal control codes, such as an xterm (e.g., don't use
   an Emacs shell buffer or other pseudo-terminal, because it won't
@@ -50,6 +58,8 @@
 
         $ cd marzipan-prep
         $ python register/ui.py
+
+* TODO: Make sure everything is working
 
 * Make the computer boot directly into text mode, if desired.  Edit
   /etc/default/grub and change the line that reads
@@ -78,8 +88,8 @@
 
   Now do the same for tty2 and tty3 if desired.
 
-  Next reboot.  You should find ALT-F1 through ALT-F3 run concurrent copies of
-  the register, and ALT-F4 etc are available for administrative login.
+  Now reboot.  You should find ALT-F1 through ALT-F3 run separate copies of
+  the POS, and ALT-F4 etc are available for administrative login.
 
 # Installing the web tools:
 
