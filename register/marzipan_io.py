@@ -18,6 +18,7 @@ from datetime import *
 import lxml
 from lxml import etree
 import suds
+from logging import getLogger
 
 def write_cui_pipe(str):
     if not config.get('cui-enable'):
@@ -402,6 +403,7 @@ report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?W
 report.set_options(timeout=7)
 
 def send_globalpay_request(amount, card, sale):
+    logger = getLogger
     f = open('/tmp/marzipanlog', 'w')
     f.write("file open\n")
     f.flush
@@ -415,6 +417,7 @@ def send_globalpay_request(amount, card, sale):
                                                 card.account_name,
                                                 '%.2f' % amount,
                                                 '', '', '', '', '', '3AO')
+        logger.info(resp)
     except:
         #request timed out. check logs to see if it managed to go through.
         now = datetime.now()
