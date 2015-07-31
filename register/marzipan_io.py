@@ -410,7 +410,7 @@ def send_globalpay_request(amount, card, sale):
     if not card.validate():
         raise CCError('invalid card info')
     try:
-        resp = transact.service.ProcessCreditCard('open3746', 'Aimedaca1', 'sale',
+        resp = transact.service.ProcessCreditCard('open3746', '99W2MWg9', 'sale',
                                                 card.number,
                                                 '%02d%02d' % (card.exp_month, card.exp_year % 100),
                                                 card.track2,
@@ -423,7 +423,7 @@ def send_globalpay_request(amount, card, sale):
         now = datetime.now()
         twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
         try:
-            resp = report.service.GetCardTrx('open3746', 'Aimedaca1', '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
+            resp = report.service.GetCardTrx('open3746', '99W2MWg9', '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
             root = etree.fromstring(str(resp))
             res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
             if len(res) >= 1:
