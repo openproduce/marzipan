@@ -419,7 +419,9 @@ def send_globalpay_request(amount, card, sale):
                                                 card.account_name,
                                                 '%.2f' % amount,
                                                 '', '', '', '', '', '3AO')
+        print 2.1
         logger.info(resp)
+        print 2.3
     except:
         print 3
         #request timed out. check logs to see if it managed to go through.
