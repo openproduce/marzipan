@@ -165,4 +165,39 @@
         $ sudo a2ensite marzipan
         $ sudo service apache2 restart
 
+# SETTING UP MYSQL REPLICATION IN THE CLOUD
+
+ * setup master
+  * server-id
+  * bin-logs
+
+ * get a cloud version of your database
+ * ssh tunnel
+
+ * set up slave server-id with different value than master or other slaves
+
+ * setting up replication:
+  * on master terminal 1:
+        `FLUSH TABLES READ WITH READ LOCK`
+        stops any new commits so we can find our place in replication
+  * on master terminal 2:
+        `SHOW MASTER STATUS` 
+        This will show us the file and position in the binlog to pick up replication
+
+  * Create mysqldump to transfer master state to slave in preparation on replication
+      master cmdline: mysqldump -u root inventory --master-data > dump_file
+  * Load mysqldump on slave
+    * scp dump to slave:
+    * mysql inventory < dump_file
+
+  * Use `CHANGE MASTER TO` syntax (https://dev.mysql.com/doc/refman/5.0/en/change-master-to.html)  to set pertinent configuration values for slave. 
+  * slave terminal:
+`CHANGE MASTER TO MASTER_HOST='xxxxx', MASTER_USER='xxxxxx', MASTER_PASSWORD='xxxxx', MASTER_PORT=12345, MASTER_LOG_FILE='xxxxx', MASTER_LOG_POS=12345`
+
+  * slave terminal:
+        START SLAVE
+
+  * MAGIC!
+
+
 * Test the site by visiting http://YOUR.SITE/ !
