@@ -424,6 +424,7 @@ def send_globalpay_request(amount, card, sale):
         twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
         try:
             resp = report.service.GetCardTrx('open3746', '99W2MWg9', '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
+            logger.info(resp)
             root = etree.fromstring(str(resp))
             res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
             if len(res) >= 1:
