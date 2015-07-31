@@ -428,9 +428,13 @@ def send_globalpay_request(amount, card, sale):
         try:
             print 4
             resp = report.service.GetCardTrx('open3746', '99W2MWg9', '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
+            print 4.1
             logger.info(resp)
+            print 4.2
             root = etree.fromstring(str(resp))
+            print 4.3
             res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
+            print 4.4
             if len(res) >= 1:
                 print 5
                 #we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
