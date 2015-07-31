@@ -407,9 +407,11 @@ def send_globalpay_request(amount, card, sale):
     f = open('/tmp/marzipanlog', 'w')
     f.write("file open\n")
     f.flush
+    print 1
     if not card.validate():
         raise CCError('invalid card info')
     try:
+        print 2
         resp = transact.service.ProcessCreditCard('open3746', '99W2MWg9', 'sale',
                                                 card.number,
                                                 '%02d%02d' % (card.exp_month, card.exp_year % 100),
@@ -419,25 +421,31 @@ def send_globalpay_request(amount, card, sale):
                                                 '', '', '', '', '', '3AO')
         logger.info(resp)
     except:
+        print 3
         #request timed out. check logs to see if it managed to go through.
         now = datetime.now()
         twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
         try:
+            print 4
             resp = report.service.GetCardTrx('open3746', '99W2MWg9', '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
             logger.info(resp)
             root = etree.fromstring(str(resp))
             res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
             if len(res) >= 1:
+                print 5
                 #we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
                 return (res[0].find('TranID').text.strip(), 'APPROVED')
             else:
+                print 6
                 #If reporting works but transaction timed out, just try again 
                 send_globalpay_request(amount, card, sale)
         except:
+            print 7
             #asking for the log timed out too.
             #if the clerk reruns it and it says "duplicate", then we're fine, and the sale should be logged as completed 
             return ('','timeout. re-run transaction.' )
     try:
+        print 8
         f.write(str(resp))
         f.write("\n--------------------\n")
         f.flush
