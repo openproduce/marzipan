@@ -2,8 +2,8 @@ import sys
 from suds.client import Client
 import config
 
-gp_login = config.get('globalpay_login')
-gp_passwd = config.get('globalpay_password')
+gp_login = config.get('globalpay-login')
+gp_passwd = config.get('globalpay-password')
 
 url = 'https://certapia.globalpay.com/GlobalPay/transact.asmx?WSDL'
 client = Client(url)
