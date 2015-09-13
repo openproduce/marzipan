@@ -199,5 +199,20 @@
 
   * MAGIC!
 
+ # moving regsister-tape
+
+ on existing POSmachine:
+    * enable bin-logs
+           edit my.cnf with:
+           
+
+    * lock mysql tables
+        `FLUSH TABLES READ WITH READ LOCK`
+        stops any new commits so we can find our place in replication
+  * on master terminal 2:
+        `SHOW MASTER STATUS` 
+        This will show us the file and position in the binlog to pick up replication
+
+
 
 * Test the site by visiting http://YOUR.SITE/ !
