@@ -1,5 +1,10 @@
 import sys
 from suds.client import Client
+import config
+
+gp_login = config.get('globalpay_login')
+gp_passwd = config.get('globalpay_password')
+
 url = 'https://certapia.globalpay.com/GlobalPay/transact.asmx?WSDL'
 client = Client(url)
 print client
@@ -20,7 +25,7 @@ mc_track = ';5499990123456781=15125025432198712345?'
 visa_track = ';4003000123456781=15125025432198712345?'
 
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
                                         visa_exp,
                                         visa_track,
@@ -32,7 +37,7 @@ print resp
 print "### SWIPED SALE ###"
 sys.stdin.readline()
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
                                         visa_exp,
                                         visa_track,
@@ -42,7 +47,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
                                         visa_exp,
                                         visa_track,
@@ -52,7 +57,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         mc_num,
                                         mc_exp,
                                         mc_track,
@@ -61,7 +66,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
                                         '', '', '', '', '', '<Force>T</Force><TermType>3AO</TermType>')
 print client.last_sent()
 print resp
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         mc_num,
                                         mc_exp,
                                         mc_track,
@@ -76,7 +81,7 @@ sys.exit()
 print "### PARTIAL AUTH ###"
 sys.stdin.readline()
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5111111111111118',
                                         '1215',
                                         '',
@@ -85,7 +90,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print client.last_sent()
 print resp
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '4111111111111111',
                                         '1215',
                                         '',
@@ -94,7 +99,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print client.last_sent()
 print resp
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '6011000993326655',
                                         '1215',
                                         '',
@@ -105,7 +110,7 @@ print client.last_sent()
 print resp
 
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '5111111111111118',
                                         '1215',
                                         '',
@@ -114,7 +119,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print client.last_sent()
 print resp
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '4111111111111111',
                                         '1215',
                                         '',
@@ -125,7 +130,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '6011000993326655',
                                         '1215',
                                         '',
@@ -139,7 +144,7 @@ print resp
 
 print "### PARTIAL AUTH REV ###"
 sys.stdin.readline()
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5111111111111118',
                                         '1215',
                                         '',
@@ -150,7 +155,7 @@ pnref = resp.PNRef
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '5111111111111118',
                                         '',
                                         '',
@@ -162,7 +167,7 @@ print resp
 
 
 ##2##
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '4111111111111111',
                                         '1215',
                                         '',
@@ -173,7 +178,7 @@ pnref = resp.PNRef
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '4111111111111111',
                                         '',
                                         '',
@@ -184,7 +189,7 @@ print client.last_sent()
 print resp
 
 ##3##
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '6011000993326655',
                                         '1215',
                                         '',
@@ -195,7 +200,7 @@ pnref = resp.PNRef
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '6011000993326655',
                                         '',
                                         '',
@@ -206,7 +211,7 @@ print client.last_sent()
 print resp
 
 ##4##
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '5111111111111118',
                                         '1215',
                                         '',
@@ -217,7 +222,7 @@ pnref = resp.PNRef
 print client.last_sent()
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '5111111111111118',
                                         '',
                                         '',
@@ -236,7 +241,7 @@ sys.stdin.readline()
 print "### VOID TRANSACTIONS ### first make some transactions"
 sys.stdin.readline()
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -246,7 +251,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
 print resp
 VisaPNRef = resp.PNRef
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -255,7 +260,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
                                         '', '', '', '', '', '3AO')
 MCPNRef = resp.PNRef
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -266,7 +271,7 @@ print resp
 MCPNRef_auth = resp.PNRef
 
 #client.set_options(location='http://localhost:3010')
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -278,7 +283,7 @@ MCPNRef_authcompl = resp.PNRef
 """
 
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -291,7 +296,7 @@ VisaPNRef_force = resp.PNRef
 print "### VOID TRANSACTIONS ### time to void"
 sys.stdin.readline()
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -304,7 +309,7 @@ print resp
 
 
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -314,7 +319,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
 print resp
 
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -324,7 +329,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
 print resp
 
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -333,7 +338,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
                                         '', VisaPNRef_force, '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'void',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -344,7 +349,7 @@ print resp
 
 
 print "### FORCE TRANSACTIONS ###"
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -358,7 +363,7 @@ print resp
 
 """
 #this one gets approved
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -368,7 +373,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
 print resp
 
 #this one gets rejected (duplicate)
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -378,7 +383,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
 print resp
 
 #this one gets approved (duplicate force)
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'force',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -390,7 +395,7 @@ print resp
 
 ### RETURN TRANSACTIONS ###
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -404,7 +409,7 @@ print resp
 
 """
 #THIS ONE IS BORKEN:
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -416,7 +421,7 @@ print resp
 """
 
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '36018634567895',
                                         '1012',
                                         '',
@@ -426,7 +431,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
 PNRef3 = resp.PNRef
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '373953191351005',
                                         '1215',
                                         '',
@@ -440,7 +445,7 @@ print resp
 #now the returns
 """
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -452,7 +457,7 @@ print resp
 
 #THIS ONE IS BORKEN:
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -463,7 +468,7 @@ print resp
 """
 
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '36018634567895',
                                         '1012',
                                         '',
@@ -472,7 +477,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
                                         '', PNRef3, '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '373953191351005',
                                         '1215',
                                         '',
@@ -487,7 +492,7 @@ print "## orig PNRef OFF ##"
 sys.stdin.readline()
 
 """
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '4003000123456781',
                                         '1012',
                                         '',
@@ -496,7 +501,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '5499990123456781',
                                         '1012',
                                         '',
@@ -505,7 +510,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '36018634567895',
                                         '1012',
                                         '',
@@ -514,7 +519,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'return',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '373953191351005',
                                         '1215',
                                         '',
@@ -526,7 +531,7 @@ print resp
 
 print "### PREAUTH TRANS ###"
 sys.stdin.readline()
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
                                         visa_exp,
                                         visa_track,
@@ -535,7 +540,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
                                         '1012',
                                         visa_track,
@@ -544,7 +549,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
                                         mc_exp,
                                         mc_track,
@@ -553,7 +558,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
                                         '1012',
                                         '',
@@ -562,7 +567,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '36018634567895',
                                         '1012',
                                         '373953191351005',
@@ -571,7 +576,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
                                         '1215',
                                         '',
@@ -582,7 +587,7 @@ print resp
 
 print "### PREAUTH REV TRANS ###"
 sys.stdin.readline()
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
                                         '1012',
                                         '',
@@ -592,7 +597,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'auth',
 pnref = resp.PNRef
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         visa_num,
                                         '1012',
                                         '',
@@ -603,7 +608,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
 
 print "### REV TRANS ###"
 sys.stdin.readline()
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
                                         '1012',
                                         '',
@@ -613,7 +618,7 @@ resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'sale',
 pnref = resp.PNRef
 print resp
 
-resp = client.service.ProcessCreditCard('open9738', 'Aimedaca1', 'reversal',
+resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         visa_num,
                                         '',
                                         '',
