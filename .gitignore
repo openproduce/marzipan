@@ -6,3 +6,7 @@ error
 web/staff/.htpasswd
 web/staff/op_tools/db_config.py
 sale_receipt.tex
+
+----  Build folders for submodules ---- (We should probably use submodules!)
+
+register/pysimplesoap-1.05a/build
