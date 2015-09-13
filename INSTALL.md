@@ -140,6 +140,13 @@
         Bye
         $ 
 
+* Update DB config with new DB credentials:
+
+ * Staff op_tools:
+  * Update web/staff/op_tools/db_config.py with correct database credentials
+
+ *      
+
 
 * Create the marzipan web root:
 
