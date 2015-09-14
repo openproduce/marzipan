@@ -25,6 +25,11 @@
 
         $ mysql -u root -p < scripts/setup.sql
 
+* Unzip sample data files:
+
+        $ bunzip2 -k sample-data/op-register_tape-sample.sql.bz2
+        $ bunzip2 -k sample-data/op-inventory-sample.sql.bz2
+
 * Load data (real inventory data, fake customer data)
 
         $ mysql -u marzipan -p
