@@ -25,18 +25,13 @@
 
         $ mysql -u root -p < scripts/setup.sql
 
-* Unzip sample data files:
-
-        $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
-        $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
-
-* Load data (THIS IS REAL DATA!)
+* Load data (real inventory data, fake customer data)
 
         $ mysql -u marzipan -p
         mysql> use register_tape
-        mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> source sample-data/op-register_tape-sample.sql
         mysql> use inventory
-        mysql> source sample-data/op-inventory-20150316.sql
+        mysql> source sample-data/op-inventory-sample.sql
         mysql> quit
         Bye
         $ 
