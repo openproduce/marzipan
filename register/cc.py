@@ -130,8 +130,8 @@ def make_globalpay_sale_xml(amount, card):
 def make_tnbci_txn_data(amount, card):
 
     txn = {'type': 'sale',
-           'username': config.get('tnbci-login')
-           'password': config.get('tnbci-password')
+           'username': config.get('tnbci-login'),
+           'password': config.get('tnbci-password'),
            'ccnumber': str(card.number),
            'ccexp': '%02d%02d' % (card.exp_month, card.exp_year % 100),
            'amount': '%.2f' % amount,
