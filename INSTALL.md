@@ -185,7 +185,7 @@
 
  * setting up replication:
   * on master terminal 1:
-        `FLUSH TABLES READ WITH READ LOCK`
+        `FLUSH TABLES WITH READ LOCK`
         stops any new commits so we can find our place in replication
   * on master terminal 2:
         `SHOW MASTER STATUS` 
@@ -214,7 +214,7 @@
            
 
     * lock mysql tables
-        `FLUSH TABLES READ WITH READ LOCK`
+        `FLUSH TABLES WITH READ LOCK`
         stops any new commits so we can find our place in replication
   * on master terminal 2:
         `SHOW MASTER STATUS` 
