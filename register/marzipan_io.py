@@ -408,7 +408,7 @@ def send_globalpay_request(amount, card, sale):
     if not card.validate():
         raise CCError('invalid card info')
     try:
-        resp = transact.service.ProcessCreditCard(config.get('globalpay-login'), config.get('globalpay-passowrd'), 'sale',
+        resp = transact.service.ProcessCreditCard(config.get('globalpay-login'), config.get('globalpay-password'), 'sale',
                                                 card.number,
                                                 '%02d%02d' % (card.exp_month, card.exp_year % 100),
                                                 card.track2,
