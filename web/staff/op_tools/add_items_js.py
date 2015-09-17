@@ -16,7 +16,7 @@ print '''<html><head>
     <style type="text/css">
     * { font-size: 12px; }\n
     </style>
-    <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>
     <script type="text/javascript">
 '''
 # The following array is needed so that the when an item is split it will have the dropdown to change sale units

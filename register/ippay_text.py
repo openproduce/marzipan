@@ -2,7 +2,7 @@ import config
 import cc
 import pycurl
 
-ms = open("ms", "r").read().rstrip().lstrip("%")
+ms = open("magnetic_stripe", "r").read().rstrip().lstrip("%")
 #print(ms)
 c = cc.parse_magstripe(ms)
 

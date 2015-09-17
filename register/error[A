@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "ui.py", line 10, in <module>
-    import ui.dialogs
-  File "/home/openproduce/marzipan.lui.20101027/ui/dialogs.py", line 434
-    cd = CCInfoDialog(in_swipe)
-                              ^
-IndentationError: unindent does not match any outer indentation level

@@ -5,3 +5,16 @@ error
 *.swo
 web/staff/.htpasswd
 web/staff/op_tools/db_config.py
+sale_receipt.tex
+
+
+
+---- Register files
+
+register/customer_card_receipt.*
+register/merchant_card_receipt.*
+register/sale_receipt.*
+
+----  Build folders for submodules ---- (We should probably use submodules!)
+
+register/pysimplesoap-1.05a/build

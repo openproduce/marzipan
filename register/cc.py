@@ -101,7 +101,7 @@ def make_ippay_sale_xml(amount, card):
      int(amount*100)))
 
 
-#This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
+#This is not used. It is provided in case the WSDL stuff in marzipan_io.send_globalpay_request stops working 
 def make_globalpay_sale_xml(amount, card):
     xid = _gen_transaction_id()
     return (xid, """<?xml version="1.0" encoding="UTF-8"?>
@@ -130,8 +130,8 @@ def make_globalpay_sale_xml(amount, card):
 def make_tnbci_txn_data(amount, card):
 
     txn = {'type': 'sale',
-           'username': 'openproduce',
-           'password': '@1medaca',
+           'username': config.get('tnbci-login'),
+           'password': config.get('tnbci-password'),
            'ccnumber': str(card.number),
            'ccexp': '%02d%02d' % (card.exp_month, card.exp_year % 100),
            'amount': '%.2f' % amount,

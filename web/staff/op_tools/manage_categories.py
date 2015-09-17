@@ -10,7 +10,7 @@ print '''<html><head>
     <style type="text/css">
       * { font-family: sans-serif; font-size: 12px;}
     </style>
-    <script type="text/javascript" src="../../jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>
     <script type="text/javascript">
 
     function trim(str) {

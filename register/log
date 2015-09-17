@@ -1,2 +1,0 @@
-/home/openproduce/globalpay_test/marzipan/io.py:7: DeprecationWarning: The popen2 module is deprecated.  Use the subprocess module.
-  import popen2
