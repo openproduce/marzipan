@@ -13,10 +13,8 @@ Marzipan is an open source point-of-sale system for a small retailer.
 * `scripts/` holds non-web scripts that can be run against the
   marzipan databases.
 
-This is a work in progress.  This repository has been created for the
-purpose of cleaning up the code before moving it to a public
-repository.  Current problems include private information saved in the
-code and non-anonymized sample data.
+This is a work in progress.  There are many baked-in customizations for the
+launch customer, Open Produce.  Collaborators are welcome!
 
 
 Installing Marzipan
