@@ -1,0 +1,648 @@
+2009-06-21:
+
+* Added checksum support to ean8 encoder.
+* Fixed breakage in ean8 when includetext not in use.
+
+
+2009-06-20-1:
+
+* Fix looping in datamatrix ASCII-mode encoder.
+
+
+2009-06-20:
+
+* The ASCII-mode encoder for datamatrix was improved to compact pairs of digits.
+
+
+2009-06-19:
+
+* An EDIFACT-mode autoencoder was added to the datamatrix encoder.
+
+
+2009-06-03:
+
+* A byte-mode autoencoder was added to the datamatrix encoder and set as default.
+
+
+2009-05-20:
+
+* A byte-mode-only autoencoder was added to the pdf417 encoder to simplify the use of the pdf417 encoder for common tasks.
+
+
+2009-05-17:
+
+* A byte-mode-only autoencoder was added to the azteccode encoder to simplify the use of the azteccode encoder for common tasks.
+
+
+2009-05-15:
+
+* A byte-mode-only autoencoder was added to the qrcode encoder to simplify the use of the qrcode encoder for common tasks.
+
+
+2009-05-13:
+
+* An ASCII-mode-only autoencoder was added to the datamatrix encoder to simplify the use of the datamatrix encoder for common tasks.
+
+
+2009-04-28:
+
+* Update the descriptions of the RSS symbologies to GS1 DataBar.
+
+
+2009-03-16:
+
+* A textgaps option was added to adjust the inter-character gap in non-default text alignment modes for linear barcodes.
+* A justify mode was added to the textxalign option in linear barcodes.
+
+
+2009-03-06:
+
+* The encoders were amended to automatically invoke the appropriate renderer.
+* The dispatcher procedure was removed.
+* A dontdraw option was added to each encoder to suppress automatic rendering.
+* The encoders were reordered by their dependancy chain and references to dependant procedures were changed to use immediately evalutated name syntax.
+
+
+2009-02-26:
+
+* Minor fixups were made to the addon positioning.
+* The samples were amended to demonstrate the new dict option passing mechanism and alttext option.
+
+
+2009-02-25-1:
+
+* The EAN-5 and EAN-2 addon encoders were folded into the EAN, UPC and ISBN encoders.
+
+
+2009-02-25:
+
+* The options parser of each encoder was improved to also accept a dict of options.
+* An alttext option was added to the renlinear renderer which allows alternative human readable text to be specified.
+
+
+2009-02-10:
+
+* Support for the JapanPost symbology was added.
+
+
+2009-01-11:
+
+* The efficiency the RSS symbol generation was slightly improved.
+
+
+2008-12-28:
+
+* The efficiency of Data Matrix symbol generation was further improved.
+
+
+2008-12-27:
+
+* The efficiency of Data Matrix symbol generation was improved.
+
+
+2008-12-26:
+
+* Minor efficiency improvements where made to the Reed-Solomon error correction routines.
+
+
+2008-12-22:
+
+* The efficiency of the mask evaluation for full QR Code symbols was significantly improved.
+
+
+2008-12-14:
+
+* A bug in the placement of error correction modules within 144x144 Data Matrix symbols was fixed.
+
+
+2008-12-07:
+
+* Switched from the image operator to the imagemask operator for rendering of 2D matrix symbologies. 
+* Support for color and backgroundcolor for 2D matrix symbologies was added.
+
+
+2008-12-06-1:
+
+* The line caps are explicitly squared off to prevent interference from the environment.
+
+
+2008-12-06:
+
+* The syntax for constructing the dictionary for passing the barcode paramaters to the renderer was updated.
+
+
+2008-12-01:
+
+* Removed unnecessary DSC comment %%EndProlog.
+
+
+2008-11-25:
+
+* The QR Code encoder was improved so that it performs mask evaluation for full mode symbols.
+
+
+2008-11-16:
+
+* A bug introduced in version 2008-10-17 that resulted in incorrect checksum handling for UPC-E symbols was fixed.
+
+
+2008-10-27:
+
+* The efficiency of the RSS symbologies was significantly improved.
+
+
+2008-10-24:
+
+* The efficiency of the RSS symbologies was improved.
+
+
+2008-10-17:
+
+* The ability to override the automatic checksum calculation for EAN-13, UPC-A, UPC-E and ISBN was removed.
+
+
+2008-09-14:
+
+* Support for hiding the asterisks in the human readable text of Code 39 symbols was added.
+
+
+2008-07-10:
+
+* The efficiency of the OneCode encoder was improved by replacing routines that generate tables of constants by the tables of constants themselves.
+
+
+2008-04-06-1:
+
+* The Data Matrix encoder was shortened by replacing the list of all possible generator polynomials by a routine that derives only the required set.
+
+
+2008-04-06:
+
+* The PDF417 encoder was shortened by replacing the list of all possible generator polynomials by a routine that derives only the required set.
+
+
+2008-03-30-1:
+
+* The superfluous size option was removed from the QR Code encoder.
+
+
+2008-03-30:
+
+* The QR Code encoder was amended to select full format symbols unless instructed otherwise.
+
+
+2008-03-29:
+
+* Support for the QR Code 2D symbology was added.
+
+
+2008-03-13:
+
+* Added support for FCC type 45 (Reply Paid Barcode) to the Auspost symbology.
+
+
+2008-03-08:
+
+* A bug in the treatment of the human readable text when using special text alignment with Code 128C was fixed.
+
+
+2008-03-01:
+
+* A bug in the check-bars calculation for the RSS Limited symbology was fixed. 
+
+
+2008-02-25:
+
+* Bugs in the Reduced Space Symbologies were fixed.
+
+
+2008-02-17:
+
+* Support for the Aztec Code 2D symbology was added.
+
+
+2008-02-15:
+
+* Fixed some occurances of a bad programming paradigm that could result in the incorrect generation of certain symbols when including multiple instances.
+
+
+2008-01-25:
+
+* A bug in the generation of the pseudo-randomised padding characters for Data Matrix was corrected.
+
+
+2008-01-19:
+
+* Fixed logic error that resulted in incorrect codeword lengths for modes 4, 5 and 6 in MaxiCode.
+
+
+2008-01-15:
+
+* Support for the Data Matrix ECC200 2D symbology was added.
+
+
+2008-01-02:
+
+* The PDF417 encoder was amended to opportunistically raise the error correction level if there is a better fit to the derived size of the matrix.
+
+
+2008-01-01:
+
+* Support for the PDF417 2D symbology was added.
+
+
+2007-12-21:
+
+* The ISBN encoder was slightly improved so that it generates the check digit even when the user does not omit the final dash.
+
+
+2007-12-03:
+
+* Human readable text support was added to RSS-14, RSS Limited, OneCode and Pharmacode symbologies.
+* Default font and spacing for specifically aligned text was change to make it more consistant with default text placement.
+* A bug that made textxalign=left ineffective was fixed. 
+
+
+2007-12-01:
+
+* Added textxalign and textyalign options to control the positioning and formatting of human readable text.
+
+
+2007-07-02:
+
+* Support for the MaxiCode 2D symbology was added.
+
+
+2007-06-16:
+
+* Code was refactored to support multiple renderers.
+* Added parsable renderer field to each encoder.
+* Renderer for maxicode symbols was added, but there is no encoder for this yet.
+
+
+2007-05-19:
+
+* Added parsable example options field to each encoder.
+
+
+2007-05-18:
+
+* An encoder for the Pharmaceutical Binary Code symbology was added.
+
+
+2007-04-22:
+
+* Added CMYK colorspace support.
+
+
+2007-02-25:
+
+* Fixed incorrect checksum calculation for UPC-E symbols.
+
+
+2006-09-26:
+
+* Added raw encoder to make it easier to create miscellaneous symbols in a custom symbology.
+
+
+2006-09-14:
+
+* Functional comments were added to the head of the encoders to allow applications to extract the symbology name and example input data.
+
+
+2006-05-26:
+
+* An encoder for the Reduced Space Symbology RSS Expanded was added.
+
+
+2006-05-25:
+
+* The incorrect definition of the USPS FIM-B symbol was fixed.
+
+
+2006-05-23:
+
+* An encoder for the Reduced Space Symbology RSS Limited was added.
+* The efficiency of RSS-14 was improved.
+
+
+2006-05-22:
+
+* An encoder for the Reduced Space Symbology RSS-14 was added.
+
+
+2006-05-16:
+
+* An encoder for the new OneCode symbology used by the US Postal Service was added.
+
+
+2006-03-04:
+
+* The FIM symbols now render according to their specification.
+
+
+2006-03-03:
+
+* The Postnet, Royal Mail, AusPost and KIX encoders were amended so that the metrics of their default symbols confirms strongly to their respective specifications.
+
+
+2006-03-02:
+
+* The encoders now pass an array containing the widths of the bar space succession to the renderer allowing for sub-point horizontal precision.
+
+
+2006-01-19:
+
+* The default border positions for EAN and UPC symbols were amended to properly enclose the human readable text.
+
+
+2006-01-18:
+
+* The colour support code was fixed to prevent overwriting of the current colour when values are left unspecified.
+
+
+2006-01-17:
+
+* The logic to guard whitespace in EAN symbols was migrated from the encoders to the renderer.
+* The whitespace guard symbols are now drawn directly making them independant of any font.
+* The inter-guard bar height of EANs and UPCs was amended.
+
+
+2006-01-16:
+
+* The renderer was amended to support the passing of encoder specific arguments.
+
+
+2006-01-08:
+
+* The options barcolor, textcolor, bordercolor, showbackground and backgroundcolor were added to the renderer.
+* A flaw in the derivation of the top border height was fixed.
+
+
+2005-12-17:
+
+* The renderer was amended to plot symbols from the current point rather than the origin.
+
+
+2005-11-01:
+
+* The performance of the renderer was improved by avoiding unnecessary calls of setfont. 
+
+
+2005-10-28:
+
+* The auspost encoder was extended to support the customer information field.
+
+
+2005-10-24:
+
+* A new encoder for the barcodes used by the Australian Postal Service was added.
+
+
+2005-10-17:
+
+* A checksum was added to the Code 2 of 5 encoder.
+
+
+2005-10-16:
+
+* A checksum was added to the Code 11 encoder.
+
+
+2005-10-14:
+
+* A new renderer option was added that forces any symbol to a user supplied width.
+
+
+2005-09-26:
+
+* A new encoder was added to support the generation of miscellaneous symbols.
+* Support for generation of FIM symbols used on US Postal service reply mail was added.
+
+
+2005-09-15:
+
+* A new encoder for the KIX symbology used by the Dutch postal service was added.
+
+
+2005-09-12:
+
+* Options were added that allow precise adjustments to be made to the ratio of bar widths and space widths.
+
+
+2005-09-11:
+
+* Placement problems with the border of EAN-2 and EAN-5 symbols have been fixed by amending the baseline of the bars.
+
+
+2005-09-10:
+
+* The options required to enable a customisable border around any barcode symbol were added to the renderer. 
+
+
+2005-09-08:
+
+* An options parser was added to the renderer.
+* Each renderer was modified to pass a copy of its user-defined options to the renderer.
+* A new user-definable option called inkspread that reduces the width of the bars was added to the renderer.
+
+
+2005-08-08:
+
+* The options parser for each of the encoders was upgraded to remove the 30 character size limitation from individual options within a given option string.
+
+
+2005-08-07:
+
+* The ISBN encoder was upgraded to support the emerging ISBN-13 symbology. 
+
+
+2005-08-02:
+
+* PostScript and PDF documentation is now created using the new pst-barcode LaTeX package to generate the barcode images. 
+
+
+2005-06-21:
+
+* The isbnfont, isbnsize, and isbnpos options were added to allow the independant manipulation of the upper part of the human readable text within the ISBN symbology.
+
+
+2005-06-09:
+
+* A minor fix was made to the positioning of human readable text within the Code 128 symbology.
+
+
+2005-06-06:
+
+* Optional whitespace guards have been added to the human readable text of EAN barcodes.
+* The position of the first character of EAN-13s has been adjusted to guard the whitespace to the left of the bars.
+
+
+2005-05-10:
+
+* The ability to allow the code to remain resident within most printer's PostScript virtual machines, until a hard reset is performed, was added. 
+
+
+2005-04-12:
+
+* The default textpos for EAN-2 and EAN-5 was changed so that it is now a function of the supplied height. 
+* Delimiter comments were added around the encoders so that the file can be easily parsed as a template. 
+
+
+2005-04-09:
+
+* Delimiters were added around individual encoders to simplify parsing.
+
+
+2005-03-29:
+
+* A bug in the calculation of Code 93 barcode length when using extended full ASCII characters was fixed.
+
+
+2005-03-21:
+
+* Support for the Royal Mail/RM4SCC symbology was added.
+* A minor fix was made to the positioning of human readable text in the PostNet symbology.
+
+
+2005-03-05:
+
+* The Postnet encoder was amended to generate correctly proportioned bars.
+
+
+2005-02-28:
+
+* A bug that resulted in the incorrect generation of Code 93 check digits for data exceeding 15 characters in length was fixed.
+
+
+2005-02-03:
+
+* A user option to override the default barcode height was added.
+
+
+2005-02-01:
+
+* The option passing mechanism was improved to allow the user to override many default variables.
+
+
+2005-01-25:
+
+* Human readable text was added to the remaining encoders. 
+* Support for a string of options to enable or disable features of an encoder for each barcode instance was added.
+
+
+2005-01-22:
+
+* Human readable text, with an option to suppress display of the check digit, was added to Code-39, Interleaved 2 of 5, and Postnet symbologies. 
+* The ability to suppress human readable text to EANs, UPCs, ISBN, and all other symbologies that show text was added. 
+* Encoders now pass font information to the renderer. 
+* The encoders were restructured to prepare for the passing of switches to enable or disable features of the encoder.
+
+
+2005-01-19:
+
+* The ability to suppress checkdigit for codabar, code39, code93, and interleaved 2 of 5 symbologies was added.
+
+
+2005-01-05:
+
+* Support for Code 93 and Code 11 was added.
+* A checksum was added to Code 39 and Interleaved 2 of 5. 
+* Incorrect generation of X human readable check-digit for ISBN was fixed.
+
+
+2005-01-02:
+
+* This release adds support for the EAN-2 and EAN-5 (the EAN/UPC add-ons) symbologies, MSI symbology, and Plessey symbology.
+* The narrow:wide ratio for Code 2 of 5 has been changed.
+
+
+2004-12-29:
+
+* This release fixes the incorrect generation of Code 128 check digits.
+
+
+2004-12-27:
+
+* This release adds a code128 encoder that fully supports character alphabets A, B, and C. This allows for UCC/EAN-128 support.
+* The obsolete code128b encoder has been dropped.
+
+
+2004-12-24:
+
+* This release fixes a bug in code128b where first ^ character in string of available characters should be &.
+
+
+2004-12-21:
+
+* The Supported Symbologies section of the documentation was enhanced to include samples of all the supported barcode types.
+
+
+2004-12-14:
+
+* Incorrect generation of human-readable check digits for the ISBN encoder was fixed and the documentation was updated with an example of use from within Perl.
+
+
+2004-12-11:
+
+* Support for the ISBN barcode format was added.
+
+
+2004-12-09:
+
+* Documentation is now available in PDF and HTML formats. 
+* The orignal .tex files are shipped in the tarball.
+
+
+2004-12-07:
+
+* Support for human readable text on the EAN and UPC formats was added.
+* Redundant code was removed from the UPC-A format.
+* Minor code cleanups were made.
+* A mailing list and support group is now available.
+
+
+2004-12-04:
+
+* EANs and UPCs now have elongated guard bars. 
+* The efficiency of the renderer was improved. 
+* A bug that printed a tiny artifact at the bottom-left of barcodes was fixed.
+* All barcodes now default to 1 inch in height with a narrow bar width of 1 pt.
+
+
+2004-12-03-1:
+
+* Support has been added for the Postnet barcode format. 
+* The renderer has been improved to allow support for symbologies with variable height bars.
+
+
+2004-12-03:
+
+* This version changes the renderer to accept a dictionary of arguments rather than an sbs string, so that it can have optional arguments such as text and bar heights passed to it. The encoders were upgraded accordingly.
+
+
+2004-11-30:
+
+* Efficiency was improved by adding the bind operator to procedure definitions to make use of early operator resolution.
+
+
+2004-11-26:
+
+* This release adds a PostScript file and a tarball on the homepage to ease downloading and patching.
+
+
+2004-11-23:
+
+* This release added support for the UPC-E barcode format.
+
+
+2004-11-21:
+
+* Support has been added for EAN-13, EAN-8, and UPC-A barcode formats.
+
+
+2004-11-19:
+
+* This release adds support for printing the EAN-13 barcode format. 
+* The software now supports EAN-13, Code 128-B, Code 39, Interleaved 2 of 5, Code 2 of 5, and Codabar.
+
