@@ -27,4 +27,4 @@ Need more information?
 ----------------------
 
 Marzipan is currently in use at Open Produce.  See
-github.com/openproduce and openproduce.org.
+[github.com/openproduce](https://github.com/openproduce) and [openproduce.org](http://openproduce.org).
