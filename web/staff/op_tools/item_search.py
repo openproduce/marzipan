@@ -10,7 +10,7 @@ def print_headers():
     print 'Content-type: text/html\n'
     print '''<html>
 <head><title>Item Search</title>
-    <link rel="stylesheet" type="text/css" href="../assets/tools.css" />
+    <link rel="stylesheet" type="text/css" href="../../tools.css" />
 </head>
 <body>
 '''
