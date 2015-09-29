@@ -2,9 +2,9 @@
 
 use CGI qw/:standard/;
 
-%catalogs = ("Kehe" => '/var/www/openproduce.org/site/kehe_catalog.txt',
-             "Raja" => '/var/www/openproduce.org/site/raja_catalog.txt',
-             "European" => '/var/www/openproduce.org/site/european_catalog.txt');
+%catalogs = ("Kehe" => '/home/openproduce/catalogs/kehe_catalog.txt',
+             "Raja" => '/home/openproduce/catalogs/raja_catalog.txt',
+             "European" => '/home/openproduce/catalogs/european_catalog.txt');
 print header;
 print start_html('OP Distributor Catalog Search');
 print start_form('GET');
