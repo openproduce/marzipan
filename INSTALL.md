@@ -101,6 +101,7 @@
 * Install other needed packages:
 
         $ sudo apt-get update
+        $ sudo apt-get install mailutils
         $ sudo apt-get install apache2
         $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
