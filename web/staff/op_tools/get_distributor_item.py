@@ -2,6 +2,22 @@
 # get_distributor_item.py
 # Returns a comma separated string containing Distributor item id, wholesale price, case size and case units for a given item/distributor pair
 
+# This file is part of Marzipan, an open source point-of-sale system.
+# Copyright (C) 2015 Open Produce LLC
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import cgi
 import op_db_library as db
 
