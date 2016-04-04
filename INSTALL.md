@@ -19,7 +19,7 @@
 
 * Get the source code:
 
-        $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
+        $ git clone git@github.com:openproduce/marzipan.git
 
 * Set up the databases and database users.  Note that as currently written this script will drop an existing database, so do not run it if your database exists and has data you want to keep!  If your databases don't exist yet this will create them.
 
@@ -56,7 +56,7 @@
   an Emacs shell buffer or other pseudo-terminal, because it won't
   work in there):
 
-        $ cd marzipan-prep
+        $ cd marzipan
         $ python register/ui.py
 
 * TODO: Make sure everything is working
@@ -84,7 +84,7 @@
 
         with
 
-        exec /sbin/getty -8 -n -l /home/openproduce/marzipan-prep/register/launch.sh 38400 tty1
+        exec /sbin/getty -8 -n -l /home/openproduce/marzipan/register/launch.sh 38400 tty1
 
   Now do the same for tty2 and tty3 if desired.
 
@@ -101,7 +101,6 @@
 * Install other needed packages:
 
         $ sudo apt-get update
-        $ sudo apt-get install mailutils
         $ sudo apt-get install apache2
         $ sudo apt-get install apache2-utils
         $ sudo apt-get install mysql-common
@@ -152,8 +151,7 @@
 * Create the marzipan web root:
 
         $ cd /var/www
-        $ git clone git@github.com:OpenTechStrategies/marzipan-prep.git
-        $ mv marzipan-prep marzipan
+        $ git clone git@github.com:openproduce/marzipan.git
         $ chown www-data.www-data marzipan
 
 * Create a `.htpasswd` file for staff web authorization:
