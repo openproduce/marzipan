@@ -41,6 +41,8 @@ import tabutil
 import sys
 sys.path.append("..")
 import config
+import register_logging
+from register_logging import *
 
 class Dialog:
     """set of frames with logic for user interaction."""
@@ -94,6 +96,7 @@ class Dialog:
             ord('7'): curses.KEY_F7,
             ord('8'): curses.KEY_F8,
             ord('9'): curses.KEY_F9,
+            ord('11'): curses.KEY_F11,
         }
         if keys.has_key(c):
             return keys[c]
@@ -301,7 +304,7 @@ class PaymentDialog(Dialog):
             Label(14, 0, 30, 'Change due: $0.00', name='change'),
             Label(16, 0, 14, 'F6: No Rcpt', color_id=HELP_COLOR),
             Label(16, 15, 14, 'F7: Print Rcpt', color_id=HELP_COLOR),
-            Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
+            Label(17, 0, 14, 'F4: E-mail Rcpt', color_id=HELP_COLOR),
 #            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
             ], layout.Center()))
 
@@ -1159,8 +1162,9 @@ class SaleDialog(Dialog):
             Label(0, 0, 14,  "F1: Clerk", color_id=HELP_COLOR),
             Label(0, 15, 14, "F2: Customer", color_id=HELP_COLOR),
             Label(0, 30, 14, "F3: Sale", color_id=HELP_COLOR),
-            Label(0, 45, 14, "F5: Pay", color_id=HELP_COLOR),
-            Label(0, 60, 14, "F9: Review", color_id=HELP_COLOR),
+            Label(0, 45, 14, "F4: Reprint Receipt", color_id=HELP_COLOR),
+            Label(0, 60, 14, "F5: Pay", color_id=HELP_COLOR),
+            Label(0, 75, 14, "F9: Review", color_id=HELP_COLOR),
             ], layout.BottomEdge(0), border=False))
         self.total = self.add_frame(Frame([
             Label(0, 0, 20, 'Clerk: ?', name='clerk'),
@@ -1379,6 +1383,13 @@ class SaleDialog(Dialog):
             self._set_focus(self.old_focus_index)
         elif c == curses.KEY_F9:
             TransactionSelectionDialog().main()
+        elif c == curses.KEY_F4: #reprint
+            session = db.get_session()
+            sale = db.get_sales(session, 1)[0]
+            marzipan_io.print_receipt(sale)
+            if db.PAYMENT[self.sale.payment] == 'debit/credit':
+                 marzipan_io.print_card_receipt(sale, sale.total, merchant_copy=False)
+            TearDialog('sale receipt').main()
         elif c == curses.KEY_F12:
             sys.exit()
         else:

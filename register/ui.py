@@ -25,8 +25,8 @@ import curses
 import curses.wrapper
 import ui.colors
 import ui.dialogs
-
 import register_logging
+
 
 def main(stdscr):
     ui.colors.init()

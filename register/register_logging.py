@@ -17,13 +17,14 @@
 import logging
 import logging.handlers
 
-logger = logging.getLogger()
-handler = logging.handlers.WatchedFileHandler("/tmp/logged_it.log")
-logger.addHandler(handler)
-logger.setLevel("DEBUG")
 
-logger.debug("START LOGGING")
-logger.debug("=============")
+this_logger = logging.getLogger()
+handler = logging.handlers.WatchedFileHandler("/tmp/logged_it.log")
+this_logger.addHandler(handler)
+this_logger.setLevel("DEBUG")
+
+this_logger.debug("START LOGGING")
+this_logger.debug("=============")
 
 
 
