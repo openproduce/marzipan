@@ -718,6 +718,7 @@ def _get_units(s):
 class CustomerAddEditDialog(Dialog):
     """add/edit customer information."""
     def __init__(self, customer=None, name=""):
+        this_logger.debug("trying to display dialog")
         Dialog.__init__(self)
         self.s = db.get_session()
         postal = ['','','','']
@@ -730,6 +731,7 @@ class CustomerAddEditDialog(Dialog):
             self.adding_customer = False
             postal = customer.postal.split('\n', 4)
         self.customer = customer
+        this_logger.debug("found customer")
         r_margin = 10
         try:
            self.add_frame(Frame([
@@ -752,7 +754,8 @@ class CustomerAddEditDialog(Dialog):
                Label(11, 0, r_margin-1, 'Limit:'),
                TextBox('credit', 11, r_margin, 40, str(customer.credit)),
                Label(12, 0, r_margin-1, 'Balance:'),
-               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
+               Label(12, r_margin, 40, str(customer.balance)),
+#               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
                Label(14, 0, 14, 'F6: Save', color_id=HELP_COLOR),
                Label(14, 15, 14, 'F7: Print card', color_id=HELP_COLOR),
                Label(14, 30, 18, 'F9: Tab history', color_id=HELP_COLOR),
@@ -939,7 +942,9 @@ class SearchDialog(Dialog):
             self.add_edit(False)
             self.clear()
         elif c == curses.KEY_F7:
+            this_logger.debug("looking for the add/edit customer dialog")
             self.add_edit(True)
+            this_logger.debug("went thru the add/edit customer dialog")
             self.clear()
         elif c == curses.KEY_F8:
             db_obj = self.get_selection()
@@ -1030,9 +1035,12 @@ class CustomerSearchDialog(SearchDialog):
             self.frame.get('search').set_labels(self.get_labels())
 
     def add_edit(self, edit):
+        this_logger.debug("in the add_edit....")
         cust = None
         if edit:
+            this_logger.debug("looking for edit...")
             cust = self.get_selection()
+        this_logger.debug("should be pulling up the dialog...")
         CustomerAddEditDialog(cust, self.frame.get('search').get_text()).main()
 
 def _find_customer():
