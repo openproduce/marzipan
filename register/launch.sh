@@ -1,3 +1,4 @@
 #!/bin/bash
-su - openproduce -c "(cd /home/openproduce/marzipan-prep/register; python ui.py 2> /var/tmp/pos_errs)"
+su - openproduce -c "ssh -L 3306:localhost:3306 cardamom -N&"
+su - openproduce -c "(cd /home/openproduce/marzipan/register; python2.7 ui.py 2> /var/tmp/pos_errs)"
 

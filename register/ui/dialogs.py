@@ -42,6 +42,12 @@ import sys
 sys.path.append("..")
 import config
 
+import logging
+logging.basicConfig(filename='/home/openproduce/example.log',level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
+
 class Dialog:
     """set of frames with logic for user interaction."""
 
@@ -409,7 +415,7 @@ class PaymentDialog(Dialog):
             return False
         except ValueError:
             alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
+            alert.set_text('Sorry, credit card ValueError')
             return False
         self.frame.get('alert').set_text(status)
         self.frame.show()
@@ -468,12 +474,13 @@ class PaymentDialog(Dialog):
 
     def _get_card(self, in_swipe=False):
         try:
+            logging.info(in_swipe)
             cd = CCInfoDialog(in_swipe)
             cd.main()
             self.card = cd.get_result()
-        except:
+        except Exception as e:
             alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
+            alert.set_text(str(e))
             return self.frame.get('method')
 
     def _get_link_info(self):
@@ -589,8 +596,11 @@ class CCInfoDialog(Dialog):
     """enter credit card payment information."""
     def __init__(self, in_swipe=False):
         Dialog.__init__(self)
+        logging.info("Int he info dialog")
         self.card = cc.Card()
+        logging.info("made it past cc.card()")
         self.result = None
+        logging.info("made it past self.result")
         self.in_swipe = in_swipe
         self.magstripe = []
         r_margin = 10
@@ -607,11 +617,13 @@ class CCInfoDialog(Dialog):
             TextBox('year', 6, r_margin+8, 8, ''),
             Label(8, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
             ], layout.Center()))
+        logging.info("made it to end of init")
 
     def get_result(self):
         return self.result
 
     def _finish_entry(self):
+        logging.info("finishing entry")
         number = self.frame.get('number')
         month = self.frame.get('month')
         year = self.frame.get('year')
@@ -634,22 +646,32 @@ class CCInfoDialog(Dialog):
 
     def input(self, c):
         if self.in_swipe:
+            logging.info("in in_swipe and our mag is like" + str(self.magstripe))
             if c == ord('\n'):
+                logging.info("in the ord n")
                 try:
+                    logging.info("trying ...")
+                    logging.info("a magsripe looks like" + str(self.magstripe))
                     self.card = cc.parse_magstripe(self.magstripe)
+                    logging.info("parsed a magstripe")
                     self.frame.get('name').set_text(self.card.account_name)
+                    logging.info("got a account name")
                     self.frame.get('number').set_text(self.card.number)
                     self.frame.get('month').set_text("%02d"%(self.card.exp_month))
                     self.frame.get('year').set_text("%02d"%(self.card.exp_year))
-                except cc.BadSwipeError, e:
+                except Exception, e:
                     self.frame.get('alert').set_text(str(e))
                 self.in_swipe = False
+            logging.info("got a magstripe?")
             self.magstripe.append(c)
         elif c == ord('%') and not self.in_swipe:
+            logging.info("in the ord %")
             self.in_swipe = True
         elif Dialog.input(self, c):
+            logging.info("in the pass")
             pass
         elif c == curses.KEY_F6:
+            logging.info("in the key f6")
             self._finish_entry()
             self.result = self.card
             self.done = True

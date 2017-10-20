@@ -24,6 +24,9 @@ import config
 import random
 import urllib
 
+import logging
+logging.basicConfig(filename='/home/openproduce/example.log',level=logging.DEBUG)
+
 class Card:
     def __init__(self):
         self.account_name = ''
@@ -55,12 +58,17 @@ class BadSwipeError(Exception):
 
 
 def parse_magstripe(magstripe):
+    logging.info("parsing magstripe... and it is " + str(magstripe))
     magtext = ''.join([chr(x) for x in magstripe]) #todo uncomment
+    logging.info("the magtext is " + magtext)
     card = Card()
     card.magtext = "%" + magtext
+    logging.info("got a magstripe...")
     tracks = magtext.split(';')
     card.track1 = "%" + tracks[0] #added by apc
-    card.track2 = ';' + tracks[1] 
+    card.track2 = ';' + tracks[1]
+    logging.info("track1 is" + card.track1)
+    logging.info("track2 is" + card.track2)
     if "%E?" in magtext or "+E?" in magtext:
         raise BadSwipeError("need both tracks")
 
@@ -75,6 +83,7 @@ def parse_magstripe(magstripe):
     if not re.match('^\d{16}$', number):
         raise BadSwipeError('non 16-digit number')
     card.number = number
+    logging.info("we have a number and it is " + number)
     name = name.strip()
     if '/' in name:
         (last, first) = name.split('/')

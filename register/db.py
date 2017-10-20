@@ -636,10 +636,10 @@ def connect():
     global _inv_engine
     global _reg_engine
     global _Session
-    _inv_engine = create_engine('mysql://%s:%s@%s/%s'%(
+    _inv_engine = create_engine('mysql://%s:%s@%s:3306/%s'%(
         config.get('db-user'), config.get('db-passwd'),
         config.get('db-host'), config.get('db-name-inv')))
-    _reg_engine = create_engine('mysql://%s:%s@%s/%s'%(
+    _reg_engine = create_engine('mysql://%s:%s@%s:3306/%s'%(
         config.get('db-user'), config.get('db-passwd'),
         config.get('db-host'), config.get('db-name-reg')))
     _Session = sessionmaker(twophase=True)
