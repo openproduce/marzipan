@@ -1689,6 +1689,7 @@ class TransactionDialog(Dialog):
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance -= self.sale.total
                 self.sale.is_void = 1
+                marzipan_io.print_receipt(self.sale)
             self.done = True
             self.result = True
         elif c == curses.KEY_F7:    # reprint receipt
