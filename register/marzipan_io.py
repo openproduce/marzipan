@@ -208,13 +208,15 @@ def _make_receipt_tex(sale):
 {\small Chicago, IL 60615}\n\n
 {\small (773) 496-4327}\n\n
 www.openproduce.org\\\\
-\\vskip 0.3cm
-{\Large \sf \\bf SALE RECEIPT}\n\n
-\\end{center}
-{\scriptsize Returns, exchanges, and refunds are allowed at manager's discretion and as required by law. Bargain items cannot be returned.  To comply with Chicago's health code, frozen and refrigerated items cannot be returned for a refund, and may only be exchanged for the same item.  On all other items, only the person who made the original purchase may request a refund.\par}\n\n
+\\vskip 0.3cm""",]
+    if sale.is_void == 1:
+        out.append("{\Large \sf \\bf VOIDED SALE}\n\n\"]")
+    else:
+        out.append("{\Large \sf \\bf SALE RECEIPT}\n\n\"]")
+    out.append("""\\end{center}
+    {\scriptsize Returns, exchanges, and refunds are allowed at manager's discretion and as required by law. Bargain items cannot be returned.  To comply with Chicago's health code, frozen and refrigerated items cannot be returned for a refund, and may only be exchanged for the same item.  On all other items, only the person who made the original purchase may request a refund.\par}\n\n
 \\begin{center}
-""",
-    ]
+""")
     out.append(sale.time_ended.strftime("%m/%d/%y %H:%M:%S\n"))
     out.append("\\end{center}\n\n")
     if sale.clerk:
