@@ -412,13 +412,25 @@ def _parse_globalpay_response(resp):
     
     return m.group(1).upper()
 
-
-
-def send_globalpay_request(amount, card, sale):
+try:
     transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
     transact.set_options(timeout=7)
     report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
     report.set_options(timeout=7)
+    # try to setup cc on boot, but fail silently if we can't
+except:
+    pass
+
+
+
+def send_globalpay_request(amount, card, sale):
+    try:
+        transact
+    except NameError:
+        transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+        transact.set_options(timeout=7)
+        report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+        report.set_options(timeout=7)
     f = open('/tmp/marzipanlog', 'w')
     f.write("file open\n")
     f.flush

@@ -773,7 +773,7 @@ class CustomerAddEditDialog(Dialog):
         name = self.frame.get('name').get_text()
         email = self.frame.get('email').get_text()
         tel = self.frame.get('tel').get_text()
-        balance = self.frame.get('balance').get_text()
+#        balance = self.frame.get('balance').get_text()
         credit = self.frame.get('credit').get_text()
         alert = self.frame.get('alert')
         if not re.match('\S+', name):
@@ -788,9 +788,9 @@ class CustomerAddEditDialog(Dialog):
         elif not re.match('^\d{0,6}(\.\d{0,2})?$', credit):
             alert.set_text('expect credit like dddddd.dd')
             return self.frame.get('credit')
-        elif not re.match('^[-+]?\d{0,6}(\.\d{0,2})?$', balance):
-            alert.set_text('expect balance like [-+]dddddd.dd')
-            return self.frame.get('balance')
+        # elif not re.match('^[-+]?\d{0,6}(\.\d{0,2})?$', balance):
+        #     alert.set_text('expect balance like [-+]dddddd.dd')
+        #     return self.frame.get('balance')
         return None
 
     def _fill(self):
@@ -800,8 +800,8 @@ class CustomerAddEditDialog(Dialog):
         self.customer.postal = '\n'.join(
             [self.frame.get(x).get_text() for x in [
                 'postal_1','postal_2','postal_3','postal_4']])
-        self.customer.balance = decimal.Decimal(
-            self.frame.get('balance').get_text())
+#        self.customer.balance = decimal.Decimal(
+#            self.frame.get('balance').get_text())
         self.customer.credit = decimal.Decimal(
             self.frame.get('credit').get_text())
 
