@@ -412,11 +412,12 @@ def _parse_globalpay_response(resp):
     
     return m.group(1).upper()
 
-transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-transact.set_options(timeout=7)
+# commented out by clara 11/9/17... these lines make network necessary 4 boot
+#transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#transact.set_options(timeout=7)
 
-report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-report.set_options(timeout=7)
+#report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#report.set_options(timeout=7)
 
 def send_globalpay_request(amount, card, sale):
     f = open('/tmp/marzipanlog', 'w')

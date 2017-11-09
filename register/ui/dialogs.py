@@ -1112,7 +1112,8 @@ class ItemSearchDialog(SearchDialog):
         elif c == KEY_ESCAPE and self.has_cancel:
             self.result = None
             self.done = True
-        elif c == curses.KEY_F10:
+        elif c == curses.KEY_F8:
+            this_logger.debug('f8')
             d = ItemInfoDialog(self.get_selection())
             d.main()
         else:
@@ -1711,9 +1712,13 @@ def item_info(session, item):
         mct = 0
         mct_when = datetime.datetime(1900, 1, 1, 1, 1, 1)
     q = session.query(db.SaleItem).filter_by(item = item)
-    q = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
-    quantity_sold = sum( x.quantity  for x in q )
+    sold = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
+    quantity_sold = sum( x.quantity  for x in sold )
+#    last_sold = session.query(db.Sale).join(db.SaleItem).filter( db.SaleItem.item.id == item.id )
+# here is where i left off
+
     ret = cStringIO.StringIO()
+    this_logger.debug("in item dialog")
     print >>ret, "Item %d: %s" % (item.id, item.name)
     print >>ret, "Barcode(s): %s" % (', '.join( b.barcode for b in item.barcodes ) )
     print >>ret, ""
@@ -1744,6 +1749,14 @@ def item_info(session, item):
     print >>ret, "Latest manual count: %s" % mct
     print >>ret, "        timestamped: %s" % mct_when.strftime("%c")
     print >>ret, "Quantity sold since last count: %s" % quantity_sold
+    print >>ret, "Number on hand: %s" % (mct - quantity_sold)
+    this_logger.debug("made it to number on hand")
+    print >>ret, "Last sale: %s" % last_sold
+    if not item.deliveries:
+        print >>ret, "No recorded deliveries"
+    else:
+        print >>ret, "Last delivery: %s" % (item.deliveries[-1]).time_delivered.strftime("%c")
+    this_logger.debug("made it past deliveries...")
     return ret.getvalue()
 
 class ItemInfoDialog(Dialog):
