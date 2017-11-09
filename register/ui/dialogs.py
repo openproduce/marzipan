@@ -412,7 +412,7 @@ class PaymentDialog(Dialog):
             return False
         except ValueError:
             alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
+            alert.set_text('CC value error')
             return False
         self.frame.get('alert').set_text(status)
         self.frame.show()
@@ -476,7 +476,7 @@ class PaymentDialog(Dialog):
             self.card = cd.get_result()
         except:
             alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
+            alert.set_text('CC processing failure')
             return self.frame.get('method')
 
     def _get_link_info(self):
