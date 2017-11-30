@@ -281,6 +281,7 @@ class PaymentDialog(Dialog):
         self.sale = sale
         self.sale_done = False
         self.card = None
+        self.change = None
         assert sale is not None
         cust_name = '?'
         if self.sale.customer is not None:
@@ -372,6 +373,9 @@ class PaymentDialog(Dialog):
         self.s.commit()
 
     def _finish_sale(self, want_receipt=False):
+
+        if self.change is not None and self.change > 0:
+            ChangeDialog(money.moneyfmt(self.change, curr='$', sep='')).main()
         bad_widget = self._validate()
         if bad_widget is not None:
             self.frame.set_focus(bad_widget)
@@ -382,7 +386,7 @@ class PaymentDialog(Dialog):
 
         if db.PAYMENT[pm_id] == 'link':
             return self._pay_link() #TODO make _pay_link()
-
+        
         self._fill()
         return True
 
@@ -444,7 +448,6 @@ class PaymentDialog(Dialog):
         TearDialog('merchant receipt').main()
         if want_receipt:
             marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
-        #TearDialog('customer receipt').main()
         return True
 
     def _pay_link(self):
@@ -546,9 +549,11 @@ class PaymentDialog(Dialog):
                paid_text != '.':
                 amount = decimal.Decimal(paid_text)
                 if amount >= self.sale.total:
+                    self.change = amount - self.sale.total;
                     self.frame.get('change').set_text('Change due: %s'%(
-                        money.moneyfmt(amount - self.sale.total,
+                        money.moneyfmt(self.change,
                                        curr='$', sep='')))
+
         if method.get_hit_enter():
             method.reset_hit_enter()
             pm_id = method.get_selection()
@@ -564,7 +569,6 @@ class PaymentDialog(Dialog):
                 self.frame.get('customer').set_text('Customer: %s'%(cust_name))
 
 
-
 class TearDialog(Dialog):
     """prompt to wait for receipt then tear."""
     def __init__(self, clue):
@@ -578,6 +582,21 @@ class TearDialog(Dialog):
         if not Dialog.input(self, c):
             self.done = True
         return True
+
+
+class ChangeDialog(Dialog):
+    """prompt to give change."""
+    def __init__(self, clue):
+        Dialog.__init__(self)
+        self.done = False
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'Change due: %s.'%(clue)),
+            Label(1, 0, 40, 'Press any key to continue...')
+            ], layout.Center()))
+
+    def input(self, c):
+        if c > 0:
+            self.done = True
 
 
 def check_network():
@@ -718,7 +737,7 @@ def _get_units(s):
 class CustomerAddEditDialog(Dialog):
     """add/edit customer information."""
     def __init__(self, customer=None, name=""):
-        this_logger.debug("trying to display dialog")
+
         Dialog.__init__(self)
         self.s = db.get_session()
         postal = ['','','','']
@@ -731,7 +750,7 @@ class CustomerAddEditDialog(Dialog):
             self.adding_customer = False
             postal = customer.postal.split('\n', 4)
         self.customer = customer
-        this_logger.debug("found customer")
+
         r_margin = 10
         try:
            self.add_frame(Frame([
@@ -942,9 +961,9 @@ class SearchDialog(Dialog):
             self.add_edit(False)
             self.clear()
         elif c == curses.KEY_F7:
-            this_logger.debug("looking for the add/edit customer dialog")
+
             self.add_edit(True)
-            this_logger.debug("went thru the add/edit customer dialog")
+
             self.clear()
         elif c == curses.KEY_F8:
             db_obj = self.get_selection()
@@ -1035,12 +1054,12 @@ class CustomerSearchDialog(SearchDialog):
             self.frame.get('search').set_labels(self.get_labels())
 
     def add_edit(self, edit):
-        this_logger.debug("in the add_edit....")
+
         cust = None
         if edit:
-            this_logger.debug("looking for edit...")
+
             cust = self.get_selection()
-        this_logger.debug("should be pulling up the dialog...")
+
         CustomerAddEditDialog(cust, self.frame.get('search').get_text()).main()
 
 def _find_customer():
@@ -1715,9 +1734,9 @@ def item_info(session, item):
     sold = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
     quantity_sold = sum( x.quantity  for x in sold )
     last_sold = session.query(db.Sale).join(db.SaleItem).filter_by(item = item).order_by(db.Sale.time_ended.desc()).first().time_ended
-    this_logger.debug(last_sold)
+
     ret = cStringIO.StringIO()
-    this_logger.debug("in item dialog")
+
     print >>ret, "Item %d: %s" % (item.id, item.name)
     print >>ret, "Barcode(s): %s" % (', '.join( b.barcode for b in item.barcodes ) )
     print >>ret, ""
