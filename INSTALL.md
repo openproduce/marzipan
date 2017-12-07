@@ -86,6 +86,11 @@
 
         exec /sbin/getty -8 -n -l /home/openproduce/marzipan/register/launch.sh 38400 tty1
 
+* Or, for later versions of ubuntu:
+  sudo systemctl edit gety@tty1
+  and edit the second ExecStart line to read:
+  ExecStart=-/home/openproduce/marzipan/register/launch.sh --autologin openproduce
+
   Now do the same for tty2 and tty3 if desired.
 
   Now reboot.  You should find ALT-F1 through ALT-F3 run separate copies of
