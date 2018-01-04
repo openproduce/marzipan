@@ -462,9 +462,9 @@ def main():
         print_categories(item)
         print_distributor_items(item,key_handlers,select_handlers)
         print '''<br /> <br />'''
-        print '''Merge this item into item with OP SKU:'''
-        print '''<input type="text" id="merge" size="4" />'''
-        print '''<button type="button" id="merge_btn" onClick="mergeItem()"> Merge </button><br /><br />'''
+        #print '''Merge this item into item with OP SKU:'''
+        #print '''<input type="text" id="merge" size="4" />'''
+        #print '''<button type="button" id="merge_btn" onClick="mergeItem()"> Merge </button><br /><br />'''
         print '''Notes: <br /><textarea id="notes" cols="40" rows="4">%s</textarea><br />''' % (item.get_notes())
         print '''<button type="button" onClick="updateNotes()">Update Notes</button><br />'''
         print '''<br /> <br /><button type="button" id="history_button" onClick="toggleHistory()"> Show History </button>'''

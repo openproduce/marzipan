@@ -1,5 +1,5 @@
 <html>
-<title>Open Produce Latenight Sales </title>
+<title>Open Produce Dinner Rush Sales </title>
 <head>
 <!--[if IE]>
 <script type="text/javascript" src="excanvas.js"></script>
@@ -7,14 +7,14 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
 </head>
 <body>
-<h2>Sales between 11pm-4am </h2>
+<h2>Sales between 5pm - 9pm </h2>
 <div id="graph"
   style="width:600px; height:300px;"></div>
 <script type="text/javascript">
   daily = document.getElementById("daily");
   g4 = new Dygraph(
     document.getElementById("graph"),
-    "latenight_sales.csv",
+    "dinnerrush_sales.csv",
     {
       rollPeriod: 1,
       showRoller: true,

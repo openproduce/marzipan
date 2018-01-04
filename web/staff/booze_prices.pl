@@ -27,7 +27,7 @@ my $dbh_marzipan = DBI->connect("dbi:mysql:inventory:localhost:3306", 'root', ''
 <body>
 EOF
 
-$sth = $dbh_marzipan->prepare("SELECT i.name, p.unit_cost from items as i, prices as p, categories as c, category_items as ci where i.price_id = p.id and i.id = ci.item_id and ci.cat_id = c.id and (c.name like 'beer' or c.name like 'wine') ORDER BY i.name");
+$sth = $dbh_marzipan->prepare("SELECT i.name, p.unit_cost from items as i, prices as p, categories as c, category_items as ci where i.price_id = p.id and i.id = ci.item_id and ci.cat_id = c.id and i.is_discontinued = false and (c.name like 'beer' or c.name like 'wine' or c.name like 'spirits') ORDER BY i.name");
 
 $sth->execute;
 
