@@ -567,7 +567,7 @@ class TextBox(Widget):
                 self.frame.set_focus_prev()
         elif curses.ascii.isprint(c):
             self.insert_char(chr(c))
-        self.clear_on_insert = False
+            self.clear_on_insert = False
         # debug:
         #else:
         #    self.layout.window.addstr(self.y + 1, self.x, str(c))
