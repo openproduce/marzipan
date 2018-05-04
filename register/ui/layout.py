@@ -45,7 +45,6 @@ class Layout:
         self.fill = True
         self.window = curses.newwin(self.height, self.width, self.y, self.x)
         self.window.keypad(1)
-        self.window.notimeout(1)
         self.panel = curses.panel.new_panel(self.window)
         self.panel.top()
         curses.panel.update_panels()
