@@ -1379,6 +1379,7 @@ class SaleDialog(Dialog):
             self._set_focus(self.old_focus_index)
         elif c == curses.KEY_F9:
             TransactionSelectionDialog().main()
+            self.reindex()  # items have been invalidated by commit().
         elif c == curses.KEY_F12:
             sys.exit()
         else:
