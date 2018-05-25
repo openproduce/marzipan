@@ -753,7 +753,7 @@ class CustomerAddEditDialog(Dialog):
                Label(11, 0, r_margin-1, 'Limit:'),
                TextBox('credit', 11, r_margin, 40, str(customer.credit)),
                Label(12, 0, r_margin-1, 'Balance:'),
-               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
+               Label(12, 10, 10, str(customer.balance)),
                Label(14, 0, 14, 'F6: Save', color_id=HELP_COLOR),
                Label(14, 15, 14, 'F7: Print card', color_id=HELP_COLOR),
                Label(14, 30, 18, 'F9: Tab history', color_id=HELP_COLOR),
