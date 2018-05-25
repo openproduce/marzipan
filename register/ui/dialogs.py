@@ -728,6 +728,8 @@ class CustomerAddEditDialog(Dialog):
         else:
             self.adding_customer = False
             postal = customer.postal.split('\n', 4)
+            if (len(postal) < 5): 
+                postal = ['','','','']
         self.customer = customer
         r_margin = 10
         try:
