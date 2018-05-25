@@ -31,7 +31,6 @@ import register_logging
 def main(stdscr):
     ui.colors.init()
     ui.layout.init(stdscr)
-    stdscr.notimeout(1)
     signal.signal(signal.SIGTSTP, signal.SIG_IGN)
     signal.signal(signal.SIGTTIN, signal.SIG_IGN)
     signal.signal(signal.SIGTTOU, signal.SIG_IGN)

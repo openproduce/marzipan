@@ -1,21 +1,5 @@
 #!/usr/bin/env perl
 
-# This file is part of Marzipan, an open source point-of-sale system.
-# Copyright (C) 2015 Open Produce LLC
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 use DBI;
 use DBD::mysql;
 
@@ -31,7 +15,7 @@ if ($q{'p'} eq 'check') {
 <!doctype html>
 <html>
 <head>
-<title>Dash board</title>
+<title>Booze dash board</title>
 <style type="text/css">
     .check { width: 400px; height: 200px; }
     body {font-size: 14px; font-family: verdana;}
@@ -46,11 +30,12 @@ if ($q{'p'} eq 'check') {
 </head>
 <body>
 EOF
-    &browse_checks("Beer and wine", "c.name like 'wine' or c.name like 'beer'");
+    &browse_checks("Booze", "c.name like 'wine' or c.name like 'beer' or c.name like 'spirits'");
     &browse_checks("Beer sales only", "c.name like 'beer'");
     &browse_checks("Wine sales only", "c.name like 'wine'");
+    &browse_checks("Spirits sales only", "c.name like 'spirits'");
 
-    $sth3 = $dbh_marzipan->prepare("select s.time_ended, c.name, si.total, i.name from sale_items as si, sales as s, inventory.items as i, inventory.categories as c, inventory.category_items as ci where si.sale_id = s.id and si.item_id = i.id and i.id = ci.item_id and ci.cat_id = c.id and (c.name like 'beer' or c.name like 'wine') and s.time_ended >= (DATE(NOW()) - INTERVAL 7 DAY) order by s.time_ended desc");
+    $sth3 = $dbh_marzipan->prepare("select s.time_ended, c.name, si.total, i.name from sale_items as si, sales as s, inventory.items as i, inventory.categories as c, inventory.category_items as ci where si.sale_id = s.id and si.item_id = i.id and i.id = ci.item_id and ci.cat_id = c.id and s.is_void=0 and (c.name like 'beer' or c.name like 'wine' or c.name like 'spirits') and s.time_ended >= (DATE(NOW()) - INTERVAL 7 DAY) order by s.time_ended desc");
     $sth3->execute;
 
     print "<p> </p><h1>Recent Sales</h1><table>\n";
@@ -71,6 +56,22 @@ sub browse_checks {
 
 $title = $_[0];
 $sql_restrict = $_[1];
+                          my %total_hour_gross;
+                          my %total_hour_customers;
+                          my %total_hour_dpr;
+
+                          my %weekend_total_hour_gross;
+                          my %weekend_total_hour_customers;
+                          my %weekend_total_hour_dpr;
+
+                          my %weekday_total_hour_gross;
+                          my %weekday_total_hour_customers;
+                          my %weekday_total_hour_dpr;
+
+                            my $weekday_total_gross;
+                            my $weekday_total_customers;
+                            my $weekday_total_dpr;
+                            my $weekday_days_count;
 
                             my $weekend_total_gross = 0;
                             my $weekend_total_customers = 0;
@@ -120,7 +121,7 @@ my $finished = 0;
 			print "<td>$last_day_name</td>";
 			printf "<td><div class='bar' style='width: %dpx;'>$daily_customers</div></td>", $daily_customers * 3;
 			printf "<td><div class='bar' style='width: %dpx;'>%.2f</td>", $daily_dpr * 7, $daily_dpr;
-			printf "<td><div class='bar' style='width: %dpx;'>$daily_gross<div style='width: 1px; margin-top: -1em; margin-left: 100px; border-top: 1em solid black'></div></div></td>", $daily_gross/ 2;
+			printf "<td><div class='bar' style='width: %dpx;'>$daily_gross<div style='width: 1px; margin-top: -1em; margin-left: 100px; border-top: 1em solid black'></div></div></td>", $daily_gross/ 3;
 
 
 			foreach my $h ((6..23), 0, 1, 2) {
@@ -149,7 +150,7 @@ my $finished = 0;
 			$total_dpr += $daily_dpr unless $day_count == 0 or ($finished and $day_count == 8);
 
                        unless ($day_count == 0 or ($finished and $day_count == 8)) {
-                          if ($day_name eq 'Sunday' or $day_name eq 'Monday') {
+                          if ($day_name eq 'Sunday' or $day_name eq 'Saturday') {
                             $weekend_total_gross += $daily_gross; # unless $day_count == 0 or ($finished and $day_count == 8);
                             $weekend_total_customers += $daily_customers; # unless $day_count == 0 or ($finished and $day_count == 8);
                             $weekend_total_dpr += $daily_dpr; # unless $day_count == 0 or ($finished and $day_count == 8);
@@ -227,12 +228,12 @@ my $finished = 0;
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
 	}
-	printf "<tr class='total'><td colspan=2>Weekday average ($weekday_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekday_total_customers/$weekday_days_count, $weekday_total_dpr/$weekday_days_count, $weekday_total_gross/$weekday_days_count;
+	printf "<tr class='total'><td colspan=2>Weekday average ($weekday_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekday_total_customers/$weekday_days_count, $weekday_total_dpr/$weekday_days_count, $weekday_total_gross/$weekday_days_count unless $weekday_days_count == 0;
 	foreach my $h ((6..23), 0, 1, 2) {
 				my $t = 180; #threshold
 				my $f = 2.95; #factor
 
-				my $hg = $weekday_total_hour_gross{$h}/$weekday_days_count * $f;
+				my $hg = $weekday_total_hour_gross{$h}/$weekday_days_count * $f unless $weekday_days_count == 0;
 				my $a = $hg;
 				$a = $t if $a > $t;
 				my $b = $hg - $t;
@@ -242,16 +243,16 @@ my $finished = 0;
 					   143 + $b,
 					   239 - $a,
 					   143,
-					   $weekday_total_hour_customers{$h}/$weekday_days_count, $weekday_total_hour_dpr{$h}/$weekday_days_count, $weekday_total_hour_gross{$h}/$weekday_days_count;
+					   $weekday_total_hour_customers{$h}/$weekday_days_count, $weekday_total_hour_dpr{$h}/$weekday_days_count, $weekday_total_hour_gross{$h}/$weekday_days_count unless $weekday_days_count == 0;
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
 	}
-	printf "<tr class='total'><td colspan=2>Weekend average ($weekend_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekend_total_customers/$weekend_days_count, $weekend_total_dpr/$weekend_days_count, $weekend_total_gross/$weekend_days_count;
+	printf "<tr class='total'><td colspan=2>Fri/Sat average ($weekend_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekend_total_customers/$weekend_days_count, $weekend_total_dpr/$weekend_days_count, $weekend_total_gross/$weekend_days_count unless $weekend_days_count == 0;
 	foreach my $h ((6..23), 0, 1, 2) {
 				my $t = 180; #threshold
 				my $f = 2.95; #factor
 
-				my $hg = $weekend_total_hour_gross{$h}/$weekend_days_count * $f;
+				my $hg = $weekend_total_hour_gross{$h}/$weekend_days_count * $f unless $weekend_days_count == 0;
 				my $a = $hg;
 				$a = $t if $a > $t;
 				my $b = $hg - $t;
@@ -261,7 +262,7 @@ my $finished = 0;
 					   143 + $b,
 					   239 - $a,
 					   143,
-					   $weekend_total_hour_customers{$h}/$weekend_days_count, $weekend_total_hour_dpr{$h}/$weekend_days_count, $weekend_total_hour_gross{$h}/$weekend_days_count;
+					   $weekend_total_hour_customers{$h}/$weekend_days_count, $weekend_total_hour_dpr{$h}/$weekend_days_count, $weekend_total_hour_gross{$h}/$weekend_days_count unless $weekend_days_count == 0;
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
 	}
@@ -269,11 +270,11 @@ my $finished = 0;
 	print "</table>\n";
 
 
-	$sth = $dbh_marzipan->prepare(qq{
-			select date(s.time_ended) as d,dayname(s.time_ended), hour(s.time_ended), sum(si.total),count(distinct s.id) from sales as s, sale_items as si, inventory.categories as c, inventory.category_items as ci
-			where si.item_id = ci.item_id and ci.cat_id = c.id and (c.name like 'beer') and si.sale_id = s.id and (s.customer_id != 151 or s.customer_id
-				is null) and s.is_void=0 and si.item_id not in (807, 909) and (date_sub(CURDATE(), interval 7 day) <= date(s.time_ended) or (date_sub(CURDATE(), interval 8 day) <= date(s.time_ended) and HOUR(s.time_ended) != 0 and HOUR(s.time_ended) !=1 and HOUR(s.time_ended) !=2 and HOUR(s.time_ended) !=3))
-			group by d, hour(s.time_ended);
-			}); 
-	$sth->execute();
+	#$sth = $dbh_marzipan->prepare(qq{
+			#select date(s.time_ended) as d,dayname(s.time_ended), hour(s.time_ended), sum(si.total),count(distinct s.id) from sales as s, sale_items as si, inventory.categories as c, inventory.category_items as ci
+			#where si.item_id = ci.item_id and ci.cat_id = c.id and (c.name like 'beer') and si.sale_id = s.id and (s.customer_id != 151 or s.customer_id
+				#is null) and s.is_void=0 and si.item_id not in (807, 909) and (date_sub(CURDATE(), interval 7 day) <= date(s.time_ended) or (date_sub(CURDATE(), interval 8 day) <= date(s.time_ended) and HOUR(s.time_ended) != 0 and HOUR(s.time_ended) !=1 and HOUR(s.time_ended) !=2 and HOUR(s.time_ended) !=3))
+			#group by d, hour(s.time_ended);
+			#}); 
+	#$sth->execute();
 }

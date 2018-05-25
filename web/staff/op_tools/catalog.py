@@ -4,22 +4,6 @@
 # Replacement for catalog.pl written in Python and using the new database as of 11/2010
 # Option: use setTimeout to reset textboxes to have the default border after some time (used in item_info.py implemented in make_javascript)
 
-# This file is part of Marzipan, an open source point-of-sale system.
-# Copyright (C) 2015 Open Produce LLC
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import op_db_library as db
 
 import item_display_form as idf

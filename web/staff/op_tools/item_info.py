@@ -5,22 +5,6 @@
 # Mostly designed to reduce clutter on some of the other pages, but will also
 # have random information like from inventory_history etc.
 
-# This file is part of Marzipan, an open source point-of-sale system.
-# Copyright (C) 2015 Open Produce LLC
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import op_db_library as db
 from make_javascript import *
 import cgi, sys
@@ -478,9 +462,9 @@ def main():
         print_categories(item)
         print_distributor_items(item,key_handlers,select_handlers)
         print '''<br /> <br />'''
-        print '''Merge this item into item with OP SKU:'''
-        print '''<input type="text" id="merge" size="4" />'''
-        print '''<button type="button" id="merge_btn" onClick="mergeItem()"> Merge </button><br /><br />'''
+        #print '''Merge this item into item with OP SKU:'''
+        #print '''<input type="text" id="merge" size="4" />'''
+        #print '''<button type="button" id="merge_btn" onClick="mergeItem()"> Merge </button><br /><br />'''
         print '''Notes: <br /><textarea id="notes" cols="40" rows="4">%s</textarea><br />''' % (item.get_notes())
         print '''<button type="button" onClick="updateNotes()">Update Notes</button><br />'''
         print '''<br /> <br /><button type="button" id="history_button" onClick="toggleHistory()"> Show History </button>'''

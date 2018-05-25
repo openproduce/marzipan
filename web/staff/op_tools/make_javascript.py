@@ -1,23 +1,6 @@
 #!/usr/bin/env python
 # 1/31/2011
 # Patrick McQuighan
-
-# This file is part of Marzipan, an open source point-of-sale system.
-# Copyright (C) 2011 Open Produce LLC
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 # This is sort of an experimental class thing where I try to prevent myself from typing out the
 # same sort of javascript a million times.  
 #The first class here is a simple KeyHandler class

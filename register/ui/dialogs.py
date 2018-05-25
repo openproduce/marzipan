@@ -96,7 +96,6 @@ class Dialog:
             ord('7'): curses.KEY_F7,
             ord('8'): curses.KEY_F8,
             ord('9'): curses.KEY_F9,
-            ord('11'): curses.KEY_F11,
         }
         if keys.has_key(c):
             return keys[c]
@@ -281,7 +280,6 @@ class PaymentDialog(Dialog):
         self.sale = sale
         self.sale_done = False
         self.card = None
-        self.change = None
         assert sale is not None
         cust_name = '?'
         if self.sale.customer is not None:
@@ -305,7 +303,7 @@ class PaymentDialog(Dialog):
             Label(14, 0, 30, 'Change due: $0.00', name='change'),
             Label(16, 0, 14, 'F6: No Rcpt', color_id=HELP_COLOR),
             Label(16, 15, 14, 'F7: Print Rcpt', color_id=HELP_COLOR),
-            Label(17, 0, 14, 'F4: E-mail Rcpt', color_id=HELP_COLOR),
+            Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
 #            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
             ], layout.Center()))
 
@@ -373,9 +371,6 @@ class PaymentDialog(Dialog):
         self.s.commit()
 
     def _finish_sale(self, want_receipt=False):
-
-        if self.change is not None and self.change > 0:
-            ChangeDialog(money.moneyfmt(self.change, curr='$', sep='')).main()
         bad_widget = self._validate()
         if bad_widget is not None:
             self.frame.set_focus(bad_widget)
@@ -386,7 +381,7 @@ class PaymentDialog(Dialog):
 
         if db.PAYMENT[pm_id] == 'link':
             return self._pay_link() #TODO make _pay_link()
-        
+
         self._fill()
         return True
 
@@ -416,7 +411,7 @@ class PaymentDialog(Dialog):
             return False
         except ValueError:
             alert = self.frame.get('alert')
-            alert.set_text('CC value error')
+            alert.set_text('Network is DOWN')
             return False
         self.frame.get('alert').set_text(status)
         self.frame.show()
@@ -448,6 +443,7 @@ class PaymentDialog(Dialog):
         TearDialog('merchant receipt').main()
         if want_receipt:
             marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
+        #TearDialog('customer receipt').main()
         return True
 
     def _pay_link(self):
@@ -479,7 +475,7 @@ class PaymentDialog(Dialog):
             self.card = cd.get_result()
         except:
             alert = self.frame.get('alert')
-            alert.set_text('CC processing failure')
+            alert.set_text('Network is DOWN')
             return self.frame.get('method')
 
     def _get_link_info(self):
@@ -549,11 +545,9 @@ class PaymentDialog(Dialog):
                paid_text != '.':
                 amount = decimal.Decimal(paid_text)
                 if amount >= self.sale.total:
-                    self.change = amount - self.sale.total;
                     self.frame.get('change').set_text('Change due: %s'%(
-                        money.moneyfmt(self.change,
+                        money.moneyfmt(amount - self.sale.total,
                                        curr='$', sep='')))
-
         if method.get_hit_enter():
             method.reset_hit_enter()
             pm_id = method.get_selection()
@@ -569,6 +563,7 @@ class PaymentDialog(Dialog):
                 self.frame.get('customer').set_text('Customer: %s'%(cust_name))
 
 
+
 class TearDialog(Dialog):
     """prompt to wait for receipt then tear."""
     def __init__(self, clue):
@@ -582,21 +577,6 @@ class TearDialog(Dialog):
         if not Dialog.input(self, c):
             self.done = True
         return True
-
-
-class ChangeDialog(Dialog):
-    """prompt to give change."""
-    def __init__(self, clue):
-        Dialog.__init__(self)
-        self.done = False
-        self.add_frame(Frame([
-            Label(0, 0, 40, 'Change due: %s.'%(clue)),
-            Label(1, 0, 40, 'Press any key to continue...')
-            ], layout.Center()))
-
-    def input(self, c):
-        if c > 0:
-            self.done = True
 
 
 def check_network():
@@ -737,7 +717,6 @@ def _get_units(s):
 class CustomerAddEditDialog(Dialog):
     """add/edit customer information."""
     def __init__(self, customer=None, name=""):
-
         Dialog.__init__(self)
         self.s = db.get_session()
         postal = ['','','','']
@@ -750,7 +729,6 @@ class CustomerAddEditDialog(Dialog):
             self.adding_customer = False
             postal = customer.postal.split('\n', 4)
         self.customer = customer
-
         r_margin = 10
         try:
            self.add_frame(Frame([
@@ -773,8 +751,7 @@ class CustomerAddEditDialog(Dialog):
                Label(11, 0, r_margin-1, 'Limit:'),
                TextBox('credit', 11, r_margin, 40, str(customer.credit)),
                Label(12, 0, r_margin-1, 'Balance:'),
-               Label(12, r_margin, 40, str(customer.balance)),
-#               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
+               TextBox('balance', 12, r_margin, 40, str(customer.balance)),
                Label(14, 0, 14, 'F6: Save', color_id=HELP_COLOR),
                Label(14, 15, 14, 'F7: Print card', color_id=HELP_COLOR),
                Label(14, 30, 18, 'F9: Tab history', color_id=HELP_COLOR),
@@ -792,7 +769,7 @@ class CustomerAddEditDialog(Dialog):
         name = self.frame.get('name').get_text()
         email = self.frame.get('email').get_text()
         tel = self.frame.get('tel').get_text()
-#        balance = self.frame.get('balance').get_text()
+        balance = self.frame.get('balance').get_text()
         credit = self.frame.get('credit').get_text()
         alert = self.frame.get('alert')
         if not re.match('\S+', name):
@@ -807,9 +784,9 @@ class CustomerAddEditDialog(Dialog):
         elif not re.match('^\d{0,6}(\.\d{0,2})?$', credit):
             alert.set_text('expect credit like dddddd.dd')
             return self.frame.get('credit')
-        # elif not re.match('^[-+]?\d{0,6}(\.\d{0,2})?$', balance):
-        #     alert.set_text('expect balance like [-+]dddddd.dd')
-        #     return self.frame.get('balance')
+        elif not re.match('^[-+]?\d{0,6}(\.\d{0,2})?$', balance):
+            alert.set_text('expect balance like [-+]dddddd.dd')
+            return self.frame.get('balance')
         return None
 
     def _fill(self):
@@ -819,8 +796,8 @@ class CustomerAddEditDialog(Dialog):
         self.customer.postal = '\n'.join(
             [self.frame.get(x).get_text() for x in [
                 'postal_1','postal_2','postal_3','postal_4']])
-#        self.customer.balance = decimal.Decimal(
-#            self.frame.get('balance').get_text())
+        self.customer.balance = decimal.Decimal(
+            self.frame.get('balance').get_text())
         self.customer.credit = decimal.Decimal(
             self.frame.get('credit').get_text())
 
@@ -961,9 +938,7 @@ class SearchDialog(Dialog):
             self.add_edit(False)
             self.clear()
         elif c == curses.KEY_F7:
-
             self.add_edit(True)
-
             self.clear()
         elif c == curses.KEY_F8:
             db_obj = self.get_selection()
@@ -1054,12 +1029,9 @@ class CustomerSearchDialog(SearchDialog):
             self.frame.get('search').set_labels(self.get_labels())
 
     def add_edit(self, edit):
-
         cust = None
         if edit:
-
             cust = self.get_selection()
-
         CustomerAddEditDialog(cust, self.frame.get('search').get_text()).main()
 
 def _find_customer():
@@ -1189,9 +1161,8 @@ class SaleDialog(Dialog):
             Label(0, 0, 14,  "F1: Clerk", color_id=HELP_COLOR),
             Label(0, 15, 14, "F2: Customer", color_id=HELP_COLOR),
             Label(0, 30, 14, "F3: Sale", color_id=HELP_COLOR),
-            Label(0, 45, 14, "F4: Reprint Receipt", color_id=HELP_COLOR),
-            Label(0, 60, 14, "F5: Pay", color_id=HELP_COLOR),
-            Label(0, 75, 14, "F9: Review", color_id=HELP_COLOR),
+            Label(0, 45, 14, "F5: Pay", color_id=HELP_COLOR),
+            Label(0, 60, 14, "F9: Review", color_id=HELP_COLOR),
             ], layout.BottomEdge(0), border=False))
         self.total = self.add_frame(Frame([
             Label(0, 0, 20, 'Clerk: ?', name='clerk'),
@@ -1707,7 +1678,6 @@ class TransactionDialog(Dialog):
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance -= self.sale.total
                 self.sale.is_void = 1
-                marzipan_io.print_receipt(self.sale)
             self.done = True
             self.result = True
         elif c == curses.KEY_F7:    # reprint receipt
@@ -1731,12 +1701,9 @@ def item_info(session, item):
         mct = 0
         mct_when = datetime.datetime(1900, 1, 1, 1, 1, 1)
     q = session.query(db.SaleItem).filter_by(item = item)
-    sold = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
-    quantity_sold = sum( x.quantity  for x in sold )
-    last_sold = session.query(db.Sale).join(db.SaleItem).filter_by(item = item).order_by(db.Sale.time_ended.desc()).first().time_ended
-
+    q = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
+    quantity_sold = sum( x.quantity  for x in q )
     ret = cStringIO.StringIO()
-
     print >>ret, "Item %d: %s" % (item.id, item.name)
     print >>ret, "Barcode(s): %s" % (', '.join( b.barcode for b in item.barcodes ) )
     print >>ret, ""
@@ -1767,12 +1734,6 @@ def item_info(session, item):
     print >>ret, "Latest manual count: %s" % mct
     print >>ret, "        timestamped: %s" % mct_when.strftime("%c")
     print >>ret, "Quantity sold since last count: %s" % quantity_sold
-    print >>ret, "Number on hand: %s" % (mct - quantity_sold)
-    print >>ret, "Last sale: %s" % last_sold.strftime("%c")
-    if not item.deliveries:
-        print >>ret, "No recorded deliveries"
-    else:
-        print >>ret, "Last delivery: %s" % (item.deliveries[-1]).time_delivered.strftime("%c")
     return ret.getvalue()
 
 class ItemInfoDialog(Dialog):

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-# make_latenight_sales_csv.py
-# Patrick McQuighan
+# make_dinnerrush_sales_csv.py
+# Steven Lucy
 # This file generates a .csv file which is used to make a dygraphs graph.
 # The data outputted are: 
-#   Date, Sales between 11pm-4am, # customers between 11pm-4am
+#   Date, Sales between 5pm-9pm, # customers between 5pm-9pm
 
 import op_db_library as db
 
-hours = [0,1,2,3,23]
-outputfilename = 'latenight_sales.csv'
+hours = [17,18,19,20]
+outputfilename = 'dinnerrush_sales.csv'
 outputfile = open(outputfilename, 'w')
 daily_sales = db.get_daily_sales()
 format = "%Y%m%d"

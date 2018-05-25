@@ -8,7 +8,7 @@
 import op_db_library as db
 
 hours = [0,1,2,3,23]
-outputfilename = 'latenight_sales.csv'
+outputfilename = '/var/www/marzipan/web/site/openproduce.org/wordpress/latenight-sales.csv'
 outputfile = open(outputfilename, 'w')
 daily_sales = db.get_daily_sales()
 format = "%Y%m%d"
@@ -16,7 +16,7 @@ outputfile.write('"Date",Gross $,Customers\n')
 for key in sorted(daily_sales.keys()):
     day_info = daily_sales[key]
     date = day_info.get_date().strftime(format)
-   
+
     customers = 0
     gross = 0
     for h in day_info.get_hourly_sales(hours):
