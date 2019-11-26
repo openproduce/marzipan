@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import cStringIO
 import os
 import tempfile
@@ -31,10 +32,14 @@ import cc
 import money
 import tabutil
 import datetime
+import json
 from datetime import *
 import lxml
 from lxml import etree
 import suds
+from urllib2 import Request, urlopen
+from urllib import urlencode
+
 
 def write_cui_pipe(str):
     if not config.get('cui-enable'):
@@ -423,7 +428,77 @@ try:
 except:
     pass
 
+def send_dejavoo_request(amount, tid):
+    values = {
+    "total": str(amount),
+    "meta": { },
+    "printReceipt": "No",
+    "paymentType": "Credit",
+    "register": tid
+}
 
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ***REMOVED***',
+      'Accept': 'application/json'
+    }
+    #request = Request(config.get('dejavoo-url') + '/terminal/charge/queue', data=values, headers=headers)
+
+    c = pycurl.Curl()
+    c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge/queue')
+    c.setopt(pycurl.POST, 1)
+    c.setopt(pycurl.HTTPHEADER, [
+      'Content-Type: application/json',
+      'Authorization: Bearer ' + config.get('dejavoo-api-key'),
+      'Accept: application/json'])
+    c.setopt(pycurl.POSTFIELDS, json.dumps(values))
+    c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
+    c.setopt(pycurl.TIMEOUT, 30)
+    import StringIO
+    b = StringIO.StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, b.write)
+    try:
+        c.perform()
+    except:
+        raise CCError('can\'t contact dejavoo server')
+    if c.getinfo(pycurl.HTTP_CODE) != 200:
+        print >> sys.stderr, b.getvalue()
+        raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
+    resp = b.getvalue()
+    return json.loads(resp)['id']
+    
+
+def request_dejavoo_status(xid):
+
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ***REMOVED***',
+      'Accept': 'application/json'
+    }
+
+    c = pycurl.Curl()
+    c.setopt(pycurl.URL, config.get('dejavoo-url') + '/transaction/' + str(xid))
+    #c.setopt(pycurl.POST, 1)
+    c.setopt(pycurl.HTTPHEADER, [
+      'Content-Type: application/json',
+      'Authorization: Bearer ' + config.get('dejavoo-api-key'),
+      'Accept: application/json'])
+    c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
+    c.setopt(pycurl.TIMEOUT, 30)
+    import StringIO
+    b = StringIO.StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, b.write)
+    try:
+        c.perform()
+    except:
+        raise CCError('can\'t contact dejavoo server')
+    if c.getinfo(pycurl.HTTP_CODE) != 200:
+        print >> xid
+        print >> sys.stderr, b.getvalue()
+        raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
+    resp = b.getvalue()
+    print >> sys.stderr, resp
+    return json.loads(resp)
 
 def send_globalpay_request(amount, card, sale):
     try:
