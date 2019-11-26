@@ -326,7 +326,7 @@ class PaymentDialog(Dialog):
             alert.set_text('sale void but paid?')
             return self.frame.get('method')
         elif not is_void and (not paid or not decimal.Decimal(paid)):
-            alert.set_text('must be void if not paid')
+            alert.set_text('sale total is $0')
             return self.frame.get('paid')
         elif not is_void and decimal.Decimal(paid) < self.sale.total and \
              not is_tab and self.sale.total != decimal.Decimal('0.00'):
@@ -386,6 +386,61 @@ class PaymentDialog(Dialog):
         return True
 
     def _pay_credit(self, want_receipt):
+
+        if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
+            paid = decimal.Decimal(self.frame.get('paid').get_text())
+            if paid < decimal.Decimal('0'):
+                self.frame.get('alert').set_text("amount is less than $0")
+                return False
+
+            self.frame.get('alert').set_text('complete transaction using terminal...')
+            self.frame.show()
+            curses.panel.update_panels()
+            curses.doupdate()
+
+            xid = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+
+            while True: # terminal will time out after 60 seconds, no need to handle that here
+                resp = marzipan_io.request_dejavoo_status(xid)
+                if resp['message'] == 'terminalservice.waiting': # waiting for user to put in card
+                    time.sleep(1) #don't overload the API servers
+                    continue
+                if resp['success'] == False:
+                    self.frame.get('alert').set_text(resp['message'])
+                    self.frame.show()
+                    curses.panel.update_panels()
+                    curses.doupdate()
+                    return False
+                if resp['success'] == True:
+                    break
+
+            # at this point, sale was approved:
+
+            try:
+                self.sale.cc_name = resp['payment_method']['person_name']
+            except:
+                self.sale.cc_name = '?'
+        
+            self.sale.cc_last4 = resp['last_four']
+            self.sale.cc_brand = ''
+            self._fill()
+        
+        if paid > decimal.Decimal(config.get('signature-threshold')):
+            marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=True)
+            TearDialog('merchant receipt').main()
+        else:
+            self.frame.get('alert').set_text('APPROVED - no signature necessary')
+            self.frame.show()
+            curses.panel.update_panels()
+            curses.doupdate()
+
+        if want_receipt:
+            marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
+
+        return True
+
+        # use magstripe reader:
+
         if not self.card:
             self._get_card()
             if not self.card:
