@@ -388,8 +388,9 @@ class PaymentDialog(Dialog):
 
     def _pay_credit(self, want_receipt):
 
+        paid = decimal.Decimal(self.frame.get('paid').get_text())
+
         if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
-            paid = decimal.Decimal(self.frame.get('paid').get_text())
             if paid < decimal.Decimal('0'):
                 self.frame.get('alert').set_text("REFUND: %s (use terminal...)" % paid)
             else:
@@ -436,18 +437,18 @@ class PaymentDialog(Dialog):
             self.sale.cc_trans = resp['id'] # this is useful for voiding later
             self._fill()
         
-        if paid > decimal.Decimal(config.get('signature-threshold')):
-            marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=True)
-            TearDialog('merchant receipt').main()
-        else:
-            self.frame.get('alert').set_text('APPROVED - no signature necessary')
-            self.frame.show()
-            curses.panel.update_panels()
-            curses.doupdate()
-            #NoSignatureDialog().main() #prompt user to press any key
-
-        if want_receipt:
-            marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
+            if paid > decimal.Decimal(config.get('signature-threshold')):
+                marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=True)
+                TearDialog('merchant receipt').main()
+            else:
+                self.frame.get('alert').set_text('APPROVED - no signature necessary')
+                self.frame.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                #NoSignatureDialog().main() #prompt user to press any key
+    
+            if want_receipt:
+                marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
 
         return True
 
