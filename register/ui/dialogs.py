@@ -286,24 +286,25 @@ class PaymentDialog(Dialog):
             cust_name = self.sale.customer.name
         total = money.moneyfmt(self.sale.total, curr='$', sep='')
         total_nod = money.moneyfmt(self.sale.total, curr='', sep='')
+        w = 45 #width of dialog
         self.add_frame(Frame([
-            Label(0, 0, 30, 'Enter payment information.'),
-            Label(1, 0, 30, '(ESC to cancel, TAB to switch)'),
-            Label(2, 0, 30, 'Customer: %s'%(cust_name), name='customer'),
-            Label(3, 0, 30, 'Total due: %s'%(total), name='total'),
-            Label(4, 0, 30, '', name='alert', color_id=ALERT_COLOR),
-            Label(5, 0, 30, 'Payment method:'),
+            Label(0, 0, w, 'Enter payment information.'),
+            Label(1, 0, w, '(ESC to cancel, TAB to switch)'),
+            Label(2, 0, w, 'Customer: %s'%(cust_name), name='customer'),
+            Label(3, 0, w, 'Total due: %s'%(total), name='total'),
+            Label(4, 0, w, '', name='alert', color_id=ALERT_COLOR),
+            Label(5, 0, w, 'Payment method:'),
 
             #second 6 used to be a 5. changed to accomodate link APC
-            ListBox('method', 6, 0, 30, 6, 
+            ListBox('method', 6, 0, w, 6, 
                 [(k, db.PAYMENT[k]) for k in sorted(db.PAYMENT.keys())],
                 sel=1),
-            Label(12, 0, 30, 'Amount tendered (d.dd):'), 
-            TextBox('paid', 13, 0, 30, total_nod, clear_on_insert=True),
-            Label(14, 0, 30, 'Change due: $0.00', name='change'),
-            Label(16, 0, 14, 'F6: No Rcpt', color_id=HELP_COLOR),
-            Label(16, 15, 14, 'F7: Print Rcpt', color_id=HELP_COLOR),
-            Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
+            Label(12, 0, w, 'Amount tendered (d.dd):'), 
+            TextBox('paid', 13, 0, w, total_nod, clear_on_insert=True),
+            Label(14, 0, w, 'Change due: $0.00', name='change'),
+            Label(16, 0, 15, 'F6: No Receipt', color_id=HELP_COLOR),
+            Label(16, 16, 20, 'F7: Print Receipt', color_id=HELP_COLOR),
+            #Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
 #            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
             ], layout.Center()))
 
@@ -390,29 +391,38 @@ class PaymentDialog(Dialog):
         if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
             paid = decimal.Decimal(self.frame.get('paid').get_text())
             if paid < decimal.Decimal('0'):
-                self.frame.get('alert').set_text("amount is less than $0")
-                return False
-
-            self.frame.get('alert').set_text('complete transaction using terminal...')
+                self.frame.get('alert').set_text("REFUND: %s (use terminal...)" % paid)
+            else:
+                self.frame.get('alert').set_text('use terminal...')
             self.frame.show()
             curses.panel.update_panels()
             curses.doupdate()
 
-            xid = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+            resp = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+            if resp['success'] == False:
+                self.frame.get('alert').set_text(resp['message'])
+                self.frame.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                return False
 
-            while True: # terminal will time out after 60 seconds, no need to handle that here
-                resp = marzipan_io.request_dejavoo_status(xid)
-                if resp['message'] == 'terminalservice.waiting': # waiting for user to put in card
-                    time.sleep(1) #don't overload the API servers
-                    continue
-                if resp['success'] == False:
-                    self.frame.get('alert').set_text(resp['message'])
-                    self.frame.show()
-                    curses.panel.update_panels()
-                    curses.doupdate()
-                    return False
-                if resp['success'] == True:
-                    break
+            if False:
+                # THIS CODE is for the /terminal/charge/queue method, whereas we are using the /terminal/charge method for compatibility with the /terminal/credit method
+
+                xid = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+                while True: # terminal will time out after 60 seconds, no need to handle that here
+                    resp = marzipan_io.request_dejavoo_status(xid)
+                    if resp['message'] == 'terminalservice.waiting': # waiting for user to put in card
+                        time.sleep(1) #don't overload the API servers
+                        continue
+                    if resp['success'] == False:
+                        self.frame.get('alert').set_text(resp['message'])
+                        self.frame.show()
+                        curses.panel.update_panels()
+                        curses.doupdate()
+                        return False
+                    if resp['success'] == True:
+                        break
 
             # at this point, sale was approved:
 
@@ -433,6 +443,7 @@ class PaymentDialog(Dialog):
             self.frame.show()
             curses.panel.update_panels()
             curses.doupdate()
+            #NoSignatureDialog().main() #prompt user to press any key
 
         if want_receipt:
             marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
@@ -625,6 +636,20 @@ class TearDialog(Dialog):
         Dialog.__init__(self)
         self.add_frame(Frame([
             Label(0, 0, 40, 'Wait for %s, then tear.'%(clue)),
+            Label(1, 0, 40, 'Press any key to continue...')
+            ], layout.Center()))
+
+    def input(self, c):
+        if not Dialog.input(self, c):
+            self.done = True
+        return True
+
+class NoSignatureDialog(Dialog):
+    """Tell clerk no signature needed"""
+    def __init__(self):
+        Dialog.__init__(self)
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'APPROVED! No signature neccessary'),
             Label(1, 0, 40, 'Press any key to continue...')
             ], layout.Center()))
 
