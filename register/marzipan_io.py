@@ -428,6 +428,58 @@ try:
 except:
     pass
 
+def send_dejavoo_void_request(amount, xid):
+
+    c = pycurl.Curl()
+    if amount > 0:
+        #c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge/queue')
+        # opting to use /terminal/charge because it's compatible with /terminal/credit so only one set of code for handling response
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/void')
+        credit = False
+    else:
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/void')
+        amount = -amount
+        credit = True
+
+    values = {
+    "total": str(amount),
+    "meta": { },
+    "printReceipt": "Both",
+    "transactionId": xid
+    #"register": tid
+}
+
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ***REMOVED***',
+      'Accept': 'application/json'
+    }
+
+    c.setopt(pycurl.POST, 1)
+    c.setopt(pycurl.HTTPHEADER, [
+      'Content-Type: application/json',
+      'Authorization: Bearer ' + config.get('dejavoo-api-key'),
+      'Accept: application/json'])
+    c.setopt(pycurl.POSTFIELDS, json.dumps(values))
+    c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
+    c.setopt(pycurl.TIMEOUT, 75) #terminal times out in 60s so this must be longer than that
+    import StringIO
+    b = StringIO.StringIO()
+    c.setopt(pycurl.WRITEFUNCTION, b.write)
+    try:
+        c.perform()
+    except:
+        raise CCError('can\'t contact dejavoo server')
+    if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
+        return {"success": False, "message": "No card inserted; F6/F7 to try again"}
+    if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
+        print >> sys.stderr, b.getvalue()
+        raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
+    resp = b.getvalue()
+    print >> sys.stderr, resp
+    c.close()
+    return json.loads(resp)
+
 def send_dejavoo_request(amount, tid):
 
     c = pycurl.Curl()

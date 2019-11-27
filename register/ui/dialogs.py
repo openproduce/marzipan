@@ -433,6 +433,7 @@ class PaymentDialog(Dialog):
         
             self.sale.cc_last4 = resp['last_four']
             self.sale.cc_brand = ''
+            self.sale.cc_trans = resp['id'] # this is useful for voiding later
             self._fill()
         
         if paid > decimal.Decimal(config.get('signature-threshold')):
@@ -1733,8 +1734,9 @@ class TransactionDialog(Dialog):
             Label(4,0, 50, "Paid by: %s" % db.PAYMENT[sale.payment]),
             Label(5,0, 50, "TOTAL: %s" % total),
             ListBox("bought_items", 7,0, 50, 10,
-                [ (si.id, "$%6s:  %2d x %s" % (si.total, si.quantity, si.item.name))  for si in self.sale_items ]),
-            Label(18,  0, 25, "F6: %s transaction" % void_toggle, color_id=HELP_COLOR),
+                [ (si.id, "$%6s:  %.2f x %s" % (si.total, si.quantity, si.item.name))  for si in self.sale_items ]),
+            (Label(18,0,25, "can't unvoid debit/credit") if (db.PAYMENT[sale.payment] == "debit/credit" and self.sale.is_void) else Label(18,  0, 25, "F6: %s transaction" % void_toggle, color_id=HELP_COLOR)),
+            # can't unvoid voided credit card payments
             Label(18, 26, 25, "F7: REPRINT receipt", color_id=HELP_COLOR),
         ], layout.Center()))
 
@@ -1747,15 +1749,19 @@ class TransactionDialog(Dialog):
     def input(self, c):
         if Dialog.input(self,c):
             pass    # really pass
-        elif c == curses.KEY_F6:    # void transaction
-            if self.sale.is_void:
+        elif c == curses.KEY_F6:    # void/unvoid transaction
+            if self.sale.is_void: #need to unvoid the transaction
+                if db.PAYMENT[self.sale.payment] == "debit/credit":
+                    return False #can't unvoid voided CC trans
                 if self.sale.has_tab_payment():
                     self.sale.customer.balance -= self.sale.tab_payment_amount()
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance += self.sale.total
                 self.sale.is_void = 0
-            else:
-                if self.sale.has_tab_payment():
+            else: #need to void the trans
+                if db.PAYMENT[self.sale.payment] == "debit/credit":
+                    marzipan_io.send_dejavoo_void_request(self.sale.total, self.sale.cc_trans)
+                elif self.sale.has_tab_payment():
                     self.sale.customer.balance += self.sale.tab_payment_amount()
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance -= self.sale.total
@@ -1763,9 +1769,9 @@ class TransactionDialog(Dialog):
             self.done = True
             self.result = True
         elif c == curses.KEY_F7:    # reprint receipt
-            marzipan_io.print_receipt(self.sale)
             if db.PAYMENT[self.sale.payment] == 'debit/credit':
                 marzipan_io.print_card_receipt(self.sale, self.sale.total, merchant_copy=False)
+            marzipan_io.print_receipt(self.sale)
             #TearDialog('sale receipt').main()
             self.done = True
         elif c == KEY_ESCAPE:
