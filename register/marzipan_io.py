@@ -429,6 +429,18 @@ except:
     pass
 
 def send_dejavoo_request(amount, tid):
+
+    c = pycurl.Curl()
+    if amount > 0:
+        #c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge/queue')
+        # opting to use /terminal/charge because it's compatible with /terminal/credit so only one set of code for handling response
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge')
+        credit = False
+    else:
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/credit')
+        amount = -amount
+        credit = True
+
     values = {
     "total": str(amount),
     "meta": { },
@@ -442,10 +454,7 @@ def send_dejavoo_request(amount, tid):
       'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjI2NTBjYzg4LTkxNjEtNDQ2OC1iM2VhLTFjOGM4ZWM4Y2JiMiIsImdvZFVzZXIiOmZhbHNlLCJzdWIiOiI3MTc4MTgzMi02NTI4LTQwMDMtOGViOS0wNDk3ZGY5OWZmYTYiLCJpc3MiOiJodHRwOi8vYXBpcHJvZC5mYXR0bGFicy5jb20vdGVhbS9hcGlrZXkiLCJpYXQiOjE1NzIzNzYwNzIsImV4cCI6NDcyNTk3NjA3MiwibmJmIjoxNTcyMzc2MDcyLCJqdGkiOiJjOU85S0tvckRwMXJJejdSIn0.umNzY1E0fCpF7Hm3_vH4TbT4AXTx_9pcudGlZEWDWTw',
       'Accept': 'application/json'
     }
-    #request = Request(config.get('dejavoo-url') + '/terminal/charge/queue', data=values, headers=headers)
 
-    c = pycurl.Curl()
-    c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge/queue')
     c.setopt(pycurl.POST, 1)
     c.setopt(pycurl.HTTPHEADER, [
       'Content-Type: application/json',
@@ -453,7 +462,7 @@ def send_dejavoo_request(amount, tid):
       'Accept: application/json'])
     c.setopt(pycurl.POSTFIELDS, json.dumps(values))
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
-    c.setopt(pycurl.TIMEOUT, 30)
+    c.setopt(pycurl.TIMEOUT, 75) #terminal times out in 60s so this must be longer than that
     import StringIO
     b = StringIO.StringIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
@@ -461,11 +470,15 @@ def send_dejavoo_request(amount, tid):
         c.perform()
     except:
         raise CCError('can\'t contact dejavoo server')
-    if c.getinfo(pycurl.HTTP_CODE) != 200:
+    if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
+        return {"success": False, "message": "No card inserted; F6/F7 to try again"}
+    if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
     resp = b.getvalue()
-    return json.loads(resp)['id']
+    print >> sys.stderr, resp
+    c.close()
+    return json.loads(resp)
     
 
 def request_dejavoo_status(xid):
@@ -484,7 +497,7 @@ def request_dejavoo_status(xid):
       'Authorization: Bearer ' + config.get('dejavoo-api-key'),
       'Accept: application/json'])
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
-    c.setopt(pycurl.TIMEOUT, 30)
+    c.setopt(pycurl.TIMEOUT, 75)
     import StringIO
     b = StringIO.StringIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
