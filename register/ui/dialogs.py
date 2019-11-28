@@ -321,7 +321,7 @@ class PaymentDialog(Dialog):
         is_void = db.PAYMENT[method] == 'void'
         is_tab = db.PAYMENT[method] == 'tab'
         if not paid or not re.match('^-?\d{0,6}(\.\d{0,2})?$', paid):
-            alert.set_text('execting amount like 1.25')
+            alert.set_text('expecting amount like 1.25')
             return self.frame.get('paid')
         elif is_void and decimal.Decimal(paid):
             alert.set_text('sale void but paid?')
@@ -388,20 +388,25 @@ class PaymentDialog(Dialog):
 
     def _pay_credit(self, want_receipt):
 
-        paid = decimal.Decimal(self.frame.get('paid').get_text())
+        #paid = decimal.Decimal(self.frame.get('paid').get_text())
+
+        # ^^^^^ not sure whose idea this was but we should charge the cc the sale total not some random amount the clerk types in the "tendered" box
+        # vvvvv much better --SL Nov2019
+
+        paid = self.sale.total
 
         if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
             if paid < decimal.Decimal('0'):
-                self.frame.get('alert').set_text("REFUND: %s (use terminal...)" % paid)
+                self.frame.get('alert').set_text("REFUND: %s (insert card...)" % paid)
             else:
-                self.frame.get('alert').set_text('use terminal...')
+                self.frame.get('alert').set_text('insert card...')
             self.frame.show()
             curses.panel.update_panels()
             curses.doupdate()
 
             resp = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
             if resp['success'] == False:
-                self.frame.get('alert').set_text(resp['message'])
+                self.frame.get('alert').set_text(resp['message'] + "; F6/F7 to try again")
                 self.frame.show()
                 curses.panel.update_panels()
                 curses.doupdate()
@@ -537,14 +542,19 @@ class PaymentDialog(Dialog):
         return True
 
     def _get_card(self, in_swipe=False):
-        try:
-            cd = CCInfoDialog(in_swipe)
-            cd.main()
-            self.card = cd.get_result()
-        except:
-            alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
-            return self.frame.get('method')
+
+        if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
+            self._finish_sale(want_receipt=False)
+
+        else: # magswipe / manual entry
+            try:
+                cd = CCInfoDialog(in_swipe)
+                cd.main()
+                self.card = cd.get_result()
+            except:
+                alert = self.frame.get('alert')
+                alert.set_text('Network is DOWN')
+                return self.frame.get('method')
 
     def _get_link_info(self):
         ld = LinkDialog(self.sale)

@@ -471,7 +471,7 @@ def send_dejavoo_void_request(amount, xid):
     except:
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
-        return {"success": False, "message": "No card inserted; F6/F7 to try again"}
+        return {"success": False, "message": "No card inserted"}
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
@@ -523,7 +523,7 @@ def send_dejavoo_request(amount, tid):
     except:
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
-        return {"success": False, "message": "No card inserted; F6/F7 to try again"}
+        return {"success": False, "message": "No card inserted"}
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
