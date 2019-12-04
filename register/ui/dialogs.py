@@ -769,8 +769,8 @@ class LinkDialog(Dialog):
             Label(2, 0, 30, '', name='alert', color_id=ALERT_COLOR),
             Label(3, 0, 30, "Total (no tax): %s" % self.sale.base_cost ),
             Label(4, 0, 40, 'Approval Code:', name='name'),
-            TextBox('number', 4, r_margin, 30, ''),
-            Label(6, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
+            TextBox('number', 5, r_margin, 30, ''),
+            Label(7, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
             ], layout.Center()))
 
     def get_result(self):
