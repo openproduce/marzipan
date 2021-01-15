@@ -419,7 +419,7 @@ class PaymentDialog(Dialog):
                 while True: # terminal will time out after 60 seconds, no need to handle that here
                     resp = marzipan_io.request_dejavoo_status(xid)
                     if resp['message'] == 'terminalservice.waiting': # waiting for user to put in card
-                        time.sleep(1) #don't overload the API servers
+                        time.sleep(0.25) #don't overload the API servers
                         continue
                     if resp['success'] == False:
                         self.frame.get('alert').set_text(resp['message'])
