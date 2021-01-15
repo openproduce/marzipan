@@ -406,7 +406,7 @@ class PaymentDialog(Dialog):
 
             resp = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
             if resp['success'] == False:
-                self.frame.get('alert').set_text(resp['message'] + "; F6/F7 to try again")
+                self.frame.get('alert').set_text(resp['message'] + "; try again")
                 self.frame.show()
                 curses.panel.update_panels()
                 curses.doupdate()
@@ -429,6 +429,9 @@ class PaymentDialog(Dialog):
                         return False
                     if resp['success'] == True:
                         break
+                    # resp['success'] was neither False nor True, not sure what to do
+                    print >> sys.stderr, resp
+                    raise
 
             # at this point, sale was approved:
 

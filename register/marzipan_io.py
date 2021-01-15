@@ -521,14 +521,15 @@ def send_dejavoo_request(amount, tid):
     try:
         c.perform()
     except:
-        raise CCError('can\'t contact dejavoo server')
+        return {"success": False, "message": "Can't contact Fatt Merchant server"}
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
         return {"success": False, "message": "No card inserted"}
     if c.getinfo(pycurl.HTTP_CODE) == 502: #bad gateway
         return {"success": False, "message": "bad gateway; try again"}
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
-        raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
+        return {"success": False, "message": "dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE))}
+        #raise CCError()
     resp = b.getvalue()
     print >> sys.stderr, resp
     c.close()
@@ -551,7 +552,7 @@ def request_dejavoo_status(xid):
       'Authorization: Bearer ' + config.get('dejavoo-api-key'),
       'Accept: application/json'])
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
-    c.setopt(pycurl.TIMEOUT, 75)
+    c.setopt(pycurl.TIMEOUT, 5)
     import StringIO
     b = StringIO.StringIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
