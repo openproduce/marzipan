@@ -524,6 +524,8 @@ def send_dejavoo_request(amount, tid):
         return {"success": False, "message": "Can't contact Fatt Merchant server"}
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
         return {"success": False, "message": "No card inserted"}
+    if c.getinfo(pycurl.HTTP_CODE) == 502: #bad gateway
+        return {"success": False, "message": "bad gateway; try again"}
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
         return {"success": False, "message": "dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE))}
