@@ -2,17 +2,17 @@
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2015 Open Produce LLC
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -20,6 +20,8 @@ from decimal import Decimal
 import decimal
 
 # from python cookbook
+
+
 def moneyfmt(value, places=2, curr='', sep=',', dp='.',
              pos='', neg='-', trailneg=''):
     """Convert Decimal to a money formatted string.
@@ -48,7 +50,7 @@ def moneyfmt(value, places=2, curr='', sep=',', dp='.',
     """
     q = Decimal((0, (1,), -places))    # 2 places --> '0.01'
     sign, digits, exp = value.quantize(q).as_tuple()
-    assert exp == -places    
+    assert exp == -places
     result = []
     digits = map(str, digits)
     build, next = result.append, digits.pop
@@ -75,6 +77,7 @@ def moneyfmt(value, places=2, curr='', sep=',', dp='.',
     result.reverse()
     return ''.join(result)
 
+
 def cost(quantity, unit_cost, tax_frac, is_tax_flat):
     """unit_cost is the item price _after_ tax (tax is pre-computed
        and included in all prices.)
@@ -90,4 +93,3 @@ def cost(quantity, unit_cost, tax_frac, is_tax_flat):
     tax = tax.quantize(Decimal('.01'), rounding=decimal.ROUND_HALF_EVEN)
     cost = total - tax
     return (cost, tax, total)
-

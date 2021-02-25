@@ -2,17 +2,17 @@
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2012 Open Produce LLC
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -24,15 +24,16 @@ import config
 import random
 import urllib
 
+
 class Card:
     def __init__(self):
         self.account_name = ''
         self.number = ''
         self.exp_month = 0
         self.exp_year = -1
-        self.track1 = '' #added by APC
-        self.track2 = '' #added by APC
-        self.magtext = '' #added by APC mar 30 2012
+        self.track1 = ''  # added by APC
+        self.track2 = ''  # added by APC
+        self.magtext = ''  # added by APC mar 30 2012
 
     def validate(self):
         if not re.match('^\d{16}$', self.number):
@@ -50,17 +51,18 @@ class Card:
 class BadSwipeError(Exception):
     def __init__(self, error):
         self.error = error
+
     def __str__(self):
-        return 'bad swipe: %s'%(self.error)
+        return 'bad swipe: %s' % (self.error)
 
 
 def parse_magstripe(magstripe):
-    magtext = ''.join([chr(x) for x in magstripe]) #todo uncomment
+    magtext = ''.join([chr(x) for x in magstripe])  # todo uncomment
     card = Card()
     card.magtext = "%" + magtext
     tracks = magtext.split(';')
-    card.track1 = "%" + tracks[0] #added by apc
-    card.track2 = ';' + tracks[1] 
+    card.track1 = "%" + tracks[0]  # added by apc
+    card.track2 = ';' + tracks[1]
     if "%E?" in magtext or "+E?" in magtext:
         raise BadSwipeError("need both tracks")
 
@@ -78,7 +80,7 @@ def parse_magstripe(magstripe):
     name = name.strip()
     if '/' in name:
         (last, first) = name.split('/')
-        card.account_name = '%s %s'%(first, last)
+        card.account_name = '%s %s' % (first, last)
     else:
         card.account_name = '?'
     m = re.match('^(\d{2})(\d{2})', exp)
@@ -92,10 +94,12 @@ def parse_magstripe(magstripe):
         raise BadSwipeError('no expiration')
     return card
 
+
 def _gen_transaction_id():
     ts = str(int(time.time()))
     return ts + ''.join([chr(ord('A')+random.randint(0, 25))
-        for x in xrange(18-len(ts))])
+                         for x in xrange(18-len(ts))])
+
 
 def make_ippay_sale_xml(amount, card):
     xid = _gen_transaction_id()
@@ -113,12 +117,12 @@ def make_ippay_sale_xml(amount, card):
         <CardExpYear>%02d</CardExpYear>
         <TotalAmount>%d</TotalAmount>
 </JetPay>
-"""%(card.track1, config.get('ippay-terminalid'), xid,
-     card.number, card.exp_month, card.exp_year%100,
-     int(amount*100)))
+""" % (card.track1, config.get('ippay-terminalid'), xid,
+       card.number, card.exp_month, card.exp_year % 100,
+       int(amount*100)))
 
 
-#This is not used. It is provided in case the WSDL stuff in marzipan_io.send_globalpay_request stops working 
+# This is not used. It is provided in case the WSDL stuff in marzipan_io.send_globalpay_request stops working
 def make_globalpay_sale_xml(amount, card):
     xid = _gen_transaction_id()
     return (xid, """<?xml version="1.0" encoding="UTF-8"?>
@@ -142,7 +146,8 @@ def make_globalpay_sale_xml(amount, card):
     		</ns1:ProcessCreditCard>
     	</SOAP-ENV:Body>
     </SOAP-ENV:Envelope>
-"""%(config.get('globalpay-login'), config.get('globalpay-password'), card.number, card.exp_month, card.exp_year%100, card.track1, card.account_name, amount, xid))
+""" % (config.get('globalpay-login'), config.get('globalpay-password'), card.number, card.exp_month, card.exp_year % 100, card.track1, card.account_name, amount, xid))
+
 
 def make_tnbci_txn_data(amount, card):
 

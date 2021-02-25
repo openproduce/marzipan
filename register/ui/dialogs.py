@@ -17,7 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import with_statement
-import cStringIO
+from io import StringIO
+
 import datetime
 import time
 import curses
@@ -33,10 +34,11 @@ import marzipan_io
 import cc
 import match
 import money
-from widgets import *
-from keys import *
-import layout
-import tabutil
+from . import widgets
+from .widgets import *
+from . import keys
+from . import layout
+from util import tabutil
 
 import sys
 sys.path.append("..")
@@ -406,7 +408,7 @@ class PaymentDialog(Dialog):
             if config.get('cc-processor') == 'globalpay':
                 (xid, status) = marzipan_io.send_globalpay_request(paid, self.card, self.sale)
 
-        except marzipan_io.CCError, e:
+        except marzipan_io.CCError as e:
             self.frame.get('alert').set_text(str(e))
             return False
         except ValueError:
@@ -486,7 +488,7 @@ class PaymentDialog(Dialog):
     def input(self, c):
         #all credit cards start with a percent sign 
         if c == ord('%'): 
-            cc_method = filter(lambda (k,v): v == 'debit/credit',
+            cc_method = filter(lambda k,v: v == 'debit/credit',
                 db.PAYMENT.items())[0][0]
             self.frame.get('method').set_selection(cc_method)
             self._get_card(in_swipe=True)
@@ -643,7 +645,7 @@ class CCInfoDialog(Dialog):
                     self.frame.get('number').set_text(self.card.number)
                     self.frame.get('month').set_text("%02d"%(self.card.exp_month))
                     self.frame.get('year').set_text("%02d"%(self.card.exp_year))
-                except cc.BadSwipeError, e:
+                except cc.BadSwipeError as e:
                     self.frame.get('alert').set_text(str(e))
                 self.in_swipe = False
             self.magstripe.append(c)

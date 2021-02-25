@@ -7,34 +7,36 @@
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2015 Open Produce LLC
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import metaphone
 
 edit_threshold = 2
+
+
 def damerau_levenshtein(seq1, seq2):
     """Calculate Damerau-Levenshtein distance between sequences.
- 
+
     This distance is the number of additions, deletions, substitutions,
     and transpositions needed to transform the first sequence into the
     second. Although generally used with strings, any sequences of
     comparable objects will work.
- 
+
     Transpositions are exchanges of *consecutive* characters; all other
     operations are self-explanatory.
- 
+
     This implementation is O(N*M) time and O(M) space, for N and M the
     lengths of the two sequences.
     """
@@ -56,16 +58,17 @@ def damerau_levenshtein(seq1, seq2):
             thisrow[y] = min(delcost, addcost, subcost)
             # This block deals with transpositions
             if (x > 0 and y > 0 and seq1[x] == seq2[y-1]
-                and seq1[x-1] == seq2[y] and seq1[x] != seq2[y]):
+                    and seq1[x-1] == seq2[y] and seq1[x] != seq2[y]):
                 thisrow[y] = min(thisrow[y], twoago[y-2] + 1)
     return thisrow[len(seq2) - 1]
 
+
 class Index:
     def __init__(self):
-        self.literal = { }
-        self.words = { }
-        self.alpha_words = { }
-        self.phonetic_words = { }
+        self.literal = {}
+        self.words = {}
+        self.alpha_words = {}
+        self.phonetic_words = {}
 
     def normalize_word(self, word):
         return word.lower()
@@ -74,9 +77,10 @@ class Index:
         return False
 
     def normalize_key(self, key):
-        words = [ self.normalize_word(w) for w in key.split() ]
+        words = [self.normalize_word(w) for w in key.split()]
         result = filter(lambda w: not self.is_stop_word(w), words[0:-1])
-        if words: result.append(words[-1])
+        if words:
+            result.append(words[-1])
         return ' '.join(result)
 
     def add_item(self, key, value):
@@ -89,18 +93,20 @@ class Index:
             self.alpha_words.setdefault(word[0], []).append(word)
             ph = metaphone.dm(word)
             self.phonetic_words.setdefault(ph[0], []).append(canon_key)
-            if ph[1]: self.phonetic_words.setdefault(ph[1], []).append(canon_key)
+            if ph[1]:
+                self.phonetic_words.setdefault(ph[1], []).append(canon_key)
 
     def match(self, search_string):
         "get set of matches sorted by plausibility"
         s = self.normalize_key(search_string)
-        if not s: return [] # empty string doesn't match
+        if not s:
+            return []  # empty string doesn't match
 
-        rk = { }
-        if self.literal.has_key(s): # exact literal match
+        rk = {}
+        if self.literal.has_key(s):  # exact literal match
             rk.setdefault(s, 0)
 
-        for k in self.literal.keys(): # exact literal substring match
+        for k in self.literal.keys():  # exact literal substring match
             if k.find(s) != -1:
                 rk.setdefault(k, 1)
 
@@ -108,7 +114,7 @@ class Index:
 #        for w in words: # literal word matches
 #            for k in self.words.get(w, []):
 #                rk.setdefault(k, 2)
-#        
+#
 #        for w in words: # phonetic word matches
 #            ph = metaphone.dm(w)
 #            if ph[0]:
@@ -124,9 +130,10 @@ class Index:
 #                        rk.setdefault(k, 3)
 
         results = []
-        for k, v in sorted(rk.items(), key=lambda(k,v):(v,k)):
+        for k, v in sorted(rk.items(), key=lambda k, v: (v, k)):
             results.extend(self.literal.get(k, []))
         return results
+
 
 if __name__ == "__main__":
     index = Index()
@@ -145,4 +152,5 @@ if __name__ == "__main__":
         'falofel', 'dakuri', 'daiuqiri', 'copy'
     ]
     for n in needles:
-        print n, index.match(n)
+        print(n, index.match(n));
+

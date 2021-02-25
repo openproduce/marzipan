@@ -2,17 +2,17 @@ import sys
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2015 Open Produce LLC
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -33,7 +33,7 @@ visa:
 %B4003000123456781^GLOBAL PAYMENT TEST CARD/^151250254321987123456789012345?;4003000123456781=15125025432198712345?
 """
 mc_num = '5499990123456781'
-visa_num= '4003000123456781'
+visa_num = '4003000123456781'
 mc_exp = '1215'
 visa_exp = '1215'
 mc_track = '%B5499990123456781^GLOBAL PAYMENT TEST CARD/^151250254321987123456789012345?;5499990123456781=15125025432198712345?'
@@ -158,7 +158,6 @@ print client.last_sent()
 print resp
 
 
-
 print "### PARTIAL AUTH REV ###"
 sys.stdin.readline()
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -250,8 +249,6 @@ print client.last_sent()
 print resp
 
 
-
-
 print "### KEYED SALE SKIPPED ###"
 sys.stdin.readline()
 
@@ -287,14 +284,14 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
 print resp
 MCPNRef_auth = resp.PNRef
 
-#client.set_options(location='http://localhost:3010')
+# client.set_options(location='http://localhost:3010')
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '5499990123456781',
                                         '1012',
                                         '',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '2.08',
-                                        '', MCPNRef_auth, '', '', '', '<TermType>3AO</TermType>')  
+                                        '', MCPNRef_auth, '', '', '', '<TermType>3AO</TermType>')
 print resp
 MCPNRef_authcompl = resp.PNRef
 """
@@ -379,7 +376,7 @@ print resp
 ### OVERRIDE TRANSACTIONS ###
 
 """
-#this one gets approved
+# this one gets approved
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
@@ -389,7 +386,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
 print resp
 
-#this one gets rejected (duplicate)
+# this one gets rejected (duplicate)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
@@ -399,7 +396,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
 print resp
 
-#this one gets approved (duplicate force)
+# this one gets approved (duplicate force)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
@@ -425,7 +422,7 @@ print resp
 """
 
 """
-#THIS ONE IS BORKEN:
+# THIS ONE IS BORKEN:
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5499990123456781',
                                         '1012',

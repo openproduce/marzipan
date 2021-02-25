@@ -19,10 +19,10 @@
 import curses
 import curses.panel
 import curses.ascii
-from font import big34
-from colors import *
-from keys import *
-from layout import add_frame
+from .font import big34
+from .colors import *
+from .keys import *
+from .layout import add_frame
 
 class Widget:
     """a widget is a ui element that reacts to input and draws itself."""
@@ -123,7 +123,7 @@ class Frame:
                 self.focus_order[self.focus_index].selected = False
             self.focus_index = None
         else:
-            for i in xrange(0,len(self.widgets)):
+            for i in range(0,len(self.widgets)):
                 if self.focus_index is None:
                     break
                 if self.focus_order[self.focus_index] == widget:
@@ -166,7 +166,7 @@ class Frame:
 
     def show(self):
         if self.layout.fill:
-            for y in xrange(0, self.layout.height-1):
+            for y in range(0, self.layout.height-1):
                 self.layout.window.addstr(y, 0, " "*self.layout.width,
                     curses.color_pair(FRAME_BG))
                 if self.h_border:
@@ -208,7 +208,7 @@ class Label(Widget):
         for line in text.split('\n'):
             self.lines.append(self._pad_line(line))
             i = i + 1
-        for j in xrange(i,self.height):
+        for j in range(i,self.height):
             self.lines.append(self._pad_line(''))
 
     def get_text(self):
@@ -255,7 +255,7 @@ class CheckBox(Widget):
         for line in text.split('\n'):
             self.lines.append(self._pad_line(line))
             i = i + 1
-        for j in xrange(i,self.height):
+        for j in range(i,self.height):
             self.lines.append(self._pad_line(''))
 
     def accepts_input(self):
@@ -345,10 +345,10 @@ class ScrollDimension:
 
     def scrollby(self, n):
         if n >= 0:
-            for k in xrange(n):
+            for k in range(n):
                 self.next()
         else:
-            for k in xrange(abs(n)):
+            for k in range(abs(n)):
                 self.prev()
 
 
@@ -473,7 +473,7 @@ class ListBox(Widget):
             label.show()
 
         while last-first < vis_labels: # pad list up to height.
-            for i in xrange(0,self.label_height):
+            for i in range(0,self.label_height):
                 self.layout.window.addstr(self.y +
                     self.label_height*(last-first) + i,
                     self.x, self.width*' ',
@@ -735,12 +735,12 @@ class BigNumberBox(Widget):
         padding = max(self.width/(self.font.width+self.font.kern) -\
             (last - first), 0)
         text = self.text[first:last] + ' '*padding
-        for i in xrange(0, len(text)):
+        for i in range(0, len(text)):
             x = i * (self.font.width + self.font.kern)
             color_id = self.color_id
             if self.selected and i == self.scroll.offset:
                 color_id = ACTIVE_SEL_COLOR
-            for y in xrange(0, self.font.height):
+            for y in range(0, self.font.height):
                 self.layout.window.addstr(self.y+y, self.x+x,
                 self.font.get_row(text[i], y)+' '*self.font.kern,
                     curses.color_pair(color_id))

@@ -20,7 +20,8 @@ import os
 import signal
 import curses
 import curses.panel
-import widgets
+from . import widgets
+from .widgets import *
 
 class TerminalTooSmallError(Exception):
     """terminal too small to display ui without curses barfing"""
