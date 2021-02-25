@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import print_function
+
 
 import sys
 import os
@@ -27,6 +27,7 @@ import curses
 import ui.colors
 import ui.dialogs
 import register_logging
+
 
 
 def main(stdscr):
@@ -47,7 +48,7 @@ def main(stdscr):
         except KeyboardInterrupt:
             stdscr.redrawwin()
             stdscr.refresh()
-        except _curses.error:
+        except _curses.error as e:
             curses.curs_set(1)
             curses.endwin()
             print('Your terminal is probably too small.')
@@ -56,7 +57,7 @@ def main(stdscr):
         except:
             curses.curs_set(1)
             curses.endwin()
-            out = file('error', 'w')
+            out = open('error', 'w')
             import traceback
             traceback.print_exc(file=out)
             out.close()

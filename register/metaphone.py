@@ -12,7 +12,7 @@ def dm(st):
     returns the double metaphone codes for given string - always a tuple
     there are no checks done on the input string, but it should be a single    word or name."""
     vowels = ['A', 'E', 'I', 'O', 'U', 'Y']
-    st = st.decode('ascii', 'ignore')
+#    st = st.decode('ascii', 'ignore')
     st = st.upper()  # st is short for string. I usually prefer descriptive over short, but this var is used a lot!
     is_slavo_germanic = (st.find('W') > -1 or st.find('K')
                          > -1 or st.find('CZ') > -1 or st.find('WITZ') > -1)
@@ -118,7 +118,7 @@ def dm(st):
                     else:  # default for 'C'
                         nxt = ('K', 1)
         # will never get here with st.encode('ascii', 'replace') above
-        elif ch == u'Ç':
+        elif ch == 'Ç':
             nxt = ('S', 1)
         elif ch == 'D':
             if st[pos:pos+2] == 'DG':
@@ -256,7 +256,7 @@ def dm(st):
                 nxt = ('N', 2)
             else:
                 nxt = ('N', 1)
-        elif ch == u'Ñ':
+        elif ch == 'Ñ':
             nxt = ('N', 1)
         elif ch == 'P':
             if st[pos+1] == 'H':
@@ -426,6 +426,6 @@ if __name__ == '__main__':
              'catherine': 'K0RN,KTRN', 'richard': 'RXRT,RKRT', 'bob': 'PP', 'eric': 'ARK', 'geoff': 'JF,KF',
              'dave': 'TF', 'ray': 'R', 'steven': 'STFN', 'bryce': 'PRS', 'randy': 'RNT', 'bryan': 'PRN',
              'brian': 'PRN', 'otto': 'AT', 'auto': 'AT', 'maisey': 'MS, None', 'zhang': 'JNK, None', 'solilijs': 'SLLS, None'}
-    for name in names.keys():
-        print(name + '\t-->\t' + str(dm(name)) + '\t(' + names[name] + ')');
+    for name in list(names.keys()):
+        print((name + '\t-->\t' + str(dm(name)) + '\t(' + names[name] + ')'));
 

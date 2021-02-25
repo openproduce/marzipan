@@ -24,7 +24,7 @@ gp_passwd = config.get('globalpay-password')
 
 url = 'https://certapia.globalpay.com/GlobalPay/transact.asmx?WSDL'
 client = Client(url)
-print client
+print(client)
 
 """
 mc:
@@ -50,8 +50,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '3.56',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 
-print resp
-print "### SWIPED SALE ###"
+print(resp)
+print("### SWIPED SALE ###")
 sys.stdin.readline()
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -61,8 +61,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.53',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
@@ -71,8 +71,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '11.02',
                                         '', '', '', '', '', '<Force>T</Force><TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         mc_num,
@@ -81,8 +81,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.02',
                                         '', '', '', '', '', '<Force>T</Force><TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         mc_num,
                                         mc_exp,
@@ -90,12 +90,12 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '11.02',
                                         '', '', '', '', '', '<Force>T</Force><TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 
 sys.exit()
-print "### PARTIAL AUTH ###"
+print("### PARTIAL AUTH ###")
 sys.stdin.readline()
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -105,8 +105,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '23.62',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '4111111111111111',
                                         '1215',
@@ -114,8 +114,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '23.54',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '6011000993326655',
                                         '1215',
@@ -123,8 +123,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '23.07',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
@@ -134,8 +134,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '23.62',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '4111111111111111',
                                         '1215',
@@ -144,8 +144,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '23.54',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '6011000993326655',
@@ -154,11 +154,11 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '23.07',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 
-print "### PARTIAL AUTH REV ###"
+print("### PARTIAL AUTH REV ###")
 sys.stdin.readline()
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '5111111111111118',
@@ -168,8 +168,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '23.62',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '5111111111111118',
@@ -178,8 +178,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 
 ##2##
@@ -191,8 +191,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '23.54',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '4111111111111111',
@@ -201,8 +201,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 ##3##
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -213,8 +213,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '23.07',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '6011000993326655',
@@ -223,8 +223,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 ##4##
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
@@ -235,8 +235,8 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '23.62',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '5111111111111118',
@@ -245,14 +245,14 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
-print client.last_sent()
-print resp
+print((client.last_sent()))
+print(resp)
 
 
-print "### KEYED SALE SKIPPED ###"
+print("### KEYED SALE SKIPPED ###")
 sys.stdin.readline()
 
-print "### VOID TRANSACTIONS ### first make some transactions"
+print("### VOID TRANSACTIONS ### first make some transactions")
 sys.stdin.readline()
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -262,7 +262,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.08',
                                         '', '', '', '', '', '3AO')
-print resp
+print(resp)
 VisaPNRef = resp.PNRef
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
@@ -281,7 +281,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '2.08',
                                         '', '', '', '', '', '3AO')
-print resp
+print(resp)
 MCPNRef_auth = resp.PNRef
 
 # client.set_options(location='http://localhost:3010')
@@ -292,7 +292,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '2.08',
                                         '', MCPNRef_auth, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 MCPNRef_authcompl = resp.PNRef
 """
 
@@ -304,10 +304,10 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '3.08',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
-print resp
+print(resp)
 VisaPNRef_force = resp.PNRef
 
-print "### VOID TRANSACTIONS ### time to void"
+print("### VOID TRANSACTIONS ### time to void")
 sys.stdin.readline()
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
@@ -318,7 +318,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '1.08',
                                         '', VisaPNRef, '', '', '', '<TermType>3AO</TermType>')
 VisaPNRef_return = resp.PNRef
-print resp
+print(resp)
 """
 
 
@@ -330,7 +330,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.15',
                                         '', MCPNRef, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
@@ -340,7 +340,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '2.08',
                                         '', MCPNRef_authcompl, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
@@ -350,7 +350,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '3.08',
                                         '', VisaPNRef_force, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         '5499990123456781',
@@ -359,10 +359,10 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'void',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.08',
                                         '', VisaPNRef_return, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 
-print "### FORCE TRANSACTIONS ###"
+print("### FORCE TRANSACTIONS ###")
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         '4003000123456781',
                                         '1012',
@@ -370,7 +370,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.99',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
-print resp
+print(resp)
 """
 
 ### OVERRIDE TRANSACTIONS ###
@@ -384,7 +384,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.00',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
-print resp
+print(resp)
 
 # this one gets rejected (duplicate)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
@@ -394,7 +394,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.00',
                                         '', '', '', '', '', '<AuthCode>999999</AuthCode><TermType>3AO</TermType>')
-print resp
+print(resp)
 
 # this one gets approved (duplicate force)
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
@@ -404,7 +404,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'force',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.00',
                                         '', '', '', '', '', '<Force>T</Force><AuthCode>999999</AuthCode><TermType>3AO</TermType>')
-print resp
+print(resp)
 """
 
 ### RETURN TRANSACTIONS ###
@@ -417,7 +417,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '1.20',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 PNRef1 = resp.PNRef
-print resp
+print(resp)
 
 """
 
@@ -431,7 +431,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '1.20',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 PNRef2 = resp.PNRef
-print resp
+print(resp)
 """
 
 """
@@ -443,7 +443,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '1.19',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 PNRef3 = resp.PNRef
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '373953191351005',
@@ -453,7 +453,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '1.01',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 PNRef4 = resp.PNRef
-print resp
+print(resp)
 """
 
 #now the returns
@@ -466,7 +466,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.20',
                                         '', PNRef1, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 """
 
 #THIS ONE IS BORKEN:
@@ -478,7 +478,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.20',
                                         '', PNRef2, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 """
 
 """
@@ -489,7 +489,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.19',
                                         '', PNRef3, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '373953191351005',
@@ -498,7 +498,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.01',
                                         '', PNRef4, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 """
 
 print "### CREDIT TRANSACTIONS ###"
@@ -513,7 +513,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.21',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '5499990123456781',
@@ -522,7 +522,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.21',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '36018634567895',
@@ -531,7 +531,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.18',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         '373953191351005',
@@ -540,10 +540,10 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'return',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.00',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 
-print "### PREAUTH TRANS ###"
+print("### PREAUTH TRANS ###")
 sys.stdin.readline()
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
@@ -552,7 +552,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.30',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
@@ -561,7 +561,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.31',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
@@ -570,7 +570,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.32',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
@@ -579,7 +579,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.33',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '36018634567895',
@@ -588,7 +588,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.18',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         mc_num,
@@ -597,9 +597,9 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.00',
                                         '', '', '30329', '4', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)
 
-print "### PREAUTH REV TRANS ###"
+print("### PREAUTH REV TRANS ###")
 sys.stdin.readline()
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         visa_num,
@@ -609,7 +609,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'auth',
                                         '1.31',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         visa_num,
@@ -620,7 +620,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
 
 
-print "### REV TRANS ###"
+print("### REV TRANS ###")
 sys.stdin.readline()
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         visa_num,
@@ -630,7 +630,7 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'sale',
                                         '1.15',
                                         '', '', '', '', '', '<TermType>3AO</TermType>')
 pnref = resp.PNRef
-print resp
+print(resp)
 
 resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         visa_num,
@@ -639,4 +639,4 @@ resp = client.service.ProcessCreditCard(gp_login, gp_passwd, 'reversal',
                                         'GLOBAL PAYMENT TEST CARD',
                                         '1.15',
                                         '', pnref, '', '', '', '<TermType>3AO</TermType>')
-print resp
+print(resp)

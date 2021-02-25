@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement
+
 from io import StringIO
 
 import datetime
@@ -99,7 +99,7 @@ class Dialog:
             ord('8'): curses.KEY_F8,
             ord('9'): curses.KEY_F9,
         }
-        if keys.has_key(c):
+        if c in keys:
             return keys[c]
         return None
 
@@ -488,8 +488,8 @@ class PaymentDialog(Dialog):
     def input(self, c):
         #all credit cards start with a percent sign 
         if c == ord('%'): 
-            cc_method = filter(lambda k,v: v == 'debit/credit',
-                db.PAYMENT.items())[0][0]
+            cc_method = list(filter(lambda k,v: v == 'debit/credit',
+                list(db.PAYMENT.items())))[0][0]
             self.frame.get('method').set_selection(cc_method)
             self._get_card(in_swipe=True)
         elif Dialog.input(self, c):
@@ -762,8 +762,11 @@ class CustomerAddEditDialog(Dialog):
                ], layout.Center()))
         except IndexError:
             import sys
-            print >>sys.stderr, len(postal)
-            print >>sys.stderr, postal
+            old_stdout = sys.stdout
+            sys.stdout = sys.stderr
+            print((len(postal)))
+            print(postal)
+            sys.stdout = old_stdout
             raise
 
     def __del__(self):
@@ -1008,27 +1011,25 @@ class CustomerSearchDialog(SearchDialog):
             # no check digit in db
             code_digs = digs[:12] if digs else ''
             ids = {}
-            for k in self.codes.keys():
+            for k in list(self.codes.keys()):
                 if code_digs and k.startswith(code_digs):
                     cust = self.codes[k]
-                    if not ids.has_key(cust.id):
+                    if cust.id not in ids:
                         self.match_set.append(cust)
                         ids[cust.id] = True
-            for k in self.emails.keys():
+            for k in list(self.emails.keys()):
                 if search_text and k.startswith(search_text):
                     cust = self.emails[k]
-                    if not ids.has_key(cust.id):
+                    if cust.id not in ids:
                         self.match_set.append(cust)
                         ids[cust.id] = True
-            for k in self.phones.keys():
+            for k in list(self.phones.keys()):
                 if digs and k.startswith(digs):
                     cust = self.phones[k]
-                    if not ids.has_key(cust.id):
+                    if cust.id not in ids:
                         self.match_set.append(cust)
                         ids[cust.id] = True
-            self.match_set.extend(filter(
-                lambda x: not ids.has_key(x.id),
-                self.names.match(search_text)))
+            self.match_set.extend([x for x in self.names.match(search_text) if x.id not in ids])
         if self.frame:
             self.frame.get('search').set_labels(self.get_labels())
 
@@ -1077,18 +1078,16 @@ class ItemSearchDialog(SearchDialog):
                 for k in self.barcodes:
                     if k.barcode.startswith(digs):
                         item = k.item
-                        if not ids.has_key(item.id):
+                        if item.id not in ids:
                             self.match_set.append(item)
                             ids[item.id] = True
-                for k in self.plus.keys():
+                for k in list(self.plus.keys()):
                     if k.startswith(digs):
                         item = self.plus[k]
-                        if not ids.has_key(item.id):
+                        if item.id not in ids:
                             self.match_set.append(self.plus[k])
                             ids[item.id] = True
-            self.match_set.extend(filter(
-                lambda x: x.id not in ids,
-                self.names.match(search_text)))
+            self.match_set.extend([x for x in self.names.match(search_text) if x.id not in ids])
         if self.frame:
             self.frame.get('search').set_labels(self.get_labels())
 
@@ -1418,8 +1417,11 @@ class SaleDialog(Dialog):
                all_names.add_item(item.name, item)
             except UnicodeEncodeError:
                import sys
-               print >>sys.stderr, self
-               print >>sys.stderr, item.barcodes
+               old_stdout = sys.stdout
+               sys.stdout = sys.stderr
+               print(self)
+               print((item.barcodes))
+               sys.stdout = old_stdout
                raise
 
 
@@ -1507,7 +1509,10 @@ class TabHistoryProcessingDialog(Dialog):
         curses.def_prog_mode()
         curses.endwin()
         with os.popen("less", 'w') as f:
-            print >>f, text
+            oldstdout = sys.stdout
+            sys.stdout = f
+            print(text)
+            sys.stdout = oldstdout
         curses.reset_prog_mode()
 
     def setup_frame(self):
@@ -1708,36 +1713,39 @@ def item_info(session, item):
     q = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
     quantity_sold = sum( x.quantity  for x in q )
     ret = cStringIO.StringIO()
-    print >>ret, "Item %d: %s" % (item.id, item.name)
-    print >>ret, "Barcode(s): %s" % (', '.join( b.barcode for b in item.barcodes ) )
-    print >>ret, ""
-    print >>ret, "Categories: %s" % (', '.join(cat.name for cat in item.categories))
+    oldstdout = sys.stdout
+    sys.stdout = ret
+    print(("Item %d: %s" % (item.id, item.name)))
+    print(("Barcode(s): %s" % (', '.join( b.barcode for b in item.barcodes ) )))
+    print("")
+    print(("Categories: %s" % (', '.join(cat.name for cat in item.categories))))
     try:
-        print >>ret, "Tax category: %s  (%.2f%%)" % (item.tax_category.name, item.tax_category.rate * 100)
+        print(("Tax category: %s  (%.2f%%)" % (item.tax_category.name, item.tax_category.rate * 100)))
     except AttributeError:  # tax category not set
-        print >>ret, "Tax category: None (2.25%% by default)"
-    print >>ret, ""
+        print("Tax category: None (2.25%% by default)")
+    print("")
     if item.size_unit.name in ("each", "count"):
-        print >>ret, "Unit size: %s" % item.size_unit.name
+        print(("Unit size: %s" % item.size_unit.name))
     else:
-        print >>ret, "Unit size: %s %s" % (item.size, item.size_unit.name)
-    print >>ret, "Retail price: $%.2f    per %s" % (item.price.unit_cost, item.price.sale_unit.name)
-    print >>ret, "            = $%.2f + $%.2f (tax)" % ( item.price.unit_cost - item.tax_amt, item.tax_amt )
-    print >>ret, ""
-    print >>ret, "Ordering:"
+        print(("Unit size: %s %s" % (item.size, item.size_unit.name)))
+    print(("Retail price: $%.2f    per %s" % (item.price.unit_cost, item.price.sale_unit.name)))
+    print(("            = $%.2f + $%.2f (tax)" % ( item.price.unit_cost - item.tax_amt, item.tax_amt )))
+    print("")
+    print("Ordering:")
     for di in item.dist_items:
-        print >>ret, "  * %s:" % di.distributor.name
-        print >>ret, "    $%.2f  for case of %s %s" % ( di.wholesale_price, di.case_size, di.case_unit )
+        print(("  * %s:" % di.distributor.name))
+        print(("    $%.2f  for case of %s %s" % ( di.wholesale_price, di.case_size, di.case_unit )))
         try:
-            print >>ret, "    margin: %.2f%%" % (100 * di.margin)
-            print >>ret, "    markup: %.2f%%" % (100 * di.markup)
+            print(("    margin: %.2f%%" % (100 * di.margin)))
+            print(("    markup: %.2f%%" % (100 * di.markup)))
         except:
             pass
         # margin, markup
-    print >>ret, ""
-    print >>ret, "Latest manual count: %s" % mct
-    print >>ret, "        timestamped: %s" % mct_when.strftime("%c")
-    print >>ret, "Quantity sold since last count: %s" % quantity_sold
+    print("")
+    print(("Latest manual count: %s" % mct))
+    print(("        timestamped: %s" % mct_when.strftime("%c")))
+    print(("Quantity sold since last count: %s" % quantity_sold))
+    sys.stdout = oldstdout
     return ret.getvalue()
 
 class ItemInfoDialog(Dialog):

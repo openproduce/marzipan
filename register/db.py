@@ -214,14 +214,14 @@ def get_sales(s, n):
 
 
 def _make_ean13():
-    return '999'+''.join([str(random.randint(0, 9)) for i in xrange(9)])
+    return '999'+''.join([str(random.randint(0, 9)) for i in range(9)])
 
 
 def new_customer_code():
     """generate random customer account number ('code') that makes sense
        as an EAN-13 barcode."""
     s = get_session()
-    for i in xrange(1000):
+    for i in range(1000):
         code = _make_ean13()
         if 0 == s.query(Customer).filter(Customer.code == code).count():
             return code
@@ -434,7 +434,7 @@ class TabLog(Base):
             return None
         session = get_session()
         # let SQL find sales by the right customer, and paid by tab
-        paid_by_tab = [k for (k, v) in PAYMENT.items() if v == 'tab'][0]
+        paid_by_tab = [k for (k, v) in list(PAYMENT.items()) if v == 'tab'][0]
         x = session.query(Sale)
         x = x.filter_by(customer_id=self.customer_id)
         x = x.filter_by(payment=paid_by_tab)
@@ -712,7 +712,7 @@ def make_db():
     # prompt user and issue commands to mysql shell
     print("warning: this will destroy the current pos database if any.") 
     print("hit ctrl+C at the prompt unless you are really sure.") 
-    print
+    print()
     import getpass
     admin_passwd = getpass.getpass("mysql admin password:")
     try:
@@ -723,7 +723,7 @@ def make_db():
                                  stdin=subprocess.PIPE)
     except OSError as e:
         if e.errno == 2:
-            print("couldn't find mysql shell;"), 
+            print("couldn't find mysql shell") 
             print("make sure --db-mysql-path is correct")
             sys.exit(1)
         else:
@@ -769,7 +769,7 @@ def _find_unit(s, name):
     if q.all():
         return q.all()[0]
     else:
-        print("unrecognized unit: %s" % (name)) 
+        print(("unrecognized unit: %s" % (name))) 
         sys.exit(2)
 
 
@@ -779,7 +779,7 @@ def import_prices():
     try:
         price_list = file(fname)
     except:
-        print("can't open price list %s" % (fname)) 
+        print(("can't open price list %s" % (fname))) 
         sys.exit(2)
 
     header = price_list.readline()
@@ -794,7 +794,7 @@ def import_prices():
             size = decimal.Decimal(size_qty)
             name = name.strip()
         except:
-            print("%s: line %d: %s" % (fname, 2+n, line)) 
+            print(("%s: line %d: %s" % (fname, 2+n, line))) 
             sys.exit(2)
         if cost != "":
             price = Price(_find_unit(s, sale_unit_name),
@@ -812,7 +812,7 @@ def import_prices():
     s.flush()
     s.add_all(items)
     s.flush()
-    print('added %d items' % (len(items)))
+    print(('added %d items' % (len(items))))
 
 
 # sqlalchemy operator for filtering out unstocked, discontinued Items:

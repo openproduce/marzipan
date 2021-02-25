@@ -24,5 +24,5 @@ import config
 
 def report(s):
     curses.endwin()
-    print "error: %s" % (s)
+    print(("error: %s" % (s)))
     sys.exit(2)

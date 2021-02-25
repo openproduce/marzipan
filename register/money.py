@@ -52,7 +52,7 @@ def moneyfmt(value, places=2, curr='', sep=',', dp='.',
     sign, digits, exp = value.quantize(q).as_tuple()
     assert exp == -places
     result = []
-    digits = map(str, digits)
+    digits = list(map(str, digits))
     build, next = result.append, digits.pop
     if sign:
         build(trailneg)

@@ -44,7 +44,7 @@ class Layout:
 
     def make_window(self):
         self.fill = True
-        self.window = curses.newwin(self.height, self.width, self.y, self.x)
+        self.window = curses.newwin(int(self.height), int(self.width), int(self.y), int(self.x))
         self.window.keypad(1)
         self.panel = curses.panel.new_panel(self.window)
         self.panel.top()

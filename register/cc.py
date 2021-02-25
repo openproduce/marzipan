@@ -22,7 +22,7 @@ import decimal
 import time
 import config
 import random
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 class Card:
@@ -98,7 +98,7 @@ def parse_magstripe(magstripe):
 def _gen_transaction_id():
     ts = str(int(time.time()))
     return ts + ''.join([chr(ord('A')+random.randint(0, 25))
-                         for x in xrange(18-len(ts))])
+                         for x in range(18-len(ts))])
 
 
 def make_ippay_sale_xml(amount, card):
@@ -157,9 +157,9 @@ def make_tnbci_txn_data(amount, card):
            'ccnumber': str(card.number),
            'ccexp': '%02d%02d' % (card.exp_month, card.exp_year % 100),
            'amount': '%.2f' % amount,
-           'track_1': urllib.quote(card.track1),
+           'track_1': urllib.parse.quote(card.track1),
            'payment': 'creditcard'
            }
-    kvpairs = ["%s=%s" % (x[0], x[1]) for x in txn.items()]
+    kvpairs = ["%s=%s" % (x[0], x[1]) for x in list(txn.items())]
     #print >>sys.stderr, '&'.join(kvpairs)
     return '&'.join(kvpairs)

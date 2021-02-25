@@ -332,7 +332,7 @@ class ScrollDimension:
             self.offset -= 1
         return True
 
-    def next(self):
+    def __next__(self):
         if self.get() >= self.virtual_size - 1:
             return False
         elif self.offset < self.real_size - self.trailing_context:
@@ -346,7 +346,7 @@ class ScrollDimension:
     def scrollby(self, n):
         if n >= 0:
             for k in range(n):
-                self.next()
+                next(self)
         else:
             for k in range(abs(n)):
                 self.prev()
@@ -406,7 +406,7 @@ class ListBox(Widget):
         (orig_base, orig_offs) = (self.scroll.base, self.scroll.offset)
         self.scroll.base = self.scroll.offset = 0
         while scrolled and key != self.labels[self.scroll.get()].key:
-            scrolled = self.scroll.next()
+            scrolled = next(self.scroll)
         found = key == self.labels[self.scroll.get()].key
         if not found: # restore scroll position
             (self.scroll.base, self.scroll.offset) = (orig_base, orig_offs)
@@ -437,7 +437,7 @@ class ListBox(Widget):
             if not self.labels and self.frame:
                 self.frame.set_focus_prev()
         elif c == curses.KEY_DOWN:
-            self.scroll.next()
+            next(self.scroll)
             if not self.labels and self.frame:
                 self.frame.set_focus_next()
         elif c == curses.KEY_NPAGE or c == curses.KEY_RIGHT:
@@ -460,7 +460,7 @@ class ListBox(Widget):
         vis_labels = self.height/self.label_height
         first = self.scroll.base
         last = min(len(self.labels), first + vis_labels)
-        for i, label in enumerate(self.labels[first:last]):
+        for i, label in enumerate(self.labels[first:int(last)]):
             label.y = self.y + (i*self.label_height)
             label.layout = self.layout
             if i == self.scroll.offset:
@@ -474,11 +474,14 @@ class ListBox(Widget):
 
         while last-first < vis_labels: # pad list up to height.
             for i in range(0,self.label_height):
-                self.layout.window.addstr(self.y +
-                    self.label_height*(last-first) + i,
-                    self.x, self.width*' ',
-                    curses.color_pair(self.color_id))
-            last += 1
+                try:
+                    self.layout.window.addstr(self.y +
+                                                (self.label_height*(last-first) + i), 
+                                                self.x, ' ', 
+                                                curses.color_pair(self.color_id))
+                    last += 1
+                except curses.error:
+                    pass
 
 
 class TextBox(Widget):
@@ -527,11 +530,11 @@ class TextBox(Widget):
         pos = self.scroll.get()
         self.text = self.text[0:pos] + c + self.text[pos:]
         self.adjust_size()
-        self.scroll.next()
+        next(self.scroll)
 
     def input(self, c):
         if c == curses.KEY_RIGHT or c == KEY_CTRL_F:
-            self.scroll.next()
+            next(self.scroll)
         elif c == curses.KEY_LEFT or c == KEY_CTRL_B:
             self.scroll.prev()
         elif c == curses.KEY_HOME or c == KEY_CTRL_A:
@@ -576,7 +579,7 @@ class TextBox(Widget):
         first = self.scroll.base
         last = min(len(self.text), first + self.width)
         padding = max(self.width - (last - first), 0)
-        text = self.text[first:last] + ' '*padding
+        text = self.text[first:last] + ' '* int(padding) 
         self.layout.window.addstr(self.y, self.x, text,
             curses.color_pair(self.color_id))
         if self.selected: # show terminal cursor at insertion point.
@@ -683,11 +686,11 @@ class BigNumberBox(Widget):
             text.append(c)
         self.text = ''.join(text)
         self.adjust_size()
-        self.scroll.next()
+        next(self.scroll)
 
     def input(self, c):
         if c == curses.KEY_RIGHT or c == KEY_CTRL_F:
-            self.scroll.next()
+            next(self.scroll)
         elif c == curses.KEY_LEFT or c == KEY_CTRL_B:
             self.scroll.prev()
         elif c == curses.KEY_HOME or c == KEY_CTRL_A:
@@ -734,7 +737,7 @@ class BigNumberBox(Widget):
             self.width/(self.font.width+self.font.kern))
         padding = max(self.width/(self.font.width+self.font.kern) -\
             (last - first), 0)
-        text = self.text[first:last] + ' '*padding
+        text = self.text[int(first):int(last)] + ' '* int(padding) 
         for i in range(0, len(text)):
             x = i * (self.font.width + self.font.kern)
             color_id = self.color_id

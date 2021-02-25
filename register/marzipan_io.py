@@ -87,12 +87,14 @@ def print_card_receipt(sale, paid, merchant_copy=False):
     else:
         filename = 'customer_card_receipt.tex'
     out = open(filename, 'w')
-    out.writelines(tex)
+    for line in tex:
+        out.write(line)
     out.flush()
     out.close()
 
     out = tempfile.NamedTemporaryFile()
-    out.writelines(tex)
+    for line in tex:
+        out.write(line)
     out.flush()
     _print_tex_file(out.name)
 
@@ -106,7 +108,8 @@ def print_receipt(sale):
     out.close()
 
     out = tempfile.NamedTemporaryFile()
-    out.writelines(tex)
+    for line in tex:
+        out.write(line.encode())
     out.flush()
     _print_tex_file(out.name)
 
@@ -119,7 +122,7 @@ def _print_tex_file(fname):
                        os.path.join(tempfile.gettempdir(), f))
     except:
         pass
-    dev_null = file('/dev/null')
+    dev_null = open('/dev/null')
     os.chdir(os.path.realpath(os.path.dirname(fname)))
     subprocess.call(['latex', fname], stdout=dev_null, stderr=dev_null)
     try:
@@ -365,8 +368,8 @@ def send_ippay_request(amount, card):
     c.setopt(pycurl.SSL_VERIFYPEER, 0)
     c.setopt(pycurl.SSL_VERIFYHOST, 2)
     c.setopt(pycurl.TIMEOUT, 30)
-    import StringIO
-    b = StringIO.StringIO()
+    import io
+    b = io.StringIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
     try:
         c.perform()
@@ -428,7 +431,7 @@ def _parse_globalpay_response(resp):
     # This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working
     m = re.search('<Message>(.*)</Message>', resp)
     if m:
-        print("global said: %s" % m.group(1))
+        print(("global said: %s" % m.group(1)))
 
     m = re.search('<RespMSG>(.*)</RespMSG>', resp)
     if not m:
@@ -547,7 +550,7 @@ def _make_tabhistory_tex(customer, tab_history):
     real_stdout = sys.stdout
     out = cStringIO.StringIO()
     sys.stdout=out
-    print(r"""\\nonstopmode
+    print((r"""\\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=0cm,left=.25cm,right=.25cm]{geometry}
 \\pagestyle{empty}
@@ -565,31 +568,31 @@ www.openproduce.org\\\\
 {\Large \sf \\bf TAB HISTORY} \\\\
 for customer: %s
 
-""" % customer.name),
-    print ( "\\end{center}\n\n"),
-    print ("""
+""" % customer.name))
+    print( "\\end{center}\n\n")
+    print("""
 \\vskip 0.3cm
 \\vskip 3pt
 \\hrule
 \\vskip 3pt
-"""),
+""")
     ###
-    print >>out, r"\tiny"
-    print >>out, r"\begin{itemize}"
+    print(r"\tiny")
+    print(r"\begin{itemize}")
     for entry in tab_history:
-        print >>out, "\\item %s" % _texify_tablog(entry)
+        print(("\\item %s" % _texify_tablog(entry)))
         if entry.is_payment() is False:
-            print >>out, r"\begin{itemize}"
+            print(r"\begin{itemize}")
             for si in tabutil.tab_charged_items(entry):
                 try:
                     si_item_name = si.item.name
                 except AttributeError:
                     si_item_name = "<unknown item>"
-                print >>out, "\\item \\$%5.2f\t%s" % (si.total, si_item_name)
-            print >>out, r"\end{itemize}"
-    print >>out, r"\end{itemize}"
+                print(("\\item \\$%5.2f\t%s" % (si.total, si_item_name)))
+            print(r"\end{itemize}")
+    print(r"\end{itemize}")
     ###
-    print >>out, """
+    print("""
 \\vskip 3pt
 \\hrule
 \\vskip 3pt
@@ -599,8 +602,8 @@ Thanks for shopping!
 \\vskip 1.5cm
 
 .
-"""
-    print >>out, "\\end{document}\n",
+""")
+    print("\\end{document}\n")
     sys.stdout = real_stdout
     our_string = out.getvalue();
     out.close();

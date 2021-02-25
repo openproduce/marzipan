@@ -45,13 +45,13 @@ def damerau_levenshtein(seq1, seq2):
     # However, only the current and two previous rows are needed at once,
     # so we only store those.
     oneago = None
-    thisrow = range(1, len(seq2) + 1) + [0]
-    for x in xrange(len(seq1)):
+    thisrow = list(range(1, len(seq2) + 1)) + [0]
+    for x in range(len(seq1)):
         # Python lists wrap around for negative indices, so put the
         # leftmost column at the *end* of the list. This matches with
         # the zero-indexed strings and saves extra calculation.
         twoago, oneago, thisrow = oneago, thisrow, [0] * len(seq2) + [x + 1]
-        for y in xrange(len(seq2)):
+        for y in range(len(seq2)):
             delcost = oneago[y] + 1
             addcost = thisrow[y - 1] + 1
             subcost = oneago[y - 1] + (seq1[x] != seq2[y])
@@ -78,7 +78,7 @@ class Index:
 
     def normalize_key(self, key):
         words = [self.normalize_word(w) for w in key.split()]
-        result = filter(lambda w: not self.is_stop_word(w), words[0:-1])
+        result = list([w for w in words[0:-1] if not self.is_stop_word(w)]) 
         if words:
             result.append(words[-1])
         return ' '.join(result)
@@ -103,10 +103,10 @@ class Index:
             return []  # empty string doesn't match
 
         rk = {}
-        if self.literal.has_key(s):  # exact literal match
+        if s in self.literal:  # exact literal match
             rk.setdefault(s, 0)
 
-        for k in self.literal.keys():  # exact literal substring match
+        for k in list(self.literal.keys()):  # exact literal substring match
             if k.find(s) != -1:
                 rk.setdefault(k, 1)
 
@@ -130,7 +130,7 @@ class Index:
 #                        rk.setdefault(k, 3)
 
         results = []
-        for k, v in sorted(rk.items(), key=lambda k, v: (v, k)):
+        for k, v in sorted(list(rk.items()), key=lambda k_v: (k_v[0], k_v[1])):
             results.extend(self.literal.get(k, []))
         return results
 
@@ -152,5 +152,5 @@ if __name__ == "__main__":
         'falofel', 'dakuri', 'daiuqiri', 'copy'
     ]
     for n in needles:
-        print(n, index.match(n));
+        print((n, index.match(n)));
 
