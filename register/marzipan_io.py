@@ -61,7 +61,7 @@ def read_scale():
 
 
 def print_customer_card(customer):
-    barcode_ps = file('postscriptbarcode/barcode.ps')
+    barcode_ps = open('postscriptbarcode/barcode.ps')
     out = tempfile.NamedTemporaryFile()
     for line in barcode_ps:
         out.write(line)

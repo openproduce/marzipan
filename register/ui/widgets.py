@@ -474,11 +474,11 @@ class ListBox(Widget):
 
         while last-first < vis_labels: # pad list up to height.
             for i in range(0,self.label_height):
+
                 try:
-                    self.layout.window.addstr(self.y +
-                                                (self.label_height*(last-first) + i), 
-                                                self.x, ' ', 
-                                                curses.color_pair(self.color_id))
+                    self.layout.window.addstr(self.y + (self.label_height*(last-first) + i), 
+                                          self.x, self.width*' ', 
+                                          curses.color_pair(self.color_id))
                     last += 1
                 except curses.error:
                     pass
