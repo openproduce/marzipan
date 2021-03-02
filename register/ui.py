@@ -48,12 +48,12 @@ def main(stdscr):
         except KeyboardInterrupt:
             stdscr.redrawwin()
             stdscr.refresh()
-        except _curses.error as e:
-            curses.curs_set(1)
-            curses.endwin()
-            print('Your terminal is probably too small.')
-            print('Please make it at least 80x25 and try again.')
-            sys.exit(1)
+        # except _curses.error as e:
+        #     curses.curs_set(1)
+        #     curses.endwin()
+        #     print('Your terminal is probably too small.')
+        #     print('Please make it at least 80x25 and try again.')
+        #     sys.exit(1)
         except:
             curses.curs_set(1)
             curses.endwin()

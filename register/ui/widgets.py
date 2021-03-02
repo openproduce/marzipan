@@ -23,6 +23,8 @@ from .font import big34
 from .colors import *
 from .keys import *
 from .layout import add_frame
+import sys
+import math
 
 class Widget:
     """a widget is a ui element that reacts to input and draws itself."""
@@ -457,10 +459,14 @@ class ListBox(Widget):
                 self.frame.set_focus_next()
 
     def show(self):
-        vis_labels = self.height/self.label_height
-        first = self.scroll.base
-        last = min(len(self.labels), first + vis_labels)
-        for i, label in enumerate(self.labels[first:int(last)]):
+        vis_labels = math.floor(self.height/self.label_height) 
+        first = int(self.scroll.base) 
+        last = (min(len(self.labels), first + vis_labels))
+        sys.stderr.write("\n")
+        sys.stderr.write("LAST")
+        sys.stderr.write(str(last))
+        sys.stderr.write("\n")
+        for i, label in enumerate(self.labels[int(first):int(last)]):
             label.y = self.y + (i*self.label_height)
             label.layout = self.layout
             if i == self.scroll.offset:
@@ -471,17 +477,25 @@ class ListBox(Widget):
             else:
                 label.color_id = self.color_id
             label.show()
+            
+        while last-first < (vis_labels): # pad list up to height.  
+            for i in range(0,(self.label_height)):
 
-        while last-first < vis_labels: # pad list up to height.
-            for i in range(0,self.label_height):
-
-                try:
-                    self.layout.window.addstr(self.y + (self.label_height*(last-first) + i), 
-                                          self.x, self.width*' ', 
-                                          curses.color_pair(self.color_id))
-                    last += 1
-                except curses.error:
-                    pass
+#                try:
+                sys.stderr.write("\n")
+                sys.stderr.write(str(self.label_height*(last-first)))
+                sys.stderr.write("\n") 
+                
+                self.layout.window.addstr(self.y + (self.label_height*(last-first) + i),
+                                          self.x,
+                                          self.width*' ',curses.color_pair(self.color_id))
+                # self.layout.window.addstr(self.y + (self.label_height*i), 
+                #                           self.x, self.width*' ', 
+                #                           curses.color_pair(self.color_id))
+            last += 1
+              
+                # except curses.error:
+                #     pass
 
 
 class TextBox(Widget):
