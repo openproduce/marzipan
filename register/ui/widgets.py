@@ -298,8 +298,12 @@ class ScrollDimension:
 
     def __init__(self, real_size, virtual_size,
         leading_context=0, trailing_context=0):
-        self.real_size = real_size
+        self.real_size = math.floor(real_size) 
+        sys.stderr.write("\n real size ")
+        sys.stderr.write(str(self.real_size))
         self.virtual_size = virtual_size
+        sys.stderr.write("\n virtual size ")
+        sys.stderr.write(str(self.virtual_size))
         self.base = 0
         self.offset = 0
         self.leading_context = leading_context
@@ -462,14 +466,23 @@ class ListBox(Widget):
         vis_labels = math.floor(self.height/self.label_height) 
         first = int(self.scroll.base) 
         last = (min(len(self.labels), first + vis_labels))
-        sys.stderr.write("\n")
-        sys.stderr.write("LAST")
-        sys.stderr.write(str(last))
-        sys.stderr.write("\n")
+        if self.label_height == 2:
+            sys.stderr.flush()
+            sys.stderr.write("\n last is ")
+            sys.stderr.write(str(last))
+            sys.stderr.write("\n first is ")
+            sys.stderr.write(str(first))
+            sys.stderr.write("\n vis labels is ")
+            sys.stderr.write(str(vis_labels))
+            sys.stderr.write("\n len labels is ")
+            sys.stderr.write(str(len(self.labels)))
+            sys.stderr.write("\n offset is ")
+            sys.stderr.write(str(self.scroll.offset))
+            sys.stderr.write("\n - \n")
         for i, label in enumerate(self.labels[int(first):int(last)]):
             label.y = self.y + (i*self.label_height)
             label.layout = self.layout
-            if i == self.scroll.offset:
+            if i == self.scroll.offset: 
                 if self.selected:
                     label.color_id = ACTIVE_SEL_COLOR
                 else:
@@ -478,25 +491,13 @@ class ListBox(Widget):
                 label.color_id = self.color_id
             label.show()
             
+            
         while last-first < (vis_labels): # pad list up to height.  
             for i in range(0,(self.label_height)):
-
-#                try:
-                sys.stderr.write("\n")
-                sys.stderr.write(str(self.label_height*(last-first)))
-                sys.stderr.write("\n") 
-                
                 self.layout.window.addstr(self.y + (self.label_height*(last-first) + i),
                                           self.x,
                                           self.width*' ',curses.color_pair(self.color_id))
-                # self.layout.window.addstr(self.y + (self.label_height*i), 
-                #                           self.x, self.width*' ', 
-                #                           curses.color_pair(self.color_id))
             last += 1
-              
-                # except curses.error:
-                #     pass
-
 
 class TextBox(Widget):
     """single-line text entry field with keyboard movements"""
