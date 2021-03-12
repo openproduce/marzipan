@@ -80,6 +80,7 @@ def print_customer_card(customer):
 
 
 def print_card_receipt(sale, paid, merchant_copy=False):
+    
     tex = _make_card_receipt_tex(sale, paid, merchant_copy)
 
     if merchant_copy:
@@ -102,14 +103,15 @@ def print_card_receipt(sale, paid, merchant_copy=False):
 def print_receipt(sale):
     tex = _make_receipt_tex(sale)
 
-    out = open('sale_receipt.tex', 'w')
-    out.writelines(tex)
+    out = open('sale_receipt.tex', 'w+t')
+    for line in tex:
+        out.write(line)
     out.flush()
     out.close()
 
-    out = tempfile.NamedTemporaryFile()
+    out = tempfile.NamedTemporaryFile(mode='w+t')
     for line in tex:
-        out.write(line.encode())
+        out.write(line)
     out.flush()
     _print_tex_file(out.name)
 
@@ -123,8 +125,9 @@ def _print_tex_file(fname):
     except:
         pass
     dev_null = open('/dev/null')
+    err_file = open('err2', 'w')
     os.chdir(os.path.realpath(os.path.dirname(fname)))
-    subprocess.call(['latex', fname], stdout=dev_null, stderr=dev_null)
+    subprocess.call(['latex', fname],stdout = err_file)
     try:
         dvi_file = fname + ".dvi"
         os.stat(dvi_file)
@@ -147,7 +150,7 @@ def _print_tex_file(fname):
 
 def _make_card_receipt_tex(sale, paid, merchant_copy=False):
     out = [
-        r"""\\nonstopmode
+r"""\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=1cm]{geometry}
 \\pagestyle{empty}
@@ -204,7 +207,7 @@ def _make_card_receipt_tex(sale, paid, merchant_copy=False):
 
 def _make_receipt_tex(sale):
     out = [
-        r"""\\nonstopmode
+        r"""\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=0cm,left=.25cm,right=.25cm]{geometry}
 \\pagestyle{empty}
