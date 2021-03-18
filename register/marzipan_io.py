@@ -113,7 +113,8 @@ def print_receipt(sale):
     for line in tex:
         out.write(line)
     out.flush()
-    _print_tex_file(out.name)
+#    _print_tex_file(out.name)
+    _print_tex_file('sale_receipt')
 
 
 def _print_tex_file(fname):
@@ -127,18 +128,18 @@ def _print_tex_file(fname):
     dev_null = open('/dev/null')
     err_file = open('err2', 'w')
     os.chdir(os.path.realpath(os.path.dirname(fname)))
-    subprocess.call(['latex', fname],stdout = err_file)
+    subprocess.call(['latex', fname + ".tex"],stdout = err_file)
     try:
         dvi_file = fname + ".dvi"
         os.stat(dvi_file)
     except:
-
         os.chdir(cwd)
         return False
-    subprocess.call(['dvips', fname], stdout=dev_null, stderr=dev_null)
+
+    subprocess.call(['dvips', fname + ".dvi"], stdout=err_file)
     subprocess.call(['lpr',
                      '-P'+config.get('receipt-printer'), fname+'.ps'],
-                    stdout=dev_null, stderr=dev_null)
+                    stdout=err_file)
     for ext in ['.dvi', '.aux', '.log', '.ps']:
         try:
             os.unlink(fname+ext)
@@ -153,9 +154,9 @@ def _make_card_receipt_tex(sale, paid, merchant_copy=False):
 r"""\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=1cm]{geometry}
-\\pagestyle{empty}
+\pagestyle{empty}
 \usepackage{epsfig}
-\\begin{document}
+\begin{document}
 \epsfig{file=logo.eps,width=4cm,height=1.5cm}
 \parindent=0pt
 \\vskip 0.2cm
@@ -210,25 +211,25 @@ def _make_receipt_tex(sale):
         r"""\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=0cm,left=.25cm,right=.25cm]{geometry}
-\\pagestyle{empty}
+\pagestyle{empty}
 \usepackage{epsfig}
-\\begin{document}
-\\hskip .75cm
-\\epsfig{file=logo.eps,width=4cm,height=1.5cm}
+\begin{document}
+\hskip .75cm
+\epsfig{file=logo.eps,width=4cm,height=1.5cm}
 \parindent=0pt
-\\vskip 0.2cm
-\\begin{center}
-{\small 1635 E. 55th St.}\n\n
-{\small Chicago, IL 60615}\n\n
-{\small (773) 496-4327}\n\n
+\vskip 0.2cm
+\begin{center}
+{\small 1635 E. 55th St.}\\
+{\small Chicago, IL 60615}\\
+{\small (773) 496-4327}\\
 www.openproduce.org\\\\
-\\vskip 0.3cm""", ]
+\vskip 0.3cm""", ]
     if sale.is_void == 1:
         out.append("{\Large \sf \\bf VOIDED SALE}\n\n")
     else:
         out.append("{\Large \sf \\bf SALE RECEIPT}\n\n")
     out.append("""\\end{center}
-    {\scriptsize Returns, exchanges, and refunds are allowed at manager's discretion and as required by law. Bargain items cannot be returned.  To comply with Chicago's health code, frozen and refrigerated items cannot be returned for a refund, and may only be exchanged for the same item.  On all other items, only the person who made the original purchase may request a refund.\par}\n\n
+    {\scriptsize Returns, exchanges, and refunds are allowed at manager's discretion and as required by law. Bargain items cannot be returned.  To comply with Chicago's health code, frozen and refrigerated items cannot be returned for a refund, and may only be exchanged for the same item.  On all other items, only the person who made the original purchase may request a refund.\par}
 \\begin{center}
 """)
     out.append(sale.time_ended.strftime("%m/%d/%y %H:%M:%S\n"))
@@ -556,18 +557,18 @@ def _make_tabhistory_tex(customer, tab_history):
     print((r"""\\nonstopmode
 \documentclass[12pt]{article}
 \usepackage[paperwidth=7cm,top=0cm,left=.25cm,right=.25cm]{geometry}
-\\pagestyle{empty}
+\pagestyle{empty}
 \usepackage{epsfig}
-\\begin{document}
-\\hskip .75cm
-\\epsfig{file=logo.eps,width=4cm,height=1.5cm}
+\begin{document}
+\hskip .75cm
+\epsfig{file=logo.eps,width=4cm,height=1.5cm}
 \parindent=0pt
-\\vskip 0.2cm
-\\begin{center}
+\vskip 0.2cm
+\begin{center}
 {\small 55th and Cornell, Chicago\\\\
 www.openproduce.org\\\\
 (773) 496--4327}
-\\vskip 0.3cm
+\vskip 0.3cm
 {\Large \sf \\bf TAB HISTORY} \\\\
 for customer: %s
 

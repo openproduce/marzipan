@@ -466,19 +466,6 @@ class ListBox(Widget):
         vis_labels = math.floor(self.height/self.label_height) 
         first = int(self.scroll.base) 
         last = (min(len(self.labels), first + vis_labels))
-        if self.label_height == 2:
-            sys.stderr.flush()
-            sys.stderr.write("\n last is ")
-            sys.stderr.write(str(last))
-            sys.stderr.write("\n first is ")
-            sys.stderr.write(str(first))
-            sys.stderr.write("\n vis labels is ")
-            sys.stderr.write(str(vis_labels))
-            sys.stderr.write("\n len labels is ")
-            sys.stderr.write(str(len(self.labels)))
-            sys.stderr.write("\n offset is ")
-            sys.stderr.write(str(self.scroll.offset))
-            sys.stderr.write("\n - \n")
         for i, label in enumerate(self.labels[int(first):int(last)]):
             label.y = self.y + (i*self.label_height)
             label.layout = self.layout
