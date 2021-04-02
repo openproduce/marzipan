@@ -1,0 +1,183 @@
+#!/usr/bin/env python
+
+########################################################################################
+#                                                                                      #
+#                              *** IMPORTANT NOTE ***                                  #
+#                                                                                      #
+# You must copy this file to config.py and change the placeholder values to your       #
+# secrets before running the application.  To find the values that need to be          #
+# changed, please search for the string "CHANGE_THIS."                                 #
+#                                                                                      #
+########################################################################################
+
+# This file is part of Marzipan, an open source point-of-sale system.
+# Copyright (C) 2015 Open Produce LLC
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import sys
+import os
+import getopt
+
+class _Option:
+    """configurable program setting"""
+    def __init__(self, is_cmdline, desc, short, has_arg, value):
+        self.is_cmdline = is_cmdline
+        self.desc = desc
+        self.short = short
+        self.has_arg = has_arg
+        self.value = value
+
+_options = {
+    # here are the values that need to be changed:
+    'db-user':
+        _Option(True, 'mysql db username', None, True, 'CHANGE_THIS_USERNAME'), 
+    'db-passwd':
+        _Option(True, 'mysql db password', None, True, 'CHANGE_THIS_PASSWORD'),
+    # if you are using the sample data, it assumes the names of these databases
+    # will be register_tape and inventory.  
+    'db-name-reg':
+        _Option(True, 'mysql db name - register tape', None, True, 'CHANGE_THIS_REGISTER_DATABASE_NAME'),
+    'db-name-inv':
+        _Option(True, 'mysql db name - inventory', None, True, 'CHANGE_THIS_INVENTORY_DATABASE_NAME'),
+    'globalpay-login':
+        _Option(True, 'globalpay login', None, True, 'CHANGE_THIS_LOGIN_NAME'),
+    'globalpay-password':
+        _Option(True, 'globalpay password', None, True, 'CHANGE_THIS_PASSWORD'),            
+    'globalpay-url':
+        # this url is something like "https://api.globalpay.com/GlobalPay/foo.asmx"
+        _Option(True, 'globalpay url', None, True, 'CHANGE_THIS_GLOBALPAY_URL'),        
+    'ippay-terminalid':
+        _Option(True, 'ippay terminal id', None, True, 'CHANGE_THIS_TERMINAL_ID'),
+    'ippay-url':
+        # this url is something like "https://gateway9.jetpay.com/jetpay"
+        _Option(True, 'ippay url', None, True, 'CHANGE_THIS_IPPAY_URL'),
+    'smtp-server':
+        # this url is something like "mail.example.com"
+        _Option(True, 'smtp server', None, True, 'CHANGE_THIS_MAIL_SERVER_URL'),
+    'receipt-printer':
+        _Option(True, 'receipt printer name', None, True, 'CHANGE_THIS_PRINTER_ID'),
+    'label-printer':
+        _Option(True, 'label printer name', None, True, 'CHANGE_THIS_LABEL_PRINTER_ID'),
+    'cc-processor':
+        # a company name from the list below
+        _Option(True, 'ippay, tnbci, or globalpay', None, True, 'CHANGE_THIS_CREDIT_CARD_PROCESSOR'),
+    'tnbci-login':
+        # this url is something like 'https://secure.tnbcigateway.com/api/bar.php'
+        _Option(True, 'tnbci login', None, True, 'CHANGE_THIS_TNBCI_LOGIN'),
+
+    'tnbci-password':
+        # this url is something like 'https://secure.tnbcigateway.com/api/bar.php'
+        _Option(True, 'tnbci password', None, True, 'CHANGE_THIS_TNBCI_PASSWORD'),
+
+    'tnbci-url':
+        # this url is something like 'https://secure.tnbcigateway.com/api/bar.php'
+        _Option(True, 'tnbci url', None, True, 'CHANGE_THIS_TNBCI_URL'),
+
+    # these are other options that might be interesting, but don't need to be
+    # changed.
+    'help':
+        _Option(True, 'dump usage info', 'h', False, None),
+
+    'cui-enable':
+        _Option(True, 'enable customer-facing display', None, False, None),
+    'cui-pipe-path':
+        _Option(True, 'pipe to customer UI', None, True, '/tmp/cuipipe'),
+
+    'db-init':
+        _Option(True, 'create db', None, False, None),
+    'db-import':
+        _Option(True, 'import price list', None, True, ''),
+    'db-mysql-path':
+        _Option(True, 'path to mysql shell', None, True, 'mysql'),
+    'db-mysql-admin':
+        _Option(True, 'mysql admin user', None, True, 'root'),
+    'db-host':
+        _Option(True, 'mysql db hostname', None, True, 'localhost'),
+        
+}
+
+def usage():
+    """print usage info to stdout. doesn't exit afterwards."""
+    print "marzipan.py [OPTIONS]"
+    print "point-of-sale terminal software\n"
+    for name in sorted(_options.keys()):
+        o = _options[name]
+        if o.is_cmdline:
+            o_str = ""
+            if o.short is not None:
+                o_str = "--%s, -%s"%(name, o.short)
+            else:
+                o_str = "--%s"%(name)
+            print "  %-24s %s"%(o_str, o.desc)
+    print
+
+def get(name):
+    """lookup option value. assume parse_cmdline() called."""
+    return _options[name].value
+
+def parse_cmdline(argv):
+    """assume program name stripped from argv"""
+    global _options
+
+    # build argument spec parameters for getopt.getopt.
+    short_opts = ''
+    long_opts = []
+    short_to_long = {}
+    for long_name in sorted(_options.keys()):
+        o = _options[long_name]
+        if o.is_cmdline:
+            if o.has_arg:
+                long_opts.append(long_name+'=')
+            else:
+                long_opts.append(long_name)
+            if o.short is not None:
+                short_to_long[o.short] = long_name
+                short_opts += o.short
+                if o.has_arg:
+                    short_opts += ':'
+
+    # call getopt and populate option values.
+    try:
+        [opts, rest] = getopt.getopt(argv, short_opts, long_opts)
+        for opt, value in opts:
+            opt_name = ''
+            if opt.startswith('--'):
+                opt_name = opt[2:]
+            elif opt.startswith('-'):
+                opt_name = short_to_long[opt[1:]]
+            else:
+                assert False, opt_name
+            o = _options[opt_name]
+            if o.has_arg:
+                o.value = value
+            else:
+                o.value = True
+    except getopt.GetoptError, e:
+        print "marzipan: %s"%(e)
+        usage()
+        sys.exit(1)
+
+    if rest:
+        print "marzipan: leftover command-line `%s'"%(rest)
+        usage()
+        sys.exit(1)
+    if get("help"):
+        usage()
+        sys.exit(0)
+
+if __name__ == "__main__":
+    parse_cmdline(sys.argv[1:])
+    for name in sorted(_options.keys()):
+        print "%-20s %s"%(name, _options[name].value)
