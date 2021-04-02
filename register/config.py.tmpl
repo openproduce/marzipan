@@ -110,8 +110,8 @@ _options = {
 
 def usage():
     """print usage info to stdout. doesn't exit afterwards."""
-    print "marzipan.py [OPTIONS]"
-    print "point-of-sale terminal software\n"
+    print("marzipan.py [OPTIONS]") 
+    print("point-of-sale terminal software\n") 
     for name in sorted(_options.keys()):
         o = _options[name]
         if o.is_cmdline:
@@ -120,7 +120,7 @@ def usage():
                 o_str = "--%s, -%s"%(name, o.short)
             else:
                 o_str = "--%s"%(name)
-            print "  %-24s %s"%(o_str, o.desc)
+            print("  %-24s %s"%(o_str, o.desc)) 
     print
 
 def get(name):
@@ -164,13 +164,13 @@ def parse_cmdline(argv):
                 o.value = value
             else:
                 o.value = True
-    except getopt.GetoptError, e:
-        print "marzipan: %s"%(e)
+    except getopt.GetoptError as e:
+        print("marzipan: %s"%(e)) 
         usage()
         sys.exit(1)
 
     if rest:
-        print "marzipan: leftover command-line `%s'"%(rest)
+        print("marzipan: leftover command-line `%s'"%(rest)) 
         usage()
         sys.exit(1)
     if get("help"):
@@ -180,4 +180,4 @@ def parse_cmdline(argv):
 if __name__ == "__main__":
     parse_cmdline(sys.argv[1:])
     for name in sorted(_options.keys()):
-        print "%-20s %s"%(name, _options[name].value)
+        print("%-20s %s"%(name, _options[name].value)) 
