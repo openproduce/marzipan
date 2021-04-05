@@ -115,7 +115,7 @@ def main():
          <div>The Spec column shows the estimated stock count for 'Speculate stock for date:' day.  Speculation is based on average # units sold per day for the last 14 days. The default date is for the next Thursday</div>
          <div>The New count field is meant to change an item's count after doing a manual count.  Deliveries should be logged under manage_prices.  Type a new count and press ENTER </div>
          <div style="clear: both; height: 15px;"> </div>'''
-    
+
     print '''<form name="options" action="catalog.py" method="get">'''
     options = idf.print_form()    # prints out all of the options for item displaying
 
@@ -150,16 +150,20 @@ def main():
              </thead><tbody id="item-stats">\n'''
 
     distributors = dict([(d.get_id(), d) for d in db.get_distributors()])
+    # Selected distributors
+    dist_selected = [d.get_id() for d in options['show_distributors']]
     for item in db.get_items(**options):
         # Need to make these floats b/c comparison b/t Decimal and float work strangely
         count = float(item.get_count())
         item_id = item.get_id()
         day7, day14, day30 = db.get_sales_in_multi_range(item_id,7,14,30)
         stock_strings = ['%.2f'%day7,'%.2f'%day14,'%.2f'%day30]
-        dist_list = item.get_distributors()     
+        dist_list = item.get_distributors()
+        if options['hide_additional_distributors']:
+            dist_list = [d for d in dist_list if d.get_distributor().get_id() in dist_selected]
         dist_count = len(dist_list)
-        
-        for i in range(max(1,dist_count)):   # need the max in case the item has no distributors            
+
+        for i in range(max(1,dist_count)):   # need the max in case the item has no distributors
             row_color = ""
             if count < -10.0:
                 row_color = "na"
@@ -170,9 +174,9 @@ def main():
             elif count < day14:
                 row_color = "low"
             print '<tr id="tr_%d_%.2f" class="%s">' % (item_id, day14,row_color)
-            
+
             print '<div class="div_%d">' % (item_id)
-        
+
             if dist_count == 0:  # don't have any distributors so we just print blanks in first two spots
                 print '''<td> - &nbsp; </td> <td> - &nbsp; </td>'''
             else:
@@ -181,7 +185,7 @@ def main():
                 case_str = '''%.2f''' % d_i.get_case_size()
                 price_str = '''$%.2f''' % d_i.get_wholesale_price()
                 print '''<td>''',str(dist),'(',case_str,' ',d_i.get_case_unit(),' ',price_str,') </td> <td>',d_i.get_dist_item_id(),' </td>'''
-        
+
             print '''<td style='padding-left: 1em;'>''',str(item),'</td>'''
             print '''<td>''',item.get_size_str(),'''</td>'''
             print '''<td>''',item.get_price_str(),'''</td>'''
@@ -206,7 +210,7 @@ def main():
             if not item.get_is_discontinued():
                 print '''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,)
             else:
-                print '''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,)                                             
+                print '''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,)
             print '''</div>'''
             print '''</tr>\n'''
     print '''</tbody></table>\n'''

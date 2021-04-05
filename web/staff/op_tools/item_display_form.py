@@ -10,12 +10,13 @@
 
 import op_db_library as db
 
-def init(form, discontinued=False, categories=False, distributors=False):
-    global input_form, discontinued_option, categories_option, distributors_option
+def init(form, discontinued=False, categories=False, distributors=False, additional_distributors=False):
+    global input_form, discontinued_option, categories_option, distributors_option, additional_distributors_option
     input_form = form
     discontinued_option = discontinued
     categories_option = categories
     distributors_option = distributors
+    additional_distributors_option = additional_distributors
 
 def print_javascript():
     if categories_option:
@@ -47,7 +48,7 @@ def print_categories():
         print '''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True" checked>All </input> <br />'''
     else:
         print '''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True">All </input> <br />'''
-    print'''
+    print '''
 <table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">'''
     hide_categories = []   # switching to displaying categories
 #    hide_categories = db.get_categories()
@@ -84,7 +85,7 @@ def print_distributors():
     dists = []
 
     print '''<table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">'''
-    
+
     for i,dist in enumerate(db.get_distributors()):
         if i % 5 == 0:
             if i> 0:
@@ -107,7 +108,7 @@ def print_distributors():
         print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True"/></td>''' % ("No Distributor", "No Distributor")
         hide_distributorless = True
     print '</tr></table><br />'
-    
+
     return dists, hide_distributorless
 
 def print_discontinued():
@@ -125,14 +126,27 @@ def print_discontinued():
         m_discontinued = input_form.getvalue("move_discontinued")
     else:
         m_discontinued = False
-    
+
     if m_discontinued:
         print '''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" checked/><br/>'''
     else:
         print '''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" /><br/>'''
 
     return h_discontinued,m_discontinued
-    
+
+def print_additional_distributors():
+    if "hide_additional_distributors" in input_form:
+        ha_distributors = input_form.getvalue("hide_additional_distributors")
+    else:
+        ha_distributors = False
+
+    if ha_distributors:
+        print '''Hide additional distributors?<input type="checkbox" name="hide_additional_distributors" value="True" checked/><br />'''
+    else:
+        print '''Hide additional distributors?<input type="checkbox" name="hide_additional_distributors" value="True" /><br />'''
+
+    return ha_distributors
+
 def print_form():
     discont = False
     move = False
@@ -140,13 +154,17 @@ def print_form():
     hide_distributors=[]
     hide_distributorless = False
     hide_categoryless = False
+    hide_additional_distributors = False
 
     if discontinued_option:
         discont,move = print_discontinued()
 
     if categories_option:
         show_categories,hide_categoryless = print_categories()
-    
+
     if distributors_option:
         show_distributors, hide_distributorless = print_distributors()
-    return {'hide_discontinued' : discont, 'show_categories' : show_categories, 'show_distributors' : show_distributors, 'hide_distributorless' : hide_distributorless, 'hide_categoryless' : hide_categoryless, 'move_discontinued':move}
+
+    if additional_distributors_option:
+        hide_additional_distributors = print_additional_distributors()
+    return {'hide_discontinued' : discont, 'show_categories' : show_categories, 'show_distributors' : show_distributors, 'hide_distributorless' : hide_distributorless, 'hide_categoryless' : hide_categoryless, 'move_discontinued':move, 'hide_additional_distributors':hide_additional_distributors }
