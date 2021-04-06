@@ -31,15 +31,21 @@ def main():
         print '''<input type="text" id="search" name="search" value="%s" />''' % (search)
     print '''<input type="submit" value="Search" />'''
     print '''</form>'''
-        
+
     if search != None:
         results = db.search_for_item(search)
-        print '<table><thead><tr><th>SKU</th><th>Name</th></tr></thead>'
+        print '<table border="1"><thead><tr><th>SKU</th><th>Name</th><th>Price</th><th>Count</th><th>Active</th></tr></thead>'
         print '<tbody>'
         for item in results:
             itemid = item.get_id()
+            price_str = item.get_price_str()
+            count = item.get_count() # current number in stock
+            is_active = "Yes" if not item.get_is_discontinued() else "No"
             print '<tr><td>',itemid,'</td>'
             print '<td><a href="%s" target="_blank"> %s </a></td>' % (db.get_item_info_page_link(itemid), item)
+            print '<td>', price_str, '</td>'
+            print '<td style="text-align:right">', count, '</td>'
+            print '<td style="text-align:right">', is_active, '</td>'
             print '</tr>'
         print '</tbody></table>'
     print '</body></html>'
