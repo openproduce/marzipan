@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # manage_prices.py
 # Patrick McQuighan
 
@@ -11,26 +11,26 @@ cgitb.enable()
 colspan = 13   # number of columns for a given item's row, i.e. doesn't include PriceID or OP Price fields
 # NOTE  this value is hardcoded into add_items_js.py
 def print_headers():
-    print '''Content-Type: text/html\n\n'''
-    print '''<html><head>
+    print('''Content-Type: text/html\n\n''')
+    print('''<html><head>
     <title>Open Produce Price Manager</title>
 
     <link rel="stylesheet" type="text/css" href="../../common/tools.css" />
     <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>\n
     <script type="text/javascript" src="../../common/sorttable.js"></script>\n
     <script type="text/javascript" src="../../common/fix_table_headers.js"></script>
-<script type="text/javascript">'''
+<script type="text/javascript">''')
     # The following is just to remove whitespace and &nbsp's from stuff
-    print '''
+    print('''
     function trim(str) {
        return str.replace(/^[\s]+/g,'').replace(/[\s]+$/g,'');
-    }'''
+    }''')
     # The following array is needed so that the when an item is split it will have the dropdown to change sale units
-    print '''units = new Array();'''
+    print('''units = new Array();''')
     for i,unit in enumerate(db.get_units()):
-        print '''units[%d] = '%s';''' % (i, str(unit))
+        print('''units[%d] = '%s';''' % (i, str(unit)))
 
-    print '''
+    print('''
     function handlePriceChange(e){
 		if (e.which == 13) {
                      var p_id = parseInt(this.id);
@@ -57,7 +57,7 @@ def print_headers():
          function(data){
          }, 'text');
    }
-  
+
     function handleGroupChange(e){
                 if (e.which == 13) {
                    var item = parseInt(this.id);
@@ -66,7 +66,7 @@ def print_headers():
                      function(data){
                        if(data.indexOf('Error:') == -1){
                        // data contains old_price_id, [1] is the number of items with a given price
-                         data = data.split(',');    
+                         data = data.split(',');
                          updateRows(item,data,newid);
                        }
                        else{
@@ -95,10 +95,10 @@ def print_headers():
 					    $('#'+id+'_amt').html(data);
                                         }
                                         day14 = parseFloat($('#tr_'+id).attr('title'))
-                                         
+
                                     }
 				}, 'text');
-                         
+
 		}
     }
 
@@ -143,7 +143,7 @@ def print_headers():
                          }
                          else { alert(data);}
                       }, 'text');
-            } 
+            }
     }
 
     function handleCaseCostChange(e){
@@ -161,7 +161,7 @@ def print_headers():
                       function(data){
                          ditem_box.disabled = false;
                          if(data.indexOf('Error:') == -1) {
-                             $(ditem_box).removeClass('default').removeClass('submitting').addClass('complete'); 
+                             $(ditem_box).removeClass('default').removeClass('submitting').addClass('complete');
                              updateMargins(price);
                          }
                          else { alert(data);}
@@ -184,14 +184,14 @@ def print_headers():
            }
            newrow += '</select></td>';
 
-           newrow += '<td ''',
-    print '''colspan="%d" class="td"> <table id="'+newid+'_table" cellspacing=0 cellpadding=0></table></td></tr>' ''' % (colspan)
-    print '''
+           newrow += '<td ''', end='')
+    print('''colspan="%d" class="td"> <table id="'+newid+'_table" cellspacing=0 cellpadding=0></table></td></tr>' ''' % (colspan))
+    print('''
            $('#main').append(newrow);
            $('.price').keypress(handlePriceChange);
          }
          $('#'+newid+'_table').append($('.'+item+'_tr'));
-                        
+
         updateMargins(newid);
 
         if (parseInt(data[1]) == 0){
@@ -208,10 +208,10 @@ def print_headers():
                else { alert(data);}
             }, 'text');
     }
- 
+
     function updateMargins(price){
         $.post('update_prices.py', {action: 'query', price_id: price},
-            function(data){                                 
+            function(data){
                if(data.indexOf('Error:') != -1){
                    alert(data);
                }
@@ -228,7 +228,7 @@ def print_headers():
                       } else if(margin <= 30) {
                          $(tagPrefix+'margin').attr('class','mid');
                       } else{
-                         $(tagPrefix+'margin').attr('class','good');                 
+                         $(tagPrefix+'margin').attr('class','good');
                       }
                    }
                }
@@ -242,7 +242,7 @@ def print_headers():
           function(data){
             if(data.indexOf('Error:') == -1){
                // data contains old_price_id, [1] is the number of items with a given price
-               data = data.split(',');    
+               data = data.split(',');
                newid = parseInt(data[3]);
                updateRows(item, data, newid);
             }
@@ -261,7 +261,7 @@ def print_headers():
               width = $('#item-stats').children(':first').children().eq(idx).css('width');
             }
             else {
-              // Since we have a table within the first table (at idx 3) we need to get a child from that table 
+              // Since we have a table within the first table (at idx 3) we need to get a child from that table
               width = $('.inner_table:first').children(':first').children().eq(idx-3).css('width');
             }
             $(th).css('width',width);
@@ -278,29 +278,29 @@ def print_headers():
 
 
 </script>
-'''
+''')
     idf.print_javascript()
-    print '''
-    </head>'''
+    print('''
+    </head>''')
 
 def main():
     form = cgi.FieldStorage()
     idf.init(form,discontinued=True,distributors=True,categories=True)
     print_headers()
-    print '''
-<body>'''
-    print '''
+    print('''
+<body>''')
+    print('''
          <div>Click table headers to sort</div>
          <div>To change a price, enter the new price in the text field and hit ENTER </div>
          <div>To change an item's price group, enter the new group and hit ENTER </div>
          <div>To split an item from the given group click the 'split' button. It will be given a new price_id </div>
          <div>To log a delivery select the appropriate distributor from the dropdown, type in the number delievered (positive or negative integer) and press ENTER </div>
-         <div style="clear: both; height: 15px;"> </div>'''
-    print '''<form name="options" action="manage_prices.py" method="get">'''
+         <div style="clear: both; height: 15px;"> </div>''')
+    print('''<form name="options" action="manage_prices.py" method="get">''')
     options = idf.print_form()
-    print '''<input type="submit" value="Change options" /> </form>'''
-    print '''<br><br>'''
-    print '''<table border=0 id="main" class="sortable" cellspacing=0 cellpadding=0>
+    print('''<input type="submit" value="Change options" /> </form>''')
+    print('''<br><br>''')
+    print('''<table border=0 id="main" class="sortable" cellspacing=0 cellpadding=0>
              <thead class="col-header">
              <th class="th">Price ID </th>
              <th class="th">OP Price</th>
@@ -319,8 +319,8 @@ def main():
              <th class="th">Change P_ID</th>
              <th class="th">Split</th>
              <th class="th">Stocked</th>
-             </thead><tbody id="item-stats">\n'''
-    
+             </thead><tbody id="item-stats">\n''')
+
     cur_price = -1
     cur_item = -1
 
@@ -332,40 +332,40 @@ def main():
         if cur_price != price_id:
             if cur_price != -1:
                 # end previous row
-                print '</tbody>'
-                print '</table></td></tr>'
-            print '<tr class="color-row" id="%d_price"><td class="td">%d</td><td class="td">$<input type="text" class="price" id="%d_price_input" size="3" value="%.2f"></input></td>'  % (price_id, price_id, price_id, price.get_unit_cost())
-        
-            print '''<td class="td"> <select class="saleunit" id="%d_sale_unit" onChange="setPriceSaleUnit(%d)">''' % (price_id,price_id)
+                print('</tbody>')
+                print('</table></td></tr>')
+            print('<tr class="color-row" id="%d_price"><td class="td">%d</td><td class="td">$<input type="text" class="price" id="%d_price_input" size="3" value="%.2f"></input></td>'  % (price_id, price_id, price_id, price.get_unit_cost()))
+
+            print('''<td class="td"> <select class="saleunit" id="%d_sale_unit" onChange="setPriceSaleUnit(%d)">''' % (price_id,price_id))
             for unit in units:
-                print '''<option value="%d"''' % (unit[0],)
+                print('''<option value="%d"''' % (unit[0],))
                 if unit[0] == price.get_sale_unit_id():
-                    print ''' selected>'''
+                    print(''' selected>''')
                 else:
-                    print '''>'''
-                print unit[1], ''' </option>'''
+                    print('''>''')
+                print(unit[1], ''' </option>''')
 
-            print '''</select></td>'''
+            print('''</select></td>''')
 
-            print'<td colspan="%d" class="td"><table id="%d_table" cellspacing=0 cellpadding=0>' % (colspan,price_id)
-            print '<tbody class="inner_table">'
+            print('<td colspan="%d" class="td"><table id="%d_table" cellspacing=0 cellpadding=0>' % (colspan,price_id))
+            print('<tbody class="inner_table">')
             cur_price = price_id
-        print '<tr class="%d_tr">' % (item_id,)
-        
+        print('<tr class="%d_tr">' % (item_id,))
+
         if cur_item != item_id:
             item_dist_count = item.get_distributor_count()
-            print '''<td rowspan='%s' id='%d_td' width='400' style='padding-left: 1em;'> %s </td>''' %  (item_dist_count, item_id, str(item))
-            print '''<td rowspan='%s' width='80'> <a href='%s' onclick="window.open(this.href,'_blank'); return false;">%d</a> </td>''' % (item_dist_count,db.get_item_info_page_link(item_id),item_id)
-            print '''<td rowspan='%s' width='80' id="%d_amt"> %d </td>''' % (item_dist_count,item_id,item.get_count())
-            print '''<td rowspan="%d" width='100'><input class="amt" id="%d_in" name="%d_in" size="2"/>''' % (item_dist_count,item_id, item_id)
-            print '''<select id="%d_dist_in" name="%d_dist_in">''' % (item_id, item_id)
+            print('''<td rowspan='%s' id='%d_td' width='400' style='padding-left: 1em;'> %s </td>''' %  (item_dist_count, item_id, str(item)))
+            print('''<td rowspan='%s' width='80'> <a href='%s' onclick="window.open(this.href,'_blank'); return false;">%d</a> </td>''' % (item_dist_count,db.get_item_info_page_link(item_id),item_id))
+            print('''<td rowspan='%s' width='80' id="%d_amt"> %d </td>''' % (item_dist_count,item_id,item.get_count()))
+            print('''<td rowspan="%d" width='100'><input class="amt" id="%d_in" name="%d_in" size="2"/>''' % (item_dist_count,item_id, item_id))
+            print('''<select id="%d_dist_in" name="%d_dist_in">''' % (item_id, item_id))
             for d in item.get_distributors():
-                print '''<option value="%s"> %s </option>''' % (d.get_dist_id(),d.get_distributor())
-            print '''</select>'''
-            print '''</td>\n'''
-        
-        print '''<td width="100"> %s </td>''' % (dist,)
-        print '''<td width="100"> <input class="ditemid" size="10" value="%s" id="%d_%d_ditemid" /> </td>''' % (dist_item.get_dist_item_id(),item.get_id(), dist.get_id())
+                print('''<option value="%s"> %s </option>''' % (d.get_dist_id(),d.get_distributor()))
+            print('''</select>''')
+            print('''</td>\n''')
+
+        print('''<td width="100"> %s </td>''' % (dist,))
+        print('''<td width="100"> <input class="ditemid" size="10" value="%s" id="%d_%d_ditemid" /> </td>''' % (dist_item.get_dist_item_id(),item.get_id(), dist.get_id()))
 
         each_cost = dist_item.get_each_cost()
         op_price = item.get_price()
@@ -376,31 +376,31 @@ def main():
         else:
             margin = 100
 
-	print '''<td width="100">$<input class="casecost" size="6" value="%.2f" id="%d_%d_%d_casecost" /></td>''' % (dist_item.get_wholesale_price(), item.get_id(), dist.get_id(), price_id)
-        print '''<td width="80" ><input class="casesize" size="5" value="%.2f" id="%d_%d_%d_casesize"/> </td>''' % (dist_item.get_case_size(), item.get_id(), dist.get_id(), price_id)
-        print '''<td width="80">%s </td>''' % (dist_item.get_case_unit(),)
+        print('''<td width="100">$<input class="casecost" size="6" value="%.2f" id="%d_%d_%d_casecost" /></td>''' % (dist_item.get_wholesale_price(), item.get_id(), dist.get_id(), price_id))
+        print('''<td width="80" ><input class="casesize" size="5" value="%.2f" id="%d_%d_%d_casesize"/> </td>''' % (dist_item.get_case_size(), item.get_id(), dist.get_id(), price_id))
+        print('''<td width="80">%s </td>''' % (dist_item.get_case_unit(),))
 
-	print '''<td width="80" id="%d_%d_each">$%.2f </td>''' % (item_id,dist.get_id(),each_cost)
+        print('''<td width="80" id="%d_%d_each">$%.2f </td>''' % (item_id,dist.get_id(),each_cost))
         if margin <= 20:
-            print '''<td width="80" class="bad" id="%d_%d_margin"> %.0f%% &nbsp;</td>''' % (item_id,dist.get_id(), margin)
+            print('''<td width="80" class="bad" id="%d_%d_margin"> %.0f%% &nbsp;</td>''' % (item_id,dist.get_id(), margin))
         elif margin <= 30:
-            print '''<td width="80" class="mid" id="%d_%d_margin"> %.0f%% &nbsp; </td>''' % (item_id,dist.get_id(), margin)
+            print('''<td width="80" class="mid" id="%d_%d_margin"> %.0f%% &nbsp; </td>''' % (item_id,dist.get_id(), margin))
         else:
-            print '''<td width="80" class="good" id="%d_%d_margin"> %.0f%% &nbsp; </td>''' % (item_id,dist.get_id(), margin)
+            print('''<td width="80" class="good" id="%d_%d_margin"> %.0f%% &nbsp; </td>''' % (item_id,dist.get_id(), margin))
 
         if cur_item != item_id:
-            print '''<td rowspan='%s' width="100"><input class="group" id="%d_group" type="text" size="3"></input></td>''' % (item_dist_count,item_id)
-            print '''<td rowspan='%s' width="80"><div onClick="split(%d)">split</div></td>''' % (item_dist_count,item_id)
+            print('''<td rowspan='%s' width="100"><input class="group" id="%d_group" type="text" size="3"></input></td>''' % (item_dist_count,item_id))
+            print('''<td rowspan='%s' width="80"><div onClick="split(%d)">split</div></td>''' % (item_dist_count,item_id))
             if not item.get_is_discontinued():
-                print '''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,)
+                print('''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,))
             else:
-                print '''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,)                                             
+                print('''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,))
             cur_item = item_id
-        print '''</tr>\n'''
+        print('''</tr>\n''')
 
-    print '</table></td></tr>'
-    print '''</tbody></table>\n'''
-    print '''</body></html>'''
+    print('</table></td></tr>')
+    print('''</tbody></table>\n''')
+    print('''</body></html>''')
 
 
 if __name__ == "__main__":

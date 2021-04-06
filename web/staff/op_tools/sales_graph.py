@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # sales_graph.py
 # Patrick McQuighan
 # Displays a png graph with sales between 9am-11pm, 11pm-midnight, midnight-4am
@@ -49,7 +49,7 @@ def make_graph(dates, vals, name):
     # Make sure we don't have negative values on the y-axis
     ymin,ymax = ax.get_ylim()
     ax.set_ylim(0,ymax)
-    
+
     ax.set_title(name)
     ax.grid(True)
     ax.legend(loc=0,ncol=2,prop=FontProperties(size='small'))
@@ -63,15 +63,15 @@ def find_index(hour):
             return i
 
 def get_values(value_type):
-    '''Returns a list containing 1 list for each hour range.  Each inner list contains a 14-day moving average of 
+    '''Returns a list containing 1 list for each hour range.  Each inner list contains a 14-day moving average of
     values for each day since store opening'''
-    hours = [9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3]    
-    
+    hours = [9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3]
+
     values = [[] for i in hour_idx_range]
     dates = []
 
     day_infos = db.get_daily_sales()
-    window_size = 14   # number of days to use in running avg 
+    window_size = 14   # number of days to use in running avg
     running_avgs = [[0.0 for w in range(window_size)] for i in hour_idx_range]   # indexed by hour-range-index then 0 to window_size-1
     window_idx = 0
     for i,key in enumerate(sorted(day_infos.keys())):   # go through days in order
@@ -79,7 +79,7 @@ def get_values(value_type):
         daily_sales =  day_info.get_gross_sales()
 
         dates.append(day_info.get_date())
-        
+
         hourly_sales = [0.0 for h in hour_idx_range]
 
         for hour_info in day_info.get_hourly_sales(hours):
@@ -101,7 +101,7 @@ def get_values(value_type):
 
         for idx,val in enumerate(to_append):
             values[idx].append(val)
-        
+
     return dates,values
 
 def accumulate(values):
@@ -116,7 +116,7 @@ def accumulate(values):
     return acc
 
 def main():
-    print 'Content-Type: image/png\n'
+    print('Content-Type: image/png\n')
     form = cgi.FieldStorage()
     graph = form.getvalue('graph')
     dates,vals = get_values (graph)

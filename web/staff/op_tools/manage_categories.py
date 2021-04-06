@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # manage_categories.py
 # This page lets the user add new categories as well as modify information about old ones
 
 import op_db_library as db
 
-print '''Content-Type: text/html\n\n'''
-print '''<html><head>
+print('''Content-Type: text/html\n\n''')
+print('''<html><head>
     <title>Open Produce Category Manager</title>
     <style type="text/css">
       * { font-family: sans-serif; font-size: 12px;}
@@ -30,7 +30,7 @@ print '''<html><head>
              $('td[onClick*=editCategory]:contains('+catname+')', window.parent.main.document).html($('td[onClick*=editCategory]:contains('+catname+')', window.parent.main.document).html().replace(catname,''));
            }
          }, 'text');
-    } 
+    }
     function addCategory() {
        var catname = $('#newCatName').val();
        if (catname != ''){
@@ -58,24 +58,24 @@ print '''<html><head>
 
    </script>
     </head>
-    '''
+    ''')
 
-print '''<body>
+print('''<body>
 <table border=0  cellspacing=2 cellpadding=0>
 <thead><tr>
 <th>Category</th>
 <th>Remove</th>
 </thead>
 <tbody id="categories">
-'''
+''')
 
 for cat in db.get_categories():
-    print '''<tr class="%d_cat_tr" id="%d_cat_tr"><td>%s</td>''' % (cat.get_id(), cat.get_id(),cat.get_name())
-    print '''<td><input type="button" onClick="removeCategory(%d,'%s')" value="remove" /></td>''' % (cat.get_id(),cat.get_name())
-    print '''</tr>'''
-print '''</tbody></table>'''
+    print('''<tr class="%d_cat_tr" id="%d_cat_tr"><td>%s</td>''' % (cat.get_id(), cat.get_id(),cat.get_name()))
+    print('''<td><input type="button" onClick="removeCategory(%d,'%s')" value="remove" /></td>''' % (cat.get_id(),cat.get_name()))
+    print('''</tr>''')
+print('''</tbody></table>''')
 
-print '''<br /><div id="new"><tr><td><input id='newCatName' type="text" size="10" value="" /></td><td><input type="button" onClick="addCategory()" value="add new" /></td>'''
-print '''</div>'''
+print('''<br /><div id="new"><tr><td><input id='newCatName' type="text" size="10" value="" /></td><td><input type="button" onClick="addCategory()" value="add new" /></td>''')
+print('''</div>''')
 
-print '''</body></html>'''
+print('''</body></html>''')

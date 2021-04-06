@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # account.py
 # Patrick McQuighan
 # Replacement for catalog.pl written in Python and using the new database as of 11/2010
@@ -10,29 +10,29 @@ def print_results(results,order=None):
     corresponding to the payment type'''
     for date in sorted(results.keys()):
         row = results[date]
-        print '<tr>'
-        print '<td><b><a href="accounts_daily.py?year=%d&month=%d">%s</a></b></td>' % (date.year,date.month,date.strftime('%Y-%m'))
+        print('<tr>')
+        print('<td><b><a href="accounts_daily.py?year=%d&month=%d">%s</a></b></td>' % (date.year,date.month,date.strftime('%Y-%m')))
         if order != None:
             for o in order:
                 if row.has_key(o):
-                    print '<td>%s</td>' % (row[o])
+                    print('<td>%s</td>' % (row[o]))
                 else:
-                    print '<td>0</td>'
+                    print('<td>0</td>')
         else:
-            print '<td>%s</td>' % (row)
-        print '</tr>'
+            print('<td>%s</td>' % (row))
+        print('</tr>')
 
-print 'Content-Type: text/html\n'
-print '''<html>
+print('Content-Type: text/html\n')
+print('''<html>
  <head>
     <title>OP Monthly Accounts</title>
 
 </head>
- <body>'''
+ <body>''')
 
 sales,payments,cash = db.get_accounts('monthly')
 
-print '''
+print('''
 <table border='1'> <caption>Total Sales</caption>
  <thead>
  <tr>
@@ -46,15 +46,15 @@ print '''
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
 print_results(sales, ['cash','check','debit/credit','tab','link','total'])
-print '''
+print('''
 </tbody>
 
 </table>
-'''
+''')
 
-print '''
+print('''
 <table border='1'> <caption>Tab Payments</caption>
 <thead>
  <tr>
@@ -66,15 +66,15 @@ print '''
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
 print_results(payments, ['cash','check','debit/credit','link'])
 
-print'''
+print('''
 </tbody>
 
-</table>'''
+</table>''')
 
-print '''
+print('''
 <table border='1'> <caption>Total Cash In (including tab payments)</caption>
 <thead>
  <tr>
@@ -83,11 +83,11 @@ print '''
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
 print_results(cash)
-print '''
+print('''
 </tbody>
 
-</table>'''
+</table>''')
 
-print '</body></html>'
+print('</body></html>')

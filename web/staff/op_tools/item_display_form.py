@@ -19,7 +19,7 @@ def init(form, discontinued=False, categories=False, distributors=False):
 
 def print_javascript():
     if categories_option:
-        print '''
+        print('''
          <script type="text/javascript">
          function allCategories(allbox){
             checked = allbox.checked;
@@ -28,9 +28,9 @@ def print_javascript():
               });
          }
          </script>
-         '''
+         ''')
     if distributors_option:
-        print '''
+        print('''
          <script type="text/javascript">
          function allDistributors(allbox){
             checked = allbox.checked;
@@ -39,75 +39,75 @@ def print_javascript():
               });
          }
          </script>
-         '''
+         ''')
 
 def print_categories():
-    print '''<br /> Select Categories to display:'''
+    print('''<br /> Select Categories to display:''')
     if "allCats" in input_form:
-        print '''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True" checked>All </input> <br />'''
+        print('''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True" checked>All </input> <br />''')
     else:
-        print '''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True">All </input> <br />'''
-    print'''
-<table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">'''
+        print('''<input name="allCats" type="checkbox" onClick="allCategories(this)" value="True">All </input> <br />''')
+    print('''
+<table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">''')
     hide_categories = []   # switching to displaying categories
 #    hide_categories = db.get_categories()
     for i,cat in enumerate(db.get_categories()):
         if i % 5 == 0:
             if i> 0:
-                print '''</tr>'''
-            print '''<tr>'''
+                print('''</tr>''')
+            print('''<tr>''')
 
         test_str = "cat_%s" % str(cat)
         if test_str in input_form:
-            print '''<td>%s</td><td style="border-right: 1px solid #999"><input class="categorybox" type="checkbox" name="cat_%s" value="True" checked/></td>''' % (cat,cat)
+            print('''<td>%s</td><td style="border-right: 1px solid #999"><input class="categorybox" type="checkbox" name="cat_%s" value="True" checked/></td>''' % (cat,cat))
             hide_categories.append(cat)
         else:
-            print '''<td>%s</td><td style="border-right: 1px solid #999"><input  class="categorybox" type="checkbox" name="cat_%s" value="True" /></td>''' % (cat, cat)
+            print('''<td>%s</td><td style="border-right: 1px solid #999"><input  class="categorybox" type="checkbox" name="cat_%s" value="True" /></td>''' % (cat, cat))
     if (i+1) % 5 == 0:
-        print '''</tr><tr>'''
+        print('''</tr><tr>''')
     if "cat_No Category" in input_form:
-        print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="categorybox" type="checkbox" name="cat_%s" value="True" checked/></td>''' % ("No Category", "No Category")
+        print('''<td>%s</td> <td style="border-right: 1px solid #999"><input class="categorybox" type="checkbox" name="cat_%s" value="True" checked/></td>''' % ("No Category", "No Category"))
         hide_categoryless = False
     else:
-        print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="categorybox"  type="checkbox" name="cat_%s" value="True"/></td>''' % ("No Category", "No Category")
+        print('''<td>%s</td> <td style="border-right: 1px solid #999"><input class="categorybox"  type="checkbox" name="cat_%s" value="True"/></td>''' % ("No Category", "No Category"))
         hide_categoryless = True
 
-    print '''</tr></table>'''
+    print('''</tr></table>''')
     return hide_categories,hide_categoryless
 
 def print_distributors():
-    print '''<br/><br/>Select distributors to display:'''
+    print('''<br/><br/>Select distributors to display:''')
     if "allDists" in input_form:
-        print '''<input name="allDists" type="checkbox" onClick="allDistributors(this)" value="True" checked>All </input><br/>'''
+        print('''<input name="allDists" type="checkbox" onClick="allDistributors(this)" value="True" checked>All </input><br/>''')
     else:
-        print '''<input name="allDists" type="checkbox" onClick="allDistributors(this)" value="True">All </input><br/>'''
+        print('''<input name="allDists" type="checkbox" onClick="allDistributors(this)" value="True">All </input><br/>''')
     dists = []
 
-    print '''<table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">'''
-    
+    print('''<table cellspacing=0 cellpadding=2 style="border-top: 1px solid #999; border-left: 1px solid #999;">''')
+
     for i,dist in enumerate(db.get_distributors()):
         if i % 5 == 0:
             if i> 0:
-                print '''</tr>'''
-            print '''<tr>'''
+                print('''</tr>''')
+            print('''<tr>''')
         test_str = "dist_%s" % str(dist)
         if test_str in input_form:
             dists.append(dist)
-            print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True" checked/></td>''' % (dist,dist)
+            print('''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True" checked/></td>''' % (dist,dist))
         else:
-            print '''<td>%s</td><td  style="border-right: 1px solid #999"> <input class="distributorbox" type="checkbox" name="dist_%s" value="True"/> </td>''' % (dist,dist)
+            print('''<td>%s</td><td  style="border-right: 1px solid #999"> <input class="distributorbox" type="checkbox" name="dist_%s" value="True"/> </td>''' % (dist,dist))
 
     if (i+1) % 5 == 0:
-        print '''</tr><tr>'''
+        print('''</tr><tr>''')
     test_str = "dist_No Distributor"
     if test_str in input_form:
-        print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True" checked/></td>''' % ("No Distributor", "No Distributor")
+        print('''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True" checked/></td>''' % ("No Distributor", "No Distributor"))
         hide_distributorless = False
     else:
-        print '''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True"/></td>''' % ("No Distributor", "No Distributor")
+        print('''<td>%s</td> <td style="border-right: 1px solid #999"><input class="distributorbox" type="checkbox" name="dist_%s" value="True"/></td>''' % ("No Distributor", "No Distributor"))
         hide_distributorless = True
-    print '</tr></table><br />'
-    
+    print('</tr></table><br />')
+
     return dists, hide_distributorless
 
 def print_discontinued():
@@ -117,22 +117,22 @@ def print_discontinued():
         h_discontinued = False
 
     if h_discontinued:
-        print '''Hide discontinued items?<input type="checkbox" name="hide_discontinued" value="True" checked/><br />'''
+        print('''Hide discontinued items?<input type="checkbox" name="hide_discontinued" value="True" checked/><br />''')
     else:
-        print '''Hide discontinued items?<input type="checkbox" name="hide_discontinued" value="True"/><br />'''
+        print('''Hide discontinued items?<input type="checkbox" name="hide_discontinued" value="True"/><br />''')
 
     if "move_discontinued" in input_form:
         m_discontinued = input_form.getvalue("move_discontinued")
     else:
         m_discontinued = False
-    
+
     if m_discontinued:
-        print '''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" checked/><br/>'''
+        print('''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" checked/><br/>''')
     else:
-        print '''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" /><br/>'''
+        print('''Move discontinued items to bottom of page?<input type="checkbox" name="move_discontinued" value="True" /><br/>''')
 
     return h_discontinued,m_discontinued
-    
+
 def print_form():
     discont = False
     move = False
@@ -146,7 +146,7 @@ def print_form():
 
     if categories_option:
         show_categories,hide_categoryless = print_categories()
-    
+
     if distributors_option:
         show_distributors, hide_distributorless = print_distributors()
     return {'hide_discontinued' : discont, 'show_categories' : show_categories, 'show_distributors' : show_distributors, 'hide_distributorless' : hide_distributorless, 'hide_categoryless' : hide_categoryless, 'move_discontinued':move}

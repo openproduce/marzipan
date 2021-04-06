@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # manage_tax_categories.py
 # This page lets the user add new tax categories as well as modify information about old ones
 
 import op_db_library as db
 
-print '''Content-Type: text/html\n\n'''
-print '''<html><head>
+print('''Content-Type: text/html\n\n''')
+print('''<html><head>
     <title>Open Produce Tax Category Manager</title>
     <style type="text/css">
       * { font-family: sans-serif; font-size: 12px;}
@@ -26,10 +26,10 @@ print '''<html><head>
            // there might be a better way to do this but I'm not sure
            $('td[onClick*=editTaxCategory]:contains('+name+')', window.parent.main.document).html('None');
          }, 'text');
-    } 
+    }
     function updateTaxCategory(id,taxcatname) {
       var taxrate = $('#'+id+'_tax_rate').val();
-      $.post('update_tax_categories.py', {taxcatid: id, action: 'update', rate: taxrate}, 
+      $.post('update_tax_categories.py', {taxcatid: id, action: 'update', rate: taxrate},
          function(data){
             if(data.indexOf("Error:") == -1){
                 $('td[onClick*=editTaxCategory]:contains('+taxcatname+')', window.parent.main.document).html(data);
@@ -72,9 +72,9 @@ print '''<html><head>
 
    </script>
     </head>
-    '''
+    ''')
 
-print '''<body>
+print('''<body>
 <table border=0  cellspacing=2 cellpadding=0>
 <thead><tr>
 <th>Tax Category</th>
@@ -83,19 +83,19 @@ print '''<body>
 <th>Remove</th>
 </thead>
 <tbody id="taxcategories">
-'''
+''')
 
 for tax in db.get_tax_categories():
-    print '''<tr class="%d_taxcat_tr" id="%d_taxcat_tr"><td>%s</td>''' % (tax.get_id(), tax.get_id(),tax.get_name())
-    print '''<td><input type="text" id="%d_tax_rate" value="%.2f" size=5>''' % (tax.get_id(), tax.get_rate()*100)
-    print '''<td><input type="button" onClick="updateTaxCategory(%d,'%s')" value="update" /></td>''' % (tax.get_id(),tax.get_name())
-    print '''<td><input type="button" onClick="removeTaxCategory(%d,'%s')" value="remove" /></td>''' % (tax.get_id(),tax.get_name())
-    print '''</tr>'''
-print '''</tbody></table>'''
+    print('''<tr class="%d_taxcat_tr" id="%d_taxcat_tr"><td>%s</td>''' % (tax.get_id(), tax.get_id(),tax.get_name()))
+    print('''<td><input type="text" id="%d_tax_rate" value="%.2f" size=5>''' % (tax.get_id(), tax.get_rate()*100))
+    print('''<td><input type="button" onClick="updateTaxCategory(%d,'%s')" value="update" /></td>''' % (tax.get_id(),tax.get_name()))
+    print('''<td><input type="button" onClick="removeTaxCategory(%d,'%s')" value="remove" /></td>''' % (tax.get_id(),tax.get_name()))
+    print('''</tr>''')
+print('''</tbody></table>''')
 
-print '''<br /><div id="new"><tr><td><input id='newTaxCatName' type="text" size="10" value="" /></td>
+print('''<br /><div id="new"><tr><td><input id='newTaxCatName' type="text" size="10" value="" /></td>
 <td><input type="text" id="newTaxCatRate" size=5>
-<td><input type="button" onClick="addTaxCategory()" value="add new" /></td>'''
-print '''</div>'''
+<td><input type="button" onClick="addTaxCategory()" value="add new" /></td>''')
+print('''</div>''')
 
-print '''</body></html>'''
+print('''</body></html>''')

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Patrick McQuighan
 # update_item_count.py
 # this is a simple cgi interface that takes in an item id and a number and increases
@@ -9,12 +9,12 @@ import cgi,sys
 import op_db_library as db
 import datetime
 def log_exception(*args):
-    print 'Error: %s' % (args[1],)
+    print('Error: %s' % (args[1],))
 
 sys.excepthook = log_exception
 
 form = cgi.FieldStorage()
-print 'Content-type: text/plain\n'
+print('Content-type: text/plain\n')
 
 action = form.getvalue("action")
 if action == "count":
@@ -27,9 +27,9 @@ if action == "count":
             count = item.get_count()
             day14 = db.get_sales_in_range(int(form.getvalue("id")), 14)
             speculated = count - day14/14*days_to_speculate   # days_to_speculate determined outside of loop
-            print '%d,%d' % (speculated, count)
+            print('%d,%d' % (speculated, count))
         else:
-            print item.get_count()
+            print(item.get_count())
 elif action == "status":
     if "id" in form and "stocked" in form:
         item = db.get_item(int(form.getvalue("id")))
@@ -42,7 +42,7 @@ elif action == "delivery":
         itemid = int(form.getvalue("id"))
         db.add_delivery(itemid, int(form.getvalue("amt")), form.getvalue("dist"))
         item = db.get_item(itemid)
-        print "%d" % item.get_count()
+        print("%d" % item.get_count())
     else:
         raise Exception('invalid arguments')
 elif action == "name":
@@ -107,7 +107,7 @@ elif action == "add":
                 price_unit = None
 
         if not_valid:
-            print 'Error: invalid price'
+            print('Error: invalid price')
         else:
             count = int(form.getvalue('count'))
             plu = None
@@ -126,7 +126,7 @@ elif action == "add":
                     dist = db.get_distributor_byname(distname)
                     db.add_distributor_item(item, dist)
                     d_i = db.get_distributor_item(item, dist)
-                    
+
                     ditemid = 0
                     wholesale_price = 0
                     case_size = 0
@@ -157,14 +157,14 @@ elif action == "add":
                     for c_id in cat_ids:
                         cat = db.get_category(c_id)
                         db.add_category_item(item, cat)
-                print '%d,%d,%d,%.2f,%.2f,%.2f,%d,%.2f,%s,%s' % (itemid,item.get_price_id(), dist.get_id(), d_i.get_wholesale_price(),d_i.get_case_size(),each_cost,margin,cost,db.get_unit(item_price.get_sale_unit_id()), db.get_item_info_page_link(itemid))
-                
+                print('%d,%d,%d,%.2f,%.2f,%.2f,%d,%.2f,%s,%s' % (itemid,item.get_price_id(), dist.get_id(), d_i.get_wholesale_price(),d_i.get_case_size(),each_cost,margin,cost,db.get_unit(item_price.get_sale_unit_id()), db.get_item_info_page_link(itemid)))
+
     else:
         raise Exception ('incorrect arguments. given %s' % (form.keys()))
 elif action == 'get-string':
     if 'id' in form:
         item = db.get_item(int(form.getvalue("id")))
-        print item
+        print(item)
     else:
         raise Exception ('incorrect arguments. need id. given %s' % (form.keys()))
 elif action == 'get-margin':
@@ -172,13 +172,13 @@ elif action == 'get-margin':
         item = db.get_item(int(form.getvalue("item_id")))
         distributor = db.get_distributor(int(form.getvalue("dist_id")))
         margin = db.get_distributor_item_margin(item, distributor)
-        print margin
+        print(margin)
     else:
         raise Exception ('invlaid arguments. need item_id, distid. given %s' % (form.keys()))
 elif action == 'update-notes':
     if 'item_id' in form and 'notes' in form:
         item = db.get_item(int(form.getvalue("item_id")))
-        item.set_notes(form.getvalue('notes'))    
+        item.set_notes(form.getvalue('notes'))
     else:
         raise Exception ('invalid arguments. need item_id, notes. given %s' % (form.keys()))
 else:
