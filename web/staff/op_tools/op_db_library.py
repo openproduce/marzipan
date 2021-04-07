@@ -669,7 +669,7 @@ def get_daily_sales(start_date=FIRST_SALES, end_date=datetime.datetime.now()):
             if hour in range(0,DAY_START_HOUR):        # put hours midnight - start hour on previous day
                 date_key -= datetime.timedelta(days=1)
 
-            if days.has_key(date_key):  # have the day already
+            if date_key in days: # have the day already
                 info = days[date_key]
                 info.set_hour_sales(hour, float(result[1]), int(result[2]))
             else:   # day not currently there
