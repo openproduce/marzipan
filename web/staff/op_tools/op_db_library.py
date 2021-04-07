@@ -868,7 +868,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         date_key = day.date()
 
-        if not tabs.has_key(date_key):
+        if date_key not in tabs:
             tabs[date_key] = {}
             for k,v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 tabs[date_key][v] = 0
@@ -878,7 +878,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
         tabs[date_key][payment_name] += float(row[2])
 
         if payment_name == 'cash':          # record cash in
-            if not cash_in.has_key(date_key):
+            if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] += float(row[2])
 
@@ -903,7 +903,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
         date_key = day.date()
 
         if payment_name == 'cash':          # record cash in
-            if not cash_in.has_key(date_key):
+            if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] -= float(row[2])
 
