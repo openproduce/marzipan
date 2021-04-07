@@ -35,6 +35,7 @@ from sqlalchemy.orm import mapper
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.orm import sessionmaker
 from decimal import Decimal, ROUND_HALF_EVEN
+from functools import reduce
 
 from db_config import register_tape_db_config, inventory_db_config
 
