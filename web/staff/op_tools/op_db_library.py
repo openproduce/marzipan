@@ -828,7 +828,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         date_key = day.date()
 
-        if not totals.has_key(date_key):
+        if date_key not in totals:
             totals[date_key] = {}
             totals[date_key]['total'] = 0
             for k,v in PAYMENT.iteritems():  # Have to initialize the each payment type for this day to be 0
