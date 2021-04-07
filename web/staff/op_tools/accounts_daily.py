@@ -17,7 +17,7 @@ def print_results(results,order=None):
         print('<td><b>%s</b></td>' % (date.strftime('%Y-%m-%d')))
         if order != None:
             for o in order:
-                if row.has_key(o):
+                if o in row:
                     print('<td>%s</td>' % (row[o]))
                 else:
                     print('<td>0</td>')
@@ -101,7 +101,7 @@ print('''<html>
 </head>
  <body>''')
 form = cgi.FieldStorage()
-if not form.has_key('month') or not form.has_key('year'):
+if 'month' not in form or 'year' not in form:
     print('Error! You must include a year and a month. Please go through <a href="accounts.py"> this tool</a>')
 else:
     print_body(int(form.getvalue('month')), int(form.getvalue('year')))
