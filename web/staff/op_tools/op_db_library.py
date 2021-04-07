@@ -831,7 +831,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
         if date_key not in totals:
             totals[date_key] = {}
             totals[date_key]['total'] = 0
-            for k,v in PAYMENT.iteritems():  # Have to initialize the each payment type for this day to be 0
+            for k, v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 totals[date_key][v] = 0
             cash_in[date_key] = 0            # if it's not in the totals dict then it's also not in the cash_in dict
 
@@ -870,7 +870,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         if not tabs.has_key(date_key):
             tabs[date_key] = {}
-            for k,v in PAYMENT.iteritems():  # Have to initialize the each payment type for this day to be 0
+            for k,v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 tabs[date_key][v] = 0
 
         payment_type = int(row[3])
