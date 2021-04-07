@@ -48,7 +48,7 @@ function %s(e) {''' % self.name
         to_print += '''
     $.post('%s', {''' % self.post_to
         varcount = len(self.post_vars.keys())
-        for i,(varname,value) in enumerate(self.post_vars.iteritems()):
+        for i,(varname,value) in enumerate(self.post_vars.items()):
             if value == TEXTBOX_VALUE:
                 to_print += '''%s:%s''' % (varname,'value')
             elif value == TEXTBOX_ID:
@@ -96,7 +96,7 @@ function %s(){''' % (self.name)
         to_print += '''
   $.post('%s', { ''' % self.post_to
         varcount = len(self.post_vars.keys())
-        for i,(varname,value) in enumerate(self.post_vars.iteritems()):
+        for i,(varname,value) in enumerate(self.post_vars.items()):
             if value == SELECT_VALUE:
                 to_print += '''%s:%s''' % (varname,'selected')
             elif value == SELECT_ID:
