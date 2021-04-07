@@ -14,7 +14,7 @@ def print_results(results,order=None):
         print('<td><b><a href="accounts_daily.py?year=%d&month=%d">%s</a></b></td>' % (date.year,date.month,date.strftime('%Y-%m')))
         if order != None:
             for o in order:
-                if row.has_key(o):
+                if o in row:
                     print('<td>%s</td>' % (row[o]))
                 else:
                     print('<td>0</td>')
