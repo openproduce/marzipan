@@ -54,7 +54,7 @@ def make_graph(dates, vals, name):
     ax.grid(True)
     ax.legend(loc=0,ncol=2,prop=FontProperties(size='small'))
     g.autofmt_xdate()
-    g.savefig(sys.stdout, format='png')
+    g.savefig(sys.stdout.buffer, format='png')
 
 def find_index(hour):
     '''Given an hour, finds which range it belongs to'''
