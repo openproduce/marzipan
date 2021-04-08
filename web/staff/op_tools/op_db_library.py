@@ -696,10 +696,11 @@ def get_sales_tax_report(start_date, end_date):
     # get items that are sold under high and low tax rates
     taxcats = get_tax_categories ()
 
-    zero_rate = map(to_id,filter (lambda x: x.get_rate() == .0000, taxcats))
-    food_rate = map(to_id,filter (lambda x: x.get_rate() == .0225, taxcats))
-    general_rate = map(to_id,filter (lambda x: x.get_rate() > .0225, taxcats))
-    soft_drink_rate = map(to_id, filter (lambda x: x.get_name() == 'soda', taxcats))
+    # map() returns a map object in python3, but we're expecting lists
+    zero_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0000, taxcats)))
+    food_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0225, taxcats)))
+    general_rate = list(map(to_id,filter (lambda x: x.get_rate() > .0225, taxcats)))
+    soft_drink_rate = list(map(to_id, filter (lambda x: x.get_name() == 'soda', taxcats)))
 
     zero_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(zero_rate)).all()
     food_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(food_rate)).all()
@@ -710,10 +711,10 @@ def get_sales_tax_report(start_date, end_date):
     refund_items = inv_session.query(Item).filter(Item.price_id.in_(negative_prices)).all()
 
     # Can make these dicts to improve speed if needed
-    zero_rate_ids = map(to_id, zero_rate_items)
-    food_rate_ids = map(to_id, food_rate_items)
-    general_rate_ids = map(to_id, general_rate_items)
-    soft_drink_rate_ids = map(to_id, soft_drink_rate_items)
+    zero_rate_ids = list(map(to_id, zero_rate_items))
+    food_rate_ids = list(map(to_id, food_rate_items))
+    general_rate_ids = list(map(to_id, general_rate_items))
+    soft_drink_rate_ids = list(map(to_id, soft_drink_rate_items))
 
     # there are some sales where the item has been deleted or doesn't have a tax_category_id or something...in this case assume 2.25%
     # -SL 5/18/12
@@ -724,7 +725,7 @@ def get_sales_tax_report(start_date, end_date):
       except:
         pass
 
-    refund_item_ids = map(to_id, refund_items)
+    refund_item_ids = list(map(to_id, refund_items))
 
     def link_only (x,y):
         '''returns the sum where x = cost and y = (cost,total,payment) if y is a LINK transaction.
@@ -1003,7 +1004,7 @@ class Item(object):
         return inv_session.query(DistributorItem).filter(DistributorItem.item_id == self.id).all()
 
     def get_distributors_str(self):
-        distributors = map(str,[dist_dict[di.dist_id] for di in self.get_distributors()])  # convert between the distributor item to distributor then apply str to all of them
+        distributors = list(map(str,[dist_dict[di.dist_id] for di in self.get_distributors()]))  # convert between the distributor item to distributor then apply str to all of them
         distributors.sort()
         return ','.join(distributors)
 
@@ -1055,7 +1056,7 @@ class Item(object):
         return inv_session.query(Category).filter(and_(Category.id == CategoryItem.cat_id, CategoryItem.item_id == self.id)).all()
 
     def get_categories_str(self):
-        categories = map(str,self.get_categories())
+        categories = list(map(str,self.get_categories()))
         categories.sort()
         return ','.join(categories)
 
