@@ -96,7 +96,7 @@ def print_dates(days,selected_date):
 
 def main():
     form = cgi.FieldStorage()
-    idf.init(form,discontinued=True,distributors=True,categories=True)
+    idf.init(form,discontinued=True,distributors=True,categories=True, additional_distributors=True)
     print_headers()
     print('''
 <body>
