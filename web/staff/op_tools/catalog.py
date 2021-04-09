@@ -150,6 +150,8 @@ def main():
              </thead><tbody id="item-stats">\n''')
 
     distributors = dict([(d.get_id(), d) for d in db.get_distributors()])
+    # Selected distributors
+    dist_selected = [d.get_id() for d in options['show_distributors']]
     for item in db.get_items(**options):
         # Need to make these floats b/c comparison b/t Decimal and float work strangely
         count = float(item.get_count())
@@ -157,6 +159,8 @@ def main():
         day7, day14, day30 = db.get_sales_in_multi_range(item_id,7,14,30)
         stock_strings = ['%.2f'%day7,'%.2f'%day14,'%.2f'%day30]
         dist_list = item.get_distributors()
+        if options['hide_additional_distributors']:
+            dist_list = [d for d in dist_list if d.get_distributor().get_id() in dist_selected]
         dist_count = len(dist_list)
 
         for i in range(max(1,dist_count)):   # need the max in case the item has no distributors
