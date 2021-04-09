@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # autocount_items.py
 # Patrick McQuighan
 # This script should be run periodically when the store is not open to perform an auto-update of the last_count and last_count_timestamp

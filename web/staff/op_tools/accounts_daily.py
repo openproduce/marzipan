@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # account.py
 # Patrick McQuighan
 # Replacement for catalog.pl written in Python and using the new database as of 11/2010
@@ -13,17 +13,17 @@ def print_results(results,order=None):
     corresponding to the payment type'''
     for date in sorted(results.keys()):
         row = results[date]
-        print '<tr>'
-        print '<td><b>%s</b></td>' % (date.strftime('%Y-%m-%d'))
+        print('<tr>')
+        print('<td><b>%s</b></td>' % (date.strftime('%Y-%m-%d')))
         if order != None:
             for o in order:
-                if row.has_key(o):
-                    print '<td>%s</td>' % (row[o])
+                if o in row:
+                    print('<td>%s</td>' % (row[o]))
                 else:
-                    print '<td>0</td>'
+                    print('<td>0</td>')
         else:
-            print '<td>%s</td>' % (row)
-        print '</tr>'
+            print('<td>%s</td>' % (row))
+        print('</tr>')
 
 def print_body(month,year):
     start = datetime.datetime(year,month,1)
@@ -33,8 +33,8 @@ def print_body(month,year):
         end = datetime.datetime(year+1,1,1)
 
     sales,payments,cash = db.get_accounts('daily',start,end)
-    
-    print '''
+
+    print('''
 <table border='1'> <caption>Total Sales</caption>
  <thead>
  <tr>
@@ -48,14 +48,14 @@ def print_body(month,year):
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
     print_results(sales, ['cash','check','debit/credit','tab','link','total'])
-    print '''
+    print('''
 </tbody>
 
 </table>
-'''
-    print '''
+''')
+    print('''
 <table border='1'> <caption>Tab Payments</caption>
 <thead>
  <tr>
@@ -67,15 +67,15 @@ def print_body(month,year):
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
     print_results(payments, ['cash','check','debit/credit','link'])
-    
-    print '''
+
+    print('''
 </tbody>
 
-</table>'''
+</table>''')
 
-    print '''
+    print('''
 <table border='1'> <caption>Total Cash In (including tab payments)</caption>
 <thead>
  <tr>
@@ -84,26 +84,26 @@ def print_body(month,year):
  </tr>
 </thead>
 
-<tbody>'''
+<tbody>''')
     print_results(cash)
-    print '''
+    print('''
 </tbody>
 
-</table>'''
-    
+</table>''')
 
 
-print 'Content-Type: text/html\n'
-print '''<html>
+
+print('Content-Type: text/html\n')
+print('''<html>
  <head>
     <title>OP Daily Accounts</title>
 
 </head>
- <body>'''
+ <body>''')
 form = cgi.FieldStorage()
-if not form.has_key('month') or not form.has_key('year'):
-    print 'Error! You must include a year and a month. Please go through <a href="accounts.py"> this tool</a>'
+if 'month' not in form or 'year' not in form:
+    print('Error! You must include a year and a month. Please go through <a href="accounts.py"> this tool</a>')
 else:
     print_body(int(form.getvalue('month')), int(form.getvalue('year')))
 
-print '</body></html>'
+print('</body></html>')

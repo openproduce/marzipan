@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # update_barcode_item.py
 # Starting using exceptions so that any error will be caught.  Eg
 # if there is some undetected error in the database, the user will
@@ -9,11 +9,11 @@ import cgi,sys
 import op_db_library as db
 
 def log_exception(*args):
-    print 'Error: %s' % (args[1],)
+    print('Error: %s' % (args[1],))
 
 sys.excepthook = log_exception
 
-print 'Content-Type: text/plain\n'
+print('Content-Type: text/plain\n')
 form = cgi.FieldStorage()
 action = form.getvalue("action")
 if action == 'add':
@@ -23,7 +23,7 @@ if action == 'add':
         barcode = form.getvalue("barcode")
         db.add_barcode_item(itemid, barcode)
         new_bcitem = db.get_barcode_item(item, barcode)
-        print new_bcitem.get_id()
+        print(new_bcitem.get_id())
     else:
         raise Exception ('missing either item_id or barcode. given:%s' % (form.keys()))
 elif action == 'remove':
@@ -33,6 +33,3 @@ elif action == 'remove':
         raise Exception ('bc_item_id not given')
 else:
     raise Exception('invalid action')
-
-
-

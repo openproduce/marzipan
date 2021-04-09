@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # merge_items.py
 # Patrick McQuighan
 # This file actually merges two item ids based on a set of given options
@@ -7,10 +7,10 @@ import op_db_library as db
 import smtplib
 import cgi
 
-print '''Content-type: text/plain\n'''
+print('''Content-type: text/plain\n''')
 form = cgi.FieldStorage()
 if 'old' not in form or 'into' not in form or 'barcodes' not in form or 'deliveries' not in form or 'dist_items' not in form or 'sales' not in form:
-    print 'Error: invalid arguments.'
+    print('Error: invalid arguments.')
 else:
     old_item_id = int(form.getvalue('old'))
     into_item_id = int(form.getvalue('into'))
@@ -25,11 +25,11 @@ else:
 
     FROM = "item_notifications@openproduce.org"
     TO = ["info@openproduce.org"]
-    
+
     SUBJECT = 'Item merger notification'
-    
+
     TEXT = '''Item %s was merged into %s (%s). '%s' no longer exists in the database.''' % (old_item.id, into_item.id, into_item, old_item)
-    
+
     message = """\
 From: %s
 To: %s
@@ -37,7 +37,7 @@ Subject: %s
 
 %s
 """ % (FROM, ", ".join(TO), SUBJECT, TEXT)
-    
+
     # Send the mail
 
     server = smtplib.SMTP(SERVER)

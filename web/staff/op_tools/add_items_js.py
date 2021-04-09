@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # add_items_js.py
 # Patrick McQuighan
 # edited add_items.py to be at the top of manage_prices
@@ -10,26 +10,26 @@ import cgi
 import cgitb
 cgitb.enable()
 
-print '''Content-Type: text/html\n\n'''
-print '''<html><head>
+print('''Content-Type: text/html\n\n''')
+print('''<html><head>
     <title>Open Produce Add Items Page</title>
     <style type="text/css">
     * { font-size: 12px; }\n
     </style>
     <script type="text/javascript" src="../../common/jquery-1.3.2.min.js"></script>
     <script type="text/javascript">
-'''
+''')
 # The following array is needed so that the when an item is split it will have the dropdown to change sale units
-print '''units = new Array();'''
+print('''units = new Array();''')
 for i,unit in enumerate(db.get_units()):
-    print '''units[%d] = '%s';''' % (i, str(unit))
+    print('''units[%d] = '%s';''' % (i, str(unit)))
 # The following is just to remove whitespace and &nbsp's from stuff
-print '''
+print('''
     function trim(str) {
        return str.replace(/^[\s]+/g,'').replace(/[\s]+$/g,'');
-    }'''
+    }''')
 
-print '''
+print('''
     function addItem(){
        name = $('#name').val();
        size = $('#itemsize').val();
@@ -44,7 +44,7 @@ print '''
 
        var categories = '';
        catselect = $('#categories option:selected').each(function() {
-                categories += $(this).val(); 
+                categories += $(this).val();
                 categories += ',';
        });
 
@@ -113,7 +113,7 @@ print '''
                $('.group', window.parent.main.document).keypress(parent.main.handleGroupChange);
                $('.amt', window.parent.main.document).keypress(parent.main.handleAmtChange);
 
- 
+
                $('#name').val('');
                $('#itemsize').val('');
                $('#barcode').val('');
@@ -124,7 +124,7 @@ print '''
                $('#wholesale_price').val('');
                $('#case_size').val('');
                $('#price').val('');
-              
+
                 parent.main.updateMargins(price_id);
             }
             else{
@@ -134,54 +134,54 @@ print '''
 };
     </script>
     </head>
-    <body>'''
+    <body>''')
 
 
 
 
-print '''item name*: <input type="text" id="name" />'''
-print '''item size*: <input type="text" id="itemsize" size="5" /> size unit*: <select id="size_unit">'''
+print('''item name*: <input type="text" id="name" />''')
+print('''item size*: <input type="text" id="itemsize" size="5" /> size unit*: <select id="size_unit">''')
 for unit in db.get_units():
-    print '''<option> %s </option> ''' % unit
-print '''</select>'''
-print '''barcode: <input type="text" id="barcode" size="10" />'''
-print '''PLU : <input type="text" id="plu" size="10" />'''
-print '''count*: <input type="text" id="count" size="3" /> <br />'''
-print '''price: $<input type="text" id="price" size="5"/>'''
-print '''price unit: <select id="price_unit">'''
+    print('''<option> %s </option> ''' % unit)
+print('''</select>''')
+print('''barcode: <input type="text" id="barcode" size="10" />''')
+print('''PLU : <input type="text" id="plu" size="10" />''')
+print('''count*: <input type="text" id="count" size="3" /> <br />''')
+print('''price: $<input type="text" id="price" size="5"/>''')
+print('''price unit: <select id="price_unit">''')
 for unit in db.get_units():
-    print '''<option> %s </option> ''' % unit
-print '''</select>'''
-print '''price id: <input type="text" id="price_id" size="4" />'''
-print '''tax category*: <select id="taxcat">'''
+    print('''<option> %s </option> ''' % unit)
+print('''</select>''')
+print('''price id: <input type="text" id="price_id" size="4" />''')
+print('''tax category*: <select id="taxcat">''')
 for taxcat in db.get_tax_categories():
     isdefault = ''
     if taxcat.get_name() == 'food':
         isdefault = 'selected'
-    print '''<option %s> %s </option> ''' % (isdefault,taxcat)
-print '''</select> <br />'''
+    print('''<option %s> %s </option> ''' % (isdefault,taxcat))
+print('''</select> <br />''')
 
-print '''distributor*: <select id="distributor" /> '''
-print '''<option></option>'''
+print('''distributor*: <select id="distributor" /> ''')
+print('''<option></option>''')
 for dist in db.get_distributors():
-    print '''<option> %s </option> ''' % dist
-print '''</select>'''
+    print('''<option> %s </option> ''' % dist)
+print('''</select>''')
 
-print '''distributor item id: <input type="text" id="dist_item_id" size=10" /> '''
-print '''case price: <input type="text" id="wholesale_price" size="5" /> '''
-print '''case size: <input type="text" id="case_size" size=5" /> '''
+print('''distributor item id: <input type="text" id="dist_item_id" size=10" /> ''')
+print('''case price: <input type="text" id="wholesale_price" size="5" /> ''')
+print('''case size: <input type="text" id="case_size" size=5" /> ''')
 
-print '''case unit: <select id="case_unit"> '''
-for unit in db.get_units():           
-    print '''<option> %s </option> ''' % unit
-print '''</select> <br />'''
+print('''case unit: <select id="case_unit"> ''')
+for unit in db.get_units():
+    print('''<option> %s </option> ''' % unit)
+print('''</select> <br />''')
 
-print '''categories: <select multiple size=5 id="categories">'''
+print('''categories: <select multiple size=5 id="categories">''')
 for cat in db.get_categories():
-    print '''<option value="%d"> %s </option>''' % (cat.get_id(),cat)
-print '''</select> <br />'''
+    print('''<option value="%d"> %s </option>''' % (cat.get_id(),cat))
+print('''</select> <br />''')
 
-print ''' <input type="button" value="Add Item" onClick="addItem()"/>'''
-print '''Starred fields are required <br />'''
-print '''Input either a price AND a price unit OR a price id'''
-print '''</body></html>'''
+print(''' <input type="button" value="Add Item" onClick="addItem()"/>''')
+print('''Starred fields are required <br />''')
+print('''Input either a price AND a price unit OR a price id''')
+print('''</body></html>''')
