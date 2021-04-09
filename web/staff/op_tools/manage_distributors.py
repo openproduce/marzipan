@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # manage_distributors.py
 # This page lets the user add new distributors as well as modify information about old ones
 
 import op_db_library as db
 
-print '''Content-Type: text/html\n\n'''
-print '''<html><head>
+print('''Content-Type: text/html\n\n''')
+print('''<html><head>
     <title>Open Produce Distributor Manager</title>
     <style type="text/css">
     * { font-family: sans-serif; font-size: 12px;}
@@ -22,7 +22,7 @@ print '''<html><head>
          function(data){
            if (data.indexOf('Error:') == -1){
                   $('.'+distid+'_dist_tr').remove();
-                  $('.'+distid+'_dist_tr', window.parent.main.document).remove();  
+                  $('.'+distid+'_dist_tr', window.parent.main.document).remove();
                   $('.'+distid+'_dist_option', window.parent.main.document).remove();
                  // there might be a better way to do this but I'm not sure
                   $('td:contains('+trim(data)+')', window.parent.main.document).each( function(){
@@ -35,17 +35,17 @@ print '''<html><head>
                            else {
                              $(thistd).html(data+' &nbsp;');
                            }
-                      
+
                        },'text');
                      }
                   });
-        
+
            }
            else{
               alert(data);
            }
           }, 'text');
-     } 
+     }
 
      function addDistributor() {
         var distname = $('#newDistName').val();
@@ -74,24 +74,24 @@ print '''<html><head>
 
     </script>
     </head>
-    '''
+    ''')
 
-print '''<body>
+print('''<body>
 <table border=0  cellspacing=2 cellpadding=0>
 <thead><tr>
 <th>Distributor</th>
 <th>Remove</th>
 </thead>
 <tbody id="distributors">
-'''
+''')
 
 for dist in db.get_distributors():
-    print '''<tr class="%d_dist_tr" id="%d_tr"><td>%s</td>''' % (dist.get_id(),dist.get_id(),dist.get_name())
-    print '''<td><input type="button" onClick="removeDistributor(%d)" value="remove" /></td>''' % (dist.get_id())
-    print '''</tr>'''
-print '''</tbody></table>'''
+    print('''<tr class="%d_dist_tr" id="%d_tr"><td>%s</td>''' % (dist.get_id(),dist.get_id(),dist.get_name()))
+    print('''<td><input type="button" onClick="removeDistributor(%d)" value="remove" /></td>''' % (dist.get_id()))
+    print('''</tr>''')
+print('''</tbody></table>''')
 
-print '''<br /><div id="new"><tr><td><input id='newDistName' type="text" size="10" value="" /></td><td><input type="button" onClick="addDistributor()" value="add new" /></td>'''
-print '''</div>'''
+print('''<br /><div id="new"><tr><td><input id='newDistName' type="text" size="10" value="" /></td><td><input type="button" onClick="addDistributor()" value="add new" /></td>''')
+print('''</div>''')
 
-print '''</body></html>'''
+print('''</body></html>''')

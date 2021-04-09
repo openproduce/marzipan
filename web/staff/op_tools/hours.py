@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # hours.py
 # Patrick McQuighan
 # Replacement for hours.pl
@@ -7,7 +7,7 @@ import op_db_library as db
 import cgi, datetime
 
 def print_headers():
-    print '''Content-type: text/html\n\n
+    print('''Content-type: text/html\n\n
     <!doctype html>
     <html>
     <head>
@@ -25,14 +25,14 @@ def print_headers():
     </style>
     </head>
     <body>
-    '''
+    ''')
 
 def main():
     print_headers()
-    print '''Note: this values may be slightly inflated as they are the sum of sales including $ from taxes, however LINK transactions are not charged taxes, but this does not take that into consideration.  Use sales_tax.py if you need precise values eg for reporting sales taxes <br /> <br />'''
+    print('''Note: this values may be slightly inflated as they are the sum of sales including $ from taxes, however LINK transactions are not charged taxes, but this does not take that into consideration.  Use sales_tax.py if you need precise values eg for reporting sales taxes <br /> <br />''')
     form = cgi.FieldStorage()
     today = datetime.datetime.now()
-    
+
     if 'days' in form:
         days = int(form.getvalue('days'))
         if days == -1:
@@ -42,45 +42,45 @@ def main():
     else:
         start_date = today - datetime.timedelta(days=7)
     start_date += datetime.timedelta(hours=(-start_date.hour+db.DAY_START_HOUR))  # subtract current hour so reporting starts at midnight DAYS days ago.  add db.DAY_START_HOUR because this is the hour we want reporting to start.
-    print '''<form name="dates" action="hours.py" method="get">'''
-    print '''Show data for:'''
-    print '''<select name="days">'''
-    print '''<option value="7">Last 7 days</option>'''
-    print '''<option value="30">Last 30 days</option>'''
-    print '''<option value="-1">Since store open</option>'''
-    print '''</select>'''
+    print('''<form name="dates" action="hours.py" method="get">''')
+    print('''Show data for:''')
+    print('''<select name="days">''')
+    print('''<option value="7">Last 7 days</option>''')
+    print('''<option value="30">Last 30 days</option>''')
+    print('''<option value="-1">Since store open</option>''')
+    print('''</select>''')
 
-    print '''<input type="submit" value="Change date range" />'''
-    print '''<br /><br />'''
-    print "<table border='0' cellspacing='0'>\n"
-    print "<tr><th>Date</th><th>Dayname</th><th>Customers</th><th>$/ring</th><th>Gross</th>\n"
-    
-    hours = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3]    
+    print('''<input type="submit" value="Change date range" />''')
+    print('''<br /><br />''')
+    print("<table border='0' cellspacing='0'>\n")
+    print("<tr><th>Date</th><th>Dayname</th><th>Customers</th><th>$/ring</th><th>Gross</th>\n")
+
+    hours = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3]
     for i in hours:
-        print "<th style='padding-left: 1px; padding-right: 1px;' class=''>%d</th>" % (i,)
-    print "</tr>\n"
-    
+        print("<th style='padding-left: 1px; padding-right: 1px;' class=''>%d</th>" % (i,))
+    print("</tr>\n")
+
     day_infos = db.get_daily_sales(start_date,today)
     for i,key in enumerate(sorted(day_infos.keys())):
         day_info = day_infos[key]
-        print '<tr>'
-        print '<td>%s</td>' % (day_info.get_date_str(),)
-        print '<td>%s</td>' % (day_info.get_dayname(),)
+        print('<tr>')
+        print('<td>%s</td>' % (day_info.get_date_str(),))
+        print('<td>%s</td>' % (day_info.get_dayname(),))
 
-        print '''<td><div class='bar' style='width: %dpx;'>%d</td>''' % (day_info.get_customers_total()/2, day_info.get_customers_total())
-        print '''<td><div class='bar' style='width: %dpx;'>%.2f</td>''' % (day_info.get_avg_sales()*10, day_info.get_avg_sales())
-        print '''<td><div class='bar' style='width: %dpx;'>%.2f<div style='width: 1px; margin-top: -1em; margin-left: 110px; border-top: 1em solid black'></div></div></td>''' % (day_info.get_gross_sales()/10, day_info.get_gross_sales())
+        print('''<td><div class='bar' style='width: %dpx;'>%d</td>''' % (day_info.get_customers_total()/2, day_info.get_customers_total()))
+        print('''<td><div class='bar' style='width: %dpx;'>%.2f</td>''' % (day_info.get_avg_sales()*10, day_info.get_avg_sales()))
+        print('''<td><div class='bar' style='width: %dpx;'>%.2f<div style='width: 1px; margin-top: -1em; margin-left: 110px; border-top: 1em solid black'></div></div></td>''' % (day_info.get_gross_sales()/10, day_info.get_gross_sales()))
 
         for h in day_info.get_hourly_sales(hours):
-            print '''<td class='tiny' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>$%d</b></td>\n''' % (255 - h.get_gross_sales()*1.3, h.get_customers(), h.get_avg_sales(), h.get_gross_sales())
+            print('''<td class='tiny' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>$%d</b></td>\n''' % (255 - h.get_gross_sales()*1.3, h.get_customers(), h.get_avg_sales(), h.get_gross_sales()))
 
         if i == 0:  # print arrows on the first row
-            print "<td class='tiny' style='border: none;'>&larr;custs<br/>&larr;\$/ring<br/>&larr;gross</td>"
+            print("<td class='tiny' style='border: none;'>&larr;custs<br/>&larr;\$/ring<br/>&larr;gross</td>")
 
-        print '</tr>\n'
+        print('</tr>\n')
 
-    print '''</table>'''
-    print '''</body></html>'''
+    print('''</table>''')
+    print('''</body></html>''')
 
 if __name__ == "__main__":
     main()

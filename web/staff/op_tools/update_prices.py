@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Patrick McQuighan
 # update_prices.py
 # last mod: 1/28/2011
@@ -7,12 +7,12 @@ import cgi,sys
 import op_db_library as db
 
 def log_exception(*args):
-    print 'Error: %s' % (args[1],)
+    print('Error: %s' % (args[1],))
 
 sys.excepthook = log_exception
 
 form = cgi.FieldStorage()
-print 'Content-type: text/plain\n'
+print('Content-type: text/plain\n')
 
 action = form.getvalue("action")
 if action == 'price':
@@ -34,7 +34,7 @@ elif action == 'group':
                 db.set_item_price(item,newid)
                 price = db.get_price(newid)
                 sale_unit = db.get_unit(price.get_sale_unit_id())
-                print '%d,%d,%.2f,%d,%s' % (old,db.price_item_count(old),price.get_unit_cost(), price.get_id(),sale_unit) 
+                print('%d,%d,%.2f,%d,%s' % (old,db.price_item_count(old),price.get_unit_cost(), price.get_id(),sale_unit))
             else:
                 raise Exception ('price_id %d not currently in database' % (newid))
         else:
@@ -58,7 +58,7 @@ elif action == 'query':
             else:
                 margin = 100
             real_profit = op_price - each_cost - tax
-            print '%d,%d,%.2f,%.0f' % (item.get_id(), dist.get_id(), each_cost, margin)
+            print('%d,%d,%.2f,%.0f' % (item.get_id(), dist.get_id(), each_cost, margin))
     else:
         raise Exception ('invalid arguments. given %s' % (form.keys()))
 elif action == 'split':
@@ -72,7 +72,7 @@ elif action == 'split':
             newprice = db.add_new_price(oldprice)
             db.set_item_price(item,newprice.get_id())
             sale_unit = db.get_unit(newprice.get_sale_unit_id())
-            print '%d,%d,%.2f,%d,%s' % (old,db.price_item_count(old),newprice.get_unit_cost(), newprice.get_id(),sale_unit) 
+            print('%d,%d,%.2f,%d,%s' % (old,db.price_item_count(old),newprice.get_unit_cost(), newprice.get_id(),sale_unit))
         else:
             raise Exception ('invalid item_id')
     else:
@@ -87,9 +87,9 @@ elif action == 'item_price':
                 price = db.get_price(item.get_price_id())
                 db.set_price(price, float(form.getvalue("price")))
             else:
-                print 'Warning: changing this price will affect the following items:'
+                print('Warning: changing this price will affect the following items:')
                 for i in price_items:
-                    print '%s. SKU %d' % (i, i.get_id())
+                    print('%s. SKU %d' % (i, i.get_id()))
         else:
             raise Exception('invalid item_id')
     else:
