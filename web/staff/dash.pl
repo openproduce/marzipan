@@ -21,7 +21,7 @@ if ($q{'p'} eq 'check') {
     &browse_checks();
 }
 
-$dbh->disconnect();
+
 
 sub browse_checks {
     print "Content-type: text/html\n\n";
@@ -47,12 +47,14 @@ EOF
 
 
 	$sth = $dbh_marzipan->prepare(qq{
-			select date(s.time_ended) as d,dayname(s.time_ended), hour(s.time_ended), sum(si.total),count(distinct s.id) from sales as s, sale_items as si
+			select date((s.time_ended)) as d,dayname(s.time_ended) as dn, hour(s.time_ended) as hour, sum(si.total),count(distinct s.id) from sales as s, sale_items as si
 			where si.sale_id = s.id and (s.customer_id != 151 or s.customer_id
 				is null) and s.is_void=0 and si.item_id not in (807, 909) and (date_sub(CURDATE(), interval 7 day) <= date(s.time_ended) or (date_sub(CURDATE(), interval 8 day) <= date(s.time_ended) and HOUR(s.time_ended) != 0 and HOUR(s.time_ended) !=1 and HOUR(s.time_ended) !=2 and HOUR(s.time_ended) !=3))
-			group by d, hour(s.time_ended);
-			}); 
-	$sth->execute();
+			group by d, hour, dn
+
+				      })  or die "Unable to prepare " . $dbh_marzipan->errstr;
+
+
 
 	print "<table border='0' cellspacing='0'>\n";
 	print "<tr><th>Date</th><th>Dayname</th><th>Customers</th><th>\$/ring</th><th>Gross</th>\n";
@@ -62,7 +64,8 @@ EOF
 	print "</tr>\n";
 	my $gross_total;
 	my $last_added;
-	my $count = 0;
+    my $count = 0;
+    $sth->execute() or die "Unable to execute " . $sth->errstr;
     while (@row = $sth->fetchrow_array()) {
 		my $day = $row[0];
 		my $day_name = $row[1];
@@ -156,11 +159,13 @@ EOF
 		$last_day_name = $day_name unless ($row[2] eq '0' or $row[2] eq '1' or $row[2] eq '2' or $row[2] eq '3');
 		$count++;
 
-	}
-	unless ($finished) { # one more time
-		$finished = 1;
-		goto FINISH;
-	}
+    }
+    $sth->execute() or die "Unable to execute " . $sth->errstr;
+    	unless ($finished) { # one more time
+    		$finished = 1;
+    		goto FINISH;
+    }
+
 	printf "<tr class='total'><td colspan=2>Week average (7 days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $total_customers/7, $total_dpr/7, $total_gross/7;
 	foreach my $h ((6..23), 0, 1, 2) {
 				my $t = 180; #threshold
@@ -180,6 +185,7 @@ EOF
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
 	}
+    if ($weekday_days_count != 0) {
 	printf "<tr class='total'><td colspan=2>Weekday average ($weekday_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekday_total_customers/$weekday_days_count, $weekday_total_dpr/$weekday_days_count, $weekday_total_gross/$weekday_days_count;
 	foreach my $h ((6..23), 0, 1, 2) {
 				my $t = 180; #threshold
@@ -199,6 +205,8 @@ EOF
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
 	}
+	}
+    if ($weekend_days_count != 0) {
 	printf "<tr class='total'><td colspan=2>Weekend average ($weekend_days_count days)</td></td><td>%d</td><td>%.2f</td><td>%.2f</td>", $weekend_total_customers/$weekend_days_count, $weekend_total_dpr/$weekend_days_count, $weekend_total_gross/$weekend_days_count;
 	foreach my $h ((6..23), 0, 1, 2) {
 				my $t = 180; #threshold
@@ -217,6 +225,7 @@ EOF
 					   $weekend_total_hour_customers{$h}/$weekend_days_count, $weekend_total_hour_dpr{$h}/$weekend_days_count, $weekend_total_hour_gross{$h}/$weekend_days_count;
              #printf "<td class='tiny%s' style='background-color: rgb(200,%d,200);'>%d<br/>%.1f<br/><b>\$%d</b></td>\n",
 #			   $h % 2 ? ' gray' : '', 255 - $total_hour_gross{$h}/7*1.3, $total_hour_customers{$h}/7, $total_hour_dpr{$h}/7, $total_hour_gross{$h}/7;
+	}
 	}
 	print "</tr>\n";
 	print "</table>\n";
