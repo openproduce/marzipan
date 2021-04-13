@@ -1,9 +1,16 @@
 #!/usr/bin/env perl
 
+use FindBin;  
+use lib $FindBin::Bin;   
+
 use DBI;
 use DBD::mysql;
 
-my $dbh_marzipan = DBI->connect("dbi:mysql:inventory:localhost:3306", 'root', '')
+use DBCreds;
+$DB_USER="marzipan";
+our $DB_PASSWORD;
+
+my $dbh_marzipan = DBI->connect("dbi:mysql:inventory:localhost:3306", 'marzipan', $DBCreds::DB_PASSWORD);
     or die "couldn't connect to database";
 
     print "Content-type: text/html\n\n";
