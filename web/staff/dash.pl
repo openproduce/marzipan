@@ -1,12 +1,17 @@
 #!/usr/bin/env perl
 
+use FindBin;  
+use lib $FindBin::Bin;   
+
 use DBI;
 use DBD::mysql;
 
+use DBCreds;
 $DB_USER="marzipan";
-$DB_PASSWORD="";
+our $DB_PASSWORD;
 
-my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", $DB_USER, $DB_PASSWORD)
+
+my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", $DB_USER, $DBCreds::DB_PASSWORD)
     or die "couldn't connect to database";
 my %q = map { split /=/, $_ } split /\&/, $ENV{'QUERY_STRING'};
 

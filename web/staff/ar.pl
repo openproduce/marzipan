@@ -1,7 +1,15 @@
 #!/usr/bin/env perl
 
+use FindBin;  
+use lib $FindBin::Bin;   
+
 use DBI;
 use DBD::mysql;
+
+use DBCreds;
+$DB_USER="marzipan";
+our $DB_PASSWORD;
+
 
 print "Content-type: text/html\n\n";
 
@@ -19,7 +27,7 @@ print "Content-type: text/html\n\n";
 		"11" => "November",
 		"12" => "December");
 
-my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'marzipan', '')
+my $dbh_marzipan = DBI->connect("dbi:mysql:register_tape:localhost:3306", 'marzipan', $DBCreds::DB_PASSWORD);
     or die "couldn't connect to database";
 my $dbh = $dbh_marzipan;
 
