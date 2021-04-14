@@ -125,14 +125,15 @@ EOF
 	    # side legend for table
 	    print "<td class='tiny' style='border: none;'>&larr;custs<br/>&larr;\$/ring<br/>&larr;gross</td>" if $day_count == 0;
 
-	    # add daily totals to weekly totals
-	    $total_gross += $daily_gross; 
-	    $total_customers += $daily_customers; 
-	    $total_dpr += $daily_dpr; 
-	    
-	    # add daily totals to weekly totals, separated by weekday/weekend
-
-		if ($day_name eq 'Sunday' or $day_name eq 'Monday') { # ie yesterday was a weekend
+	    # skip this if today, unfinished days will mess up averages
+	    unless ($day_count == 7) {
+		# add daily totals to weekly totals
+		$total_gross += $daily_gross; 
+		$total_customers += $daily_customers; 
+		$total_dpr += $daily_dpr; 
+		
+		# add daily totals to weekly totals, separated by weekday/weekend
+		if ($last_day_name eq 'Saturday' or $last_day_name eq 'Sunday') { 
 		    $weekend_total_gross += $daily_gross; 
 		    $weekend_total_customers += $daily_customers; 
 		    $weekend_total_dpr += $daily_dpr; 
@@ -143,8 +144,7 @@ EOF
 		    $weekday_total_dpr += $daily_dpr; 
 		    $weekday_days_count += 1;
 		}
-#	    }
-
+	    }
 
 	# reset daily variables for next go-round
 	$daily_gross = 0;
@@ -156,7 +156,7 @@ EOF
 
 	    
 	    print "</tr>\n";
-	    $day_count++;
+	    $day_count++ unless ($day_count == 7);
 
 	} # close day
 
