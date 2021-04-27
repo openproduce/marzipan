@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # manage_items.py
 # Patrick McQuighan
 # Tool for changing item names and stocked status and adding/removing distributors/categories/tax categories.
@@ -7,11 +7,11 @@ import op_db_library as db
 import item_display_form as idf
 import cgi
 import cgitb
-cgitb.enable() 
+cgitb.enable()
 
 def print_headers():
-    print '''Content-Type: text/html\n\n'''
-    print '''<html><head>
+    print('''Content-Type: text/html\n\n''')
+    print('''<html><head>
     <title>Open Produce Item Manager</title>
 
     <link rel="stylesheet" type="text/css" href="../../common/tools.css" />
@@ -33,7 +33,7 @@ function multiAddDist(){
            function(data){
               if(data.indexOf('Error:') == -1){   // update text
                 $.post('update_distributor_item.py', { action: 'query', item: id},
-                  function(data){ 
+                  function(data){
                      $('#'+id+'_dist').html(data + ' &nbsp; ');
                    }, 'text');
                }
@@ -50,7 +50,7 @@ function multiRemoveDist(){
            function(data){
               if(data.indexOf('Error:') == -1){   // update text
                 $.post('update_distributor_item.py', { action: 'query', item: id},
-                  function(data){  
+                  function(data){
                     $('#'+id+'_dist').html(data + ' &nbsp; ');
                   }, 'text');
                }
@@ -128,7 +128,7 @@ function updateDistributorItemInfo(itemid, d_id){
    cs = $('#'+itemid+'_'+d_id+'_caseSize').val();
    p = $('#'+itemid+'_'+d_id+'_price').val();
    di = $('#'+itemid+'_'+d_id+'_distItemId').val();
-   
+
    $.post('update_distributor_item.py', { action: 'update', item: itemid, distid: d_id, distitemid: di, price: p, casesize: cs, caseunit: cu },
        function () {alert('Update succesful');}, 'text');
 
@@ -175,7 +175,7 @@ $(document).ready(function() {
                function(data){
                   name_box.disabled = false;
                   if(data.indexOf('Error:') == -1) {
-                     $(name_box).removeClass('default').removeClass('submitting').addClass('complete');      
+                     $(name_box).removeClass('default').removeClass('submitting').addClass('complete');
                   }
                   else { alert(data);}
                }, 'text');
@@ -197,7 +197,7 @@ $(document).ready(function() {
                function(data){
                   bc_box.disabled = false;
                   if(data.indexOf('Error:') == -1) {
-                      bc_box.id = itemid + "_" + newbc + "_" + "bc";                      
+                      bc_box.id = itemid + "_" + newbc + "_" + "bc";
                       $(bc_box).removeClass('default').removeClass('submitting').addClass('complete');
                   }
                   else { alert(data);}
@@ -208,45 +208,45 @@ $(document).ready(function() {
 
 });
 </script>
-'''
+''')
     idf.print_javascript()
-    print '''</head>'''
+    print('''</head>''')
 
 def print_multi_add():
-    print '''<div class="fixed">'''
+    print('''<div class="fixed">''')
 
-    print '''<select class="multi_dist" id="multi_dist">'''
+    print('''<select class="multi_dist" id="multi_dist">''')
     for dist in db.get_distributors():
-        print '''<option class="%d_dist_option" value="%d"> %s </option>''' % (dist.get_id(),dist.get_id(),dist)
-    print '''</select>'''
-    print '''<button type="button" onClick="multiAddDist()">Add Dist</button>'''
-    print '''<button type="button" onClick="multiRemoveDist()">Remove Dist</button>'''
+        print('''<option class="%d_dist_option" value="%d"> %s </option>''' % (dist.get_id(),dist.get_id(),dist))
+    print('''</select>''')
+    print('''<button type="button" onClick="multiAddDist()">Add Dist</button>''')
+    print('''<button type="button" onClick="multiRemoveDist()">Remove Dist</button>''')
 
-    print '''<select class="multi_category" id="multi_category">'''
+    print('''<select class="multi_category" id="multi_category">''')
     for cat in db.get_categories():
-        print '''<option class="%d_cat_option" value="%d"> %s </option>''' % (cat.get_id(),cat.get_id(),cat)
-    print '''</select>'''
-    print '''<button type="button" onClick="multiAddCategory()">Add Category</button>'''
-    print '''<button type="button" onClick="multiRemoveCategory()">Remove Category</button>'''
-    
-    print '''<select class="addTaxCat" id="multi_tax_category">'''
-    for taxcat in db.get_tax_categories():
-        print '''<option class="%d_taxcat_option" value="%d"> %s </option>''' % (taxcat.get_id(),taxcat.get_id(),taxcat)
-    print '''</select>'''
-    print '''<button type="button" onClick="multiSetTaxCategory()">Set TaxCat</button>'''
+        print('''<option class="%d_cat_option" value="%d"> %s </option>''' % (cat.get_id(),cat.get_id(),cat))
+    print('''</select>''')
+    print('''<button type="button" onClick="multiAddCategory()">Add Category</button>''')
+    print('''<button type="button" onClick="multiRemoveCategory()">Remove Category</button>''')
 
-    print '''<button type="button" onClick="uncheckAllMulti()">Uncheck All Items </button>'''
-    print '''</div>'''
+    print('''<select class="addTaxCat" id="multi_tax_category">''')
+    for taxcat in db.get_tax_categories():
+        print('''<option class="%d_taxcat_option" value="%d"> %s </option>''' % (taxcat.get_id(),taxcat.get_id(),taxcat))
+    print('''</select>''')
+    print('''<button type="button" onClick="multiSetTaxCategory()">Set TaxCat</button>''')
+
+    print('''<button type="button" onClick="uncheckAllMulti()">Uncheck All Items </button>''')
+    print('''</div>''')
 
 def main():
     form = cgi.FieldStorage()
     idf.init(form,discontinued=True,distributors=True,categories=True)
     print_headers()
 
-    print '''
+    print('''
 
-<body>'''
-    print '''
+<body>''')
+    print('''
 <div class="key">
          Key:
 	      <span class="na"> very negative (produce, etc.) </span>
@@ -258,15 +258,15 @@ def main():
          <div>Click distributor to change info there. + or - signs add or remove the distributor respectively.  To change any of the other columns make your modifications and click the word update at the end of the row.</div>
          <div>Note that this currently only supports SINGLE barcodes, and needs to be redone (probably in a similar manner to categories etc) to support multiple </div>
          <div>The M-Edit checkbox allows you to add/remove things to multiple items at once </div>
-         <div style="clear: both; height: 15px;"> </div>'''
-    print '''</body></html>'''
-    
+         <div style="clear: both; height: 15px;"> </div>''')
+    print('''</body></html>''')
+
     print_multi_add()
-    print '''<form name="options" action="manage_items.py" method="get">'''
+    print('''<form name="options" action="manage_items.py" method="get">''')
     options = idf.print_form()
-    print '''<input type="submit" value="Change options" /> </form>'''
-    print '''<br> <br>'''
-    print '''<table border=0 id="main" class="sortable" cellspacing=0 cellpadding=0>
+    print('''<input type="submit" value="Change options" /> </form>''')
+    print('''<br> <br>''')
+    print('''<table border=0 id="main" class="sortable" cellspacing=0 cellpadding=0>
              <thead class="col-header">
              <th class="th">M-Edit</th>
              <th class="th">Name</th>
@@ -276,46 +276,46 @@ def main():
              <th class="th">Category</th>
              <th class="th">Tax Category</th>
              <th class="th">Stocked</th>
-             </thead><tbody id=\"item-stats\">\n'''
-    
+             </thead><tbody id=\"item-stats\">\n''')
+
     for i,item in enumerate(db.get_items(**options)):
         count = item.get_count()
         item_id = item.get_id()
         day14 = db.get_sales_in_range(item_id,14)
 
         if count < -10.0:
-            print '''<tr id="tr_%d" class="na" title="%d">''' % (item_id,day14)
+            print('''<tr id="tr_%d" class="na" title="%d">''' % (item_id,day14))
         elif count < 0.0:
-            print '''<tr id="tr_%d" class="bad" title="%d">''' % (item_id,day14)
+            print('''<tr id="tr_%d" class="bad" title="%d">''' % (item_id,day14))
         elif count < 1.0:
-            print '''<tr id="tr_%d" class="out" title="%d">''' % (item_id,day14)
+            print('''<tr id="tr_%d" class="out" title="%d">''' % (item_id,day14))
         elif count < day14:
-            print '''<tr id="tr_%d" class="low" title="%d">''' % (item_id,day14)
+            print('''<tr id="tr_%d" class="low" title="%d">''' % (item_id,day14))
         else:
-            print '<tr id="tr_%d" title="%d">' % (item_id,day14)
-        
-        print '''<div class='div_%d'>''' % (item_id)
-        print '''<td> <input class="multi" type="checkbox" id="%d" /></td>''' % (item_id,)
-	print '''<td><input type="text" class="itemname" id="%d_name" value="%s" />[%s]''' % (item.get_id(), item.get_name(),item.get_size_str())
-        print '''<td id="%d_dist" style='border-left: 1px solid #999; border-right: 1px solid #999; padding-left: 1em;'> %s &nbsp;</td>''' % (item_id, item.get_distributors_str())
+            print('<tr id="tr_%d" title="%d">' % (item_id,day14))
 
-	print '''<td style='text-align: center;'> <a href="%s" onclick="window.open(this.href,'_blank'); return false;">%d </a></td>''' % (db.get_item_info_page_link(item_id),item_id)
+        print('''<div class='div_%d'>''' % (item_id))
+        print('''<td> <input class="multi" type="checkbox" id="%d" /></td>''' % (item_id,))
+        print('''<td><input type="text" class="itemname" id="%d_name" value="%s" />[%s]''' % (item.get_id(), item.get_name(),item.get_size_str()))
+        print('''<td id="%d_dist" style='border-left: 1px solid #999; border-right: 1px solid #999; padding-left: 1em;'> %s &nbsp;</td>''' % (item_id, item.get_distributors_str()))
+
+        print('''<td style='text-align: center;'> <a href="%s" onclick="window.open(this.href,'_blank'); return false;">%d </a></td>''' % (db.get_item_info_page_link(item_id),item_id))
         barcode = item.get_first_barcode()
         if barcode != None:
-            print '''<td> <input size="16" type="text" class="itembarcode" id="%d_%s_bc" value="%s" /> &nbsp;</td>''' % (item_id,barcode.get_barcode(), barcode.get_barcode())
+            print('''<td> <input size="16" type="text" class="itembarcode" id="%d_%s_bc" value="%s" /> &nbsp;</td>''' % (item_id,barcode.get_barcode(), barcode.get_barcode()))
         else:
-            print '''<td> <input size="16" type="text" class="itembarcode" id="%d_%s_bc" value="%s" /> &nbsp;</td>''' % (item_id, 'None', 'None')
-        print '''<td style='border-left: 1px solid #999; border-right: 1px solid #999;' id='%d_cat'> %s &nbsp;</td>''' % (item_id, item.get_categories_str(), )
-        print '''<td style='border-right: 1px solid #999;' id='%d_tax'> %s &nbsp;</td>''' % (item_id, str(item.get_tax_category()), )
+            print('''<td> <input size="16" type="text" class="itembarcode" id="%d_%s_bc" value="%s" /> &nbsp;</td>''' % (item_id, 'None', 'None'))
+        print('''<td style='border-left: 1px solid #999; border-right: 1px solid #999;' id='%d_cat'> %s &nbsp;</td>''' % (item_id, item.get_categories_str(), ))
+        print('''<td style='border-right: 1px solid #999;' id='%d_tax'> %s &nbsp;</td>''' % (item_id, str(item.get_tax_category()), ))
         if not item.get_is_discontinued():
-            print '''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,)
+            print('''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,))
         else:
-            print '''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,)                                                                             
-        print '''</div>'''
-        print '''</tr>\n'''
+            print('''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,))
+        print('''</div>''')
+        print('''</tr>\n''')
 
-    print '''</tbody></table>\n'''
-    print '''</body></html>'''
+    print('''</tbody></table>\n''')
+    print('''</body></html>''')
 
 
 if __name__ == "__main__":

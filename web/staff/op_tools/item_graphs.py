@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # item_graphs.py
 # 2/2/2011
@@ -52,7 +52,7 @@ def price_graph(item,days):
     elif datetime.datetime.today().strftime('%m/%d/%y') not in x_labels:
         prices.append(prices[-1])
         x_labels.append(datetime.datetime.today().strftime('%m/%d/%y'))
-    make_graph(x_labels,'Day',[prices], 'Item price of a unit sold in the last %d days'%days,['Unit Price in $'],grid=False)    
+    make_graph(x_labels,'Day',[prices], 'Item price of a unit sold in the last %d days'%days,['Unit Price in $'],grid=False)
 
 def sales_graph(item,days):
     s = db.get_recent_item_sales(item,days,False)
@@ -64,7 +64,7 @@ def sales_graph(item,days):
     sale_counts = []   # sale in units for y-axis
 
     s_index = 0        # current sale to look at
-    s_len = len(s)    
+    s_len = len(s)
 
     for i in range(days):
         cur_date = start_date + datetime.timedelta(days=i)
@@ -72,7 +72,7 @@ def sales_graph(item,days):
             # Say cur_date = 1/4/11 1:00:00AM, then any sale occuring BEFORE then should be logged as on 1/3/11
             # Hence we subtract 1 from the date to get the label
             x_labels.append((cur_date-datetime.timedelta(days=1)).strftime('%m/%d/%y'))
-        else:  
+        else:
             # Don't want to clutterthe x-axis so we only print every third
             x_labels.append('')
 
@@ -104,7 +104,7 @@ if 'itemid' in form and 'graph' in form:
     itemid = int(form.getvalue('itemid'))
     graph = form.getvalue('graph')
     item = db.get_item(itemid)
-    print "Content-Type: image/png\n"
+    print("Content-Type: image/png\n")
     if graph == 'sales':
         sales_graph(item,30)
     if graph == 'prices':
