@@ -1,6 +1,14 @@
 #!/usr/bin/env perl
+
+use FindBin;  
+use lib $FindBin::Bin;   
+
 use DBI;
 use DBD::mysql;
+
+use DBCreds;
+$DB_USER="marzipan";
+our $DB_PASSWORD;
 
 print "Content-type: text/html\n\n";
 
@@ -9,7 +17,7 @@ $database = "register_tape";
 $host = "localhost";
 $port = "3306";
 $user = "marzipan";
-$pw = "";
+$pw = $DBCreds::DB_PASSWORD;
 
 $dsn = "dbi:mysql:$database:localhost:3306";
 $dbh = DBI->connect($dsn, $user, $pw);

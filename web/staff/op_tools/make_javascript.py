@@ -1,12 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # 1/31/2011
 # Patrick McQuighan
 # This is sort of an experimental class thing where I try to prevent myself from typing out the
-# same sort of javascript a million times.  
+# same sort of javascript a million times.
 #The first class here is a simple KeyHandler class
 # which is supposed to print out a javascript function (which I use all over the place) which
 # when the enter key is pressed will take the value from the textbox, and the id # from the
-# textbox's .id field and pass that to one of the update_ scripts and then do something on 
+# textbox's .id field and pass that to one of the update_ scripts and then do something on
 # a succesfull update
 
 # Instead of passing a whole bunch of params like '' have macros eg NO_ARGS, EMPTY_FUNC
@@ -19,7 +19,7 @@ SELECT_VALUE = 0
 SELECT_ID = 1
 
 class KeyHandler():
-    def __init__(self,name, doc, key_pressed, post_to, 
+    def __init__(self,name, doc, key_pressed, post_to,
                  post_vars,on_success,element):
         '''post_vars is a dictionary of var_name : string which gets passed to post_to as post_to?var_name=string
         element is the corresponding CLASS name to which this handler is added'''
@@ -29,7 +29,7 @@ class KeyHandler():
         self.post_to = post_to
         self.post_vars = post_vars
         self.on_success = on_success
-        self.element = element 
+        self.element = element
 
     def print_function(self):
         to_print = ''
@@ -48,7 +48,7 @@ function %s(e) {''' % self.name
         to_print += '''
     $.post('%s', {''' % self.post_to
         varcount = len(self.post_vars.keys())
-        for i,(varname,value) in enumerate(self.post_vars.iteritems()):
+        for i,(varname,value) in enumerate(self.post_vars.items()):
             if value == TEXTBOX_VALUE:
                 to_print += '''%s:%s''' % (varname,'value')
             elif value == TEXTBOX_ID:
@@ -68,10 +68,10 @@ function %s(e) {''' % self.name
   }
   setTimeout(function(box) { $(box).removeClass('submitting').removeClass('complete').addClass('default');}, 4000, box);
 }'''
-        print to_print
+        print(to_print)
 
     def print_ready(self):
-        print '''  $('.%s').keypress(%s); ''' % (self.element, self.name)
+        print('''  $('.%s').keypress(%s); ''' % (self.element, self.name))
 
 
 class SelectHandler():
@@ -82,8 +82,8 @@ class SelectHandler():
         self.post_to = post_to
         self.post_vars = post_vars
         self.on_success = on_success
-        self.element = element 
-    
+        self.element = element
+
     def print_function(self):
         to_print = ''
         to_print += '''
@@ -96,7 +96,7 @@ function %s(){''' % (self.name)
         to_print += '''
   $.post('%s', { ''' % self.post_to
         varcount = len(self.post_vars.keys())
-        for i,(varname,value) in enumerate(self.post_vars.iteritems()):
+        for i,(varname,value) in enumerate(self.post_vars.items()):
             if value == SELECT_VALUE:
                 to_print += '''%s:%s''' % (varname,'selected')
             elif value == SELECT_ID:
@@ -114,7 +114,7 @@ function %s(){''' % (self.name)
         to_print += '''
     }, 'text');
 }'''
-        print to_print
+        print(to_print)
 
     def print_ready(self):
-        print '''  $('.%s').change(%s); ''' % (self.element,self.name)
+        print('''  $('.%s').change(%s); ''' % (self.element,self.name))

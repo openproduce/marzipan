@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # op_db_library.py
 # Patrick McQuighan
 # This is the central library for interacting with the OpenProduce databases, inventory and register_tape.
@@ -35,6 +35,7 @@ from sqlalchemy.orm import mapper
 from sqlalchemy.orm import relation, backref
 from sqlalchemy.orm import sessionmaker
 from decimal import Decimal, ROUND_HALF_EVEN
+from functools import reduce
 
 from db_config import register_tape_db_config, inventory_db_config
 
@@ -276,7 +277,7 @@ def remove_distributor(dist):
 def set_barcode_item_byid(bc_item_id, newbarcode):
     to_change = inv_session.query(BarcodeItem).filter(BarcodeItem.id == bc_item_id).one()
     to_change.barcode = newbarcode
-    inv_session.flush()    
+    inv_session.flush()
 
 def get_barcode_item(item,bc):
     return inv_session.query(BarcodeItem).filter(and_(BarcodeItem.item_id == item.id,BarcodeItem.barcode == bc)).one()
@@ -297,12 +298,12 @@ def get_distributor_item_margin(item, distributor,dist_item=None):
     each_cost = dist_item.get_each_cost()
     op_price = item.get_price()
     tax = item.get_tax_value()
-    
+
     if op_price - tax > 0:
         margin = (1.0 - each_cost/(op_price - tax)) * 100
     else:
         margin = 100
-        
+
     return margin
 
 def set_item_discontinued(item, val):
@@ -372,7 +373,7 @@ def remove_barcode_item_byid(bc_item_id):
 def remove_category_item_byid(cat_item_id):
     to_remove = inv_session.query(CategoryItem).filter(CategoryItem.id == cat_item_id).one()
     inv_session.delete(to_remove)
-    inv_session.flush()    
+    inv_session.flush()
 
 def remove_category_item(item,category):
     to_remove = inv_session.query(CategoryItem).filter(and_(CategoryItem.item_id == item.id, CategoryItem.cat_id == category.id)).one()
@@ -382,7 +383,7 @@ def remove_category_item(item,category):
 def remove_distributor_item_byid(dist_item_id):
     to_remove = inv_session.query(DistributorItem).filter(DistributorItem.id == dist_item_id).one()
     inv_session.delete(to_remove)
-    inv_session.flush()    
+    inv_session.flush()
 
 def remove_distributor_item(item,distributor):
     to_remove = inv_session.query(DistributorItem).filter(and_(DistributorItem.item_id == item.id, DistributorItem.dist_id == distributor.id)).one()
@@ -398,7 +399,7 @@ def get_items(hide_discontinued=False,show_categories=None,show_distributors=Non
     items = inv_session.query(Item)
     if hide_discontinued:
         items = items.filter(Item.is_discontinued == False)
-        
+
     if hide_categoryless:
         items = items.filter(Item.categories.any(Category.name.in_(show_categories)))
     else:
@@ -444,7 +445,7 @@ def get_distributor_items(hide_discontinued=False,show_categories=None,show_dist
     if hide_distributorless:
         items = items.filter(Item.distributors.any(Distributor.name.in_(show_distributors)))
     else:
-        items = items.filter(or_(Item.distributors.any(Distributor.name.in_(show_distributors)), Item.distributors == None))        
+        items = items.filter(or_(Item.distributors.any(Distributor.name.in_(show_distributors)), Item.distributors == None))
 
     return items.all()
 
@@ -459,12 +460,12 @@ def filter_valid_sales (query_obj, start_date=None, end_date=None, slushfund=Fal
                               not_(SaleItem.item_id.in_([TAB_PAYMENT, CASH_BACK]))))
     if (not slushfund):
         query_obj = query_obj.filter(or_(Sale.customer_id!=SLUSHFUND, Sale.customer_id == None))
-                              
+
     if (start_date != None):
         query_obj = query_obj.filter (Sale.time_ended > start_date)
     if (end_date != None):
         query_obj = query_obj.filter (Sale.time_ended < end_date)
-    
+
     return query_obj
 
 def get_sales_in_range(item_id, days):
@@ -498,7 +499,7 @@ def add_item_count(item_id, amount):
     item = inv_session.query(Item).filter(Item.id == item_id).one()
     if item != None:
         item.count += amount
-        
+
         inv_session.flush()
         return item.count
 
@@ -534,7 +535,7 @@ def merge_items(old_item, new_item, merge_barcodes, merge_deliveries, merge_dist
     inv_session.flush()
     inv_session.delete(old_item)
     inv_session.flush()
-    
+
 def get_item_history(item_id, days):
     '''returns a 4-tuple of:
     total_sales (in units, not slushfunded)
@@ -604,7 +605,7 @@ class DailySaleInfo(object):
 
     def get_date(self):
         return self.date
-    
+
     def get_dayname(self):
         if self.date != None:
             return self.date.strftime('%A')
@@ -612,13 +613,13 @@ class DailySaleInfo(object):
 
     def get_date_str(self):
         if self.date != None:
-            return self.date.strftime('%Y-%m-%d')            
+            return self.date.strftime('%Y-%m-%d')
         return ''
 
     def get_hourly_sales(self,hours):
         '''returns a list of HourlySaleInfo objects for the hours specified'''
         return [self.hours[i] for i in hours]
-    
+
     def set_hour_sales(self, hour, gross, customers):
         self.hours[hour].set_gross(gross)
         self.hours[hour].set_customers(customers)
@@ -639,10 +640,10 @@ class HourlySaleInfo(object):
 
     def get_customers(self):
         return self.customers
-    
+
     def get_gross_sales(self):
         return self.gross
-    
+
     def set_gross(self, gross):
         self.gross = gross
 
@@ -650,7 +651,7 @@ class HourlySaleInfo(object):
         self.customers = customers
 
 def get_daily_sales(start_date=FIRST_SALES, end_date=datetime.datetime.now()):
-    '''returns a list of DailySaleInfo objects.  This is used by hours.py and other scripts needing sale info on a daily/hourly basis. 
+    '''returns a list of DailySaleInfo objects.  This is used by hours.py and other scripts needing sale info on a daily/hourly basis.
     optionally takes a range of dates by start_date and end_date.
     '''
 
@@ -669,7 +670,7 @@ def get_daily_sales(start_date=FIRST_SALES, end_date=datetime.datetime.now()):
             if hour in range(0,DAY_START_HOUR):        # put hours midnight - start hour on previous day
                 date_key -= datetime.timedelta(days=1)
 
-            if days.has_key(date_key):  # have the day already
+            if date_key in days: # have the day already
                 info = days[date_key]
                 info.set_hour_sales(hour, float(result[1]), int(result[2]))
             else:   # day not currently there
@@ -695,10 +696,11 @@ def get_sales_tax_report(start_date, end_date):
     # get items that are sold under high and low tax rates
     taxcats = get_tax_categories ()
 
-    zero_rate = map(to_id,filter (lambda x: x.get_rate() == .0000, taxcats))
-    food_rate = map(to_id,filter (lambda x: x.get_rate() == .0225, taxcats))
-    general_rate = map(to_id,filter (lambda x: x.get_rate() > .0225, taxcats))
-    soft_drink_rate = map(to_id, filter (lambda x: x.get_name() == 'soda', taxcats))
+    # map() returns a map object in python3, but we're expecting lists
+    zero_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0000, taxcats)))
+    food_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0225, taxcats)))
+    general_rate = list(map(to_id,filter (lambda x: x.get_rate() > .0225, taxcats)))
+    soft_drink_rate = list(map(to_id, filter (lambda x: x.get_name() == 'soda', taxcats)))
 
     zero_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(zero_rate)).all()
     food_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(food_rate)).all()
@@ -708,11 +710,11 @@ def get_sales_tax_report(start_date, end_date):
     negative_prices = map(to_id, inv_session.query(Price).filter(Price.unit_cost < 0.0).all())
     refund_items = inv_session.query(Item).filter(Item.price_id.in_(negative_prices)).all()
 
-    # Can make these dicts to improve speed if needed 
-    zero_rate_ids = map(to_id, zero_rate_items)
-    food_rate_ids = map(to_id, food_rate_items)
-    general_rate_ids = map(to_id, general_rate_items)
-    soft_drink_rate_ids = map(to_id, soft_drink_rate_items)
+    # Can make these dicts to improve speed if needed
+    zero_rate_ids = list(map(to_id, zero_rate_items))
+    food_rate_ids = list(map(to_id, food_rate_items))
+    general_rate_ids = list(map(to_id, general_rate_items))
+    soft_drink_rate_ids = list(map(to_id, soft_drink_rate_items))
 
     # there are some sales where the item has been deleted or doesn't have a tax_category_id or something...in this case assume 2.25%
     # -SL 5/18/12
@@ -723,7 +725,7 @@ def get_sales_tax_report(start_date, end_date):
       except:
         pass
 
-    refund_item_ids = map(to_id, refund_items)
+    refund_item_ids = list(map(to_id, refund_items))
 
     def link_only (x,y):
         '''returns the sum where x = cost and y = (cost,total,payment) if y is a LINK transaction.
@@ -731,7 +733,7 @@ def get_sales_tax_report(start_date, end_date):
         if int(y[payment]) == LINK_PAYMENT:
             return x + float(y[cost])
         return x
-            
+
     def non_link (x,y):
         '''sim to link_only but only adds if y is NOT a link transaction'''
         if (int(y[payment]) != LINK_PAYMENT):
@@ -777,8 +779,8 @@ def get_sales_tax_report(start_date, end_date):
     refund_sales = -1.0 * reduce(refunds,sales,0)  # refund total is negative, so we flip the sign
     # refunds are already included in one of these groups of sales, so we have to add 2*refund_sales in order to
     # get the $ value of everything rung up at the store
-    #sales_dollars = link_sales + non_link_sales + 2*refund_sales 
-    sales_dollars = link_sales + non_link_sales + refund_sales 
+    #sales_dollars = link_sales + non_link_sales + 2*refund_sales
+    sales_dollars = link_sales + non_link_sales + refund_sales
     # removing the 2x -SL 5/18/12
 
     deductions = link_sales + food_tax + general_tax + orphan_tax + refund_sales + transit_sales
@@ -807,7 +809,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
     #else:
             #commented out because i don't understand it.  -SL 5/18/12
     sales = sales.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
-        
+
     totals = {}
     tabs = {}
     cash_in = {}
@@ -826,11 +828,11 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             day = datetime.datetime(day.year, day.month, 1)
 
         date_key = day.date()
-            
-        if not totals.has_key(date_key):
+
+        if date_key not in totals:
             totals[date_key] = {}
             totals[date_key]['total'] = 0
-            for k,v in PAYMENT.iteritems():  # Have to initialize the each payment type for this day to be 0
+            for k, v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 totals[date_key][v] = 0
             cash_in[date_key] = 0            # if it's not in the totals dict then it's also not in the cash_in dict
 
@@ -841,7 +843,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             totals[date_key][payment_name] += float(row[2])
             if payment_name == 'cash':
                 cash_in[date_key] += float(row[2])
-                
+
             totals[date_key]['total'] += float(row[2])
         else:                                   # otherwise don't include tax when adding
             totals[date_key][payment_name] += float(row[1])
@@ -866,18 +868,18 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             day -= datetime.timedelta(days=day.day-1)
 
         date_key = day.date()
-            
-        if not tabs.has_key(date_key):
+
+        if date_key not in tabs:
             tabs[date_key] = {}
-            for k,v in PAYMENT.iteritems():  # Have to initialize the each payment type for this day to be 0
+            for k,v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 tabs[date_key][v] = 0
 
         payment_type = int(row[3])
         payment_name = PAYMENT[payment_type]
         tabs[date_key][payment_name] += float(row[2])
-        
+
         if payment_name == 'cash':          # record cash in
-            if not cash_in.has_key(date_key):
+            if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] += float(row[2])
 
@@ -902,26 +904,26 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
         date_key = day.date()
 
         if payment_name == 'cash':          # record cash in
-            if not cash_in.has_key(date_key):
+            if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] -= float(row[2])
 
 
     return [totals,tabs,cash_in]
-    
+
 
 #####################################################
-# 
+#
 # Classes for interacting with inventory database
 #
 # Note: the classes that have data imported from marzipan
 #  have an optional paramter id in the constructor.
-#  This is because I wanted to make sure that the ids from the old 
+#  This is because I wanted to make sure that the ids from the old
 #  database are exactly the same as the ones in the new database
-#  if this is ignored then it will be auto-incremented from whatever 
-#  the previous value was.  
+#  if this is ignored then it will be auto-incremented from whatever
+#  the previous value was.
 #  Classes that are new do not have this as the id should
-#  not be set manually.  
+#  not be set manually.
 #  This also holds for classes for register_tape
 #
 #  Additionally note that the names for variables in the classes
@@ -952,12 +954,12 @@ class Item(object):
     def __repr__(self):
         return "<Item('%s','%s',%s,%d)>"%(
             self.name, self.plu,
-            str(self.size), 
+            str(self.size),
             self.is_discontinued)
 
     def __str__(self):
         if self.size_unit_id != None:
-            return "%s [%.2f %s]" % (self.name, self.size, units_dict[self.size_unit_id]) 
+            return "%s [%.2f %s]" % (self.name, self.size, units_dict[self.size_unit_id])
         else:
             return "%s []" % self.name
 
@@ -966,10 +968,10 @@ class Item(object):
 
     def get_id(self):
         return self.id
-    
+
     def get_name(self):
         return self.name
-    
+
     def get_price(self):
         return float(inv_session.query(Price.unit_cost).filter(Price.id == self.price_id).one()[0])
 
@@ -1002,7 +1004,7 @@ class Item(object):
         return inv_session.query(DistributorItem).filter(DistributorItem.item_id == self.id).all()
 
     def get_distributors_str(self):
-        distributors = map(str,[dist_dict[di.dist_id] for di in self.get_distributors()])  # convert between the distributor item to distributor then apply str to all of them
+        distributors = list(map(str,[dist_dict[di.dist_id] for di in self.get_distributors()]))  # convert between the distributor item to distributor then apply str to all of them
         distributors.sort()
         return ','.join(distributors)
 
@@ -1014,13 +1016,13 @@ class Item(object):
         distributors = inv_session.query(DistributorItem.dist_id).filter(DistributorItem.item_id == self.id).all()
         dist_list = [str(d[0]) for d in distributors]
         return ','.join(dist_list)
-        
+
     def get_barcodes(self):
         return inv_session.query(BarcodeItem).filter(BarcodeItem.item_id == self.id).all()
 
     def get_unit_size(self):
         return self.size
-    
+
     def get_size_unit_id(self):
         return self.size_unit_id
 
@@ -1045,7 +1047,7 @@ class Item(object):
     def get_barcodes_str(self):
         barcodes = self.get_barcodes()
         return ','.join(map(BarcodeItem.get_barcode, barcodes))
-        
+
     def get_category_items(self):
         c_items = inv_session.query(CategoryItem).filter(CategoryItem.item_id == self.id).all()
         return c_items
@@ -1054,7 +1056,7 @@ class Item(object):
         return inv_session.query(Category).filter(and_(Category.id == CategoryItem.cat_id, CategoryItem.item_id == self.id)).all()
 
     def get_categories_str(self):
-        categories = map(str,self.get_categories())
+        categories = list(map(str,self.get_categories()))
         categories.sort()
         return ','.join(categories)
 
@@ -1081,7 +1083,7 @@ class Item(object):
         if self.notes == None:
             return ''
         return self.notes
-    
+
     def set_notes(self, new_notes):
         self.notes = new_notes
         inv_session.flush()
@@ -1135,10 +1137,10 @@ class SaleUnit(object):
 
     def get_id(self):
         return self.id
-    
+
     def get_time_ended(self):
         return self.get_time_ended
-    
+
     def get_name(self):
         return self.name
 
@@ -1189,7 +1191,7 @@ class Delivery(object):
         self.dist_id = dist_id
         if id != None:
             self.id = id
-    
+
     def get_time_delivered(self):
         return self.time_delivered
 
@@ -1202,7 +1204,7 @@ class Category(object):
         self.name = name
         if id != None:   # otherwise will auto-increment
             self.id = id
-    
+
     def get_name(self):
         return self.name
 
@@ -1218,7 +1220,7 @@ class CategoryItem(object):
     def __init__(self, item_id, cat_id):
         self.item_id = item_id
         self.cat_id = cat_id
-    
+
     def get_id(self):
         return self.id
 
@@ -1267,10 +1269,10 @@ class DistributorItem(object):
         self.case_unit_id = case_unit_id
         if id != None:
             self.id = id
-    
+
     def __str__(self):
         return '%s. Dist Item ID: %s. Case: $%.2f for %.2f %s.' % (dist_dict[self.dist_id], self.dist_item_id, self.wholesale_price, self.case_size, units_dict[self.case_unit_id])
-        
+
     def get_item_id(self):
         return self.item_id
 
@@ -1374,13 +1376,13 @@ class SaleItem(object):
         self.quantity = quantity
         self.unit_cost = unit_cost
         self.cost = cost
-        self.tax = tax 
+        self.tax = tax
         self.total = total
         self.is_refund = is_refund
-       
+
     def __str__(self):
         return '%d, %.2f' %(self.item_id,self.quantity)
- 
+
     def get_unit_cost(self):
         return self.unit_cost
 
@@ -1432,7 +1434,7 @@ class ItemCountLog(object):
         if self.old_count != None:
             return self.new_count - self.old_count
         return self.new_count
-    
+
     def get_is_manual_count(self):
         return self.is_manual_count
 
@@ -1538,7 +1540,7 @@ sale_units = Table('sale_units', inv_md,
 
 price_changes = Table('price_changes', inv_md,
                       Column('id',Integer, primary_key=True),
-                      Column('old_price_id',Integer, nullable=False), 
+                      Column('old_price_id',Integer, nullable=False),
                       Column('new_price_id',Integer, nullable=False),
                       Column('special_id',Integer, ForeignKey('specials.id'))
                       )
@@ -1602,7 +1604,7 @@ barcode_items = Table('barcode_items', inv_md,
                       Column('barcode', String(16))
                       )
 
-item_count_log = Table('item_count_log', inv_md, 
+item_count_log = Table('item_count_log', inv_md,
                        Column('id', Integer, primary_key=True),
                        Column('item_id',Integer,ForeignKey('items.id'),nullable=False),
                        Column('old_count', Integer,default=None),
@@ -1612,17 +1614,17 @@ item_count_log = Table('item_count_log', inv_md,
                        )
 
 # map classes to the tables defined above
-mapper(Item, items, properties = {'categories' : 
-                                  relation(Category,secondary=category_items, 
+mapper(Item, items, properties = {'categories' :
+                                  relation(Category,secondary=category_items,
                                            primaryjoin=items.c.id==category_items.c.item_id,
                                            secondaryjoin=category_items.c.cat_id==categories.c.id,
                                            foreign_keys=[category_items.c.item_id,category_items.c.cat_id]),
-                                  'distributors' : 
+                                  'distributors' :
                                   relation(Distributor, secondary=distributor_items,
                                            primaryjoin=items.c.id==distributor_items.c.item_id,
                                            secondaryjoin=distributor_items.c.dist_id==distributors.c.id,
                                            foreign_keys=[distributor_items.c.item_id,distributor_items.c.dist_id])
-                                            
+
 })
 mapper(ItemCountLog, item_count_log)
 mapper(Price, prices)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # catalog.py
 # Patrick McQuighan
 # Replacement for catalog.pl written in Python and using the new database as of 11/2010
@@ -15,8 +15,8 @@ cgitb.enable()
 spec_date_format = "%A %m/%d/%y"
 
 def print_headers():
-    print '''Content-Type: text/html\n\n'''
-    print '''<html><head>
+    print('''Content-Type: text/html\n\n''')
+    print('''<html><head>
     <title>Open Produce Catalog</title>
 
     <link rel="stylesheet" type="text/css" href="../../common/tools.css" />
@@ -75,14 +75,14 @@ $(document).ready(function() {
 });
 
 </script>
-'''
+''')
     idf.print_javascript()
-    print '''
-    </head>'''
+    print('''
+    </head>''')
 
 def print_dates(days,selected_date):
     today = datetime.datetime.now()
-    print '''<select id="exp_date" name="exp_date">'''
+    print('''<select id="exp_date" name="exp_date">''')
 
     for i in range(days):
         day = today + datetime.timedelta(days=i)
@@ -91,14 +91,14 @@ def print_dates(days,selected_date):
         else:
             selected = ""
         d_string = day.strftime(spec_date_format)
-        print '''<option value='%s' %s> %s </option>''' % (d_string, selected, d_string)
-    print '''</select>'''
+        print('''<option value='%s' %s> %s </option>''' % (d_string, selected, d_string))
+    print('''</select>''')
 
 def main():
     form = cgi.FieldStorage()
     idf.init(form,discontinued=True,distributors=True,categories=True)
     print_headers()
-    print '''
+    print('''
 <body>
 <div class="key">
          Key:
@@ -114,12 +114,12 @@ def main():
          <div>The Out in column estimates the number of days of stock left in store.  It uses the average # units sold per day for the last 14 days to get its estimate</div>
          <div>The Spec column shows the estimated stock count for 'Speculate stock for date:' day.  Speculation is based on average # units sold per day for the last 14 days. The default date is for the next Thursday</div>
          <div>The New count field is meant to change an item's count after doing a manual count.  Deliveries should be logged under manage_prices.  Type a new count and press ENTER </div>
-         <div style="clear: both; height: 15px;"> </div>'''
-    
-    print '''<form name="options" action="catalog.py" method="get">'''
+         <div style="clear: both; height: 15px;"> </div>''')
+
+    print('''<form name="options" action="catalog.py" method="get">''')
     options = idf.print_form()    # prints out all of the options for item displaying
 
-    print '''Speculate stock for date'''
+    print('''Speculate stock for date''')
     if "exp_date" in form:
         speculate_date = datetime.datetime.strptime(form.getvalue("exp_date"), spec_date_format)
         days_to_speculate = (speculate_date - datetime.datetime.now()).days
@@ -128,9 +128,9 @@ def main():
         today = datetime.datetime.now()
         days_to_speculate = (6 - today.weekday() + 4) % 7  # weekday goes Monday=0, Sunday=6 so: 6-today = days to next sunday
         print_dates(14, today+datetime.timedelta(days=days_to_speculate))
-    print ''' <br /><input type="submit" value="Change options" /> </form>'''
-    print '''<br /><br />'''
-    print '''<table border=0 class="sortable" cellspacing=2 cellpadding=0>
+    print(''' <br /><input type="submit" value="Change options" /> </form>''')
+    print('''<br /><br />''')
+    print('''<table border=0 class="sortable" cellspacing=2 cellpadding=0>
              <thead class="col-header"><tr>
              <th class="th">dist (case size/units/price)</th>
              <th class="th">d item id</th>
@@ -147,7 +147,7 @@ def main():
              <th class="th">OP SKU</th>
              <th class="th">barcodes</th>
              <th class="th">Stocked</th>
-             </thead><tbody id="item-stats">\n'''
+             </thead><tbody id="item-stats">\n''')
 
     distributors = dict([(d.get_id(), d) for d in db.get_distributors()])
     for item in db.get_items(**options):
@@ -156,10 +156,10 @@ def main():
         item_id = item.get_id()
         day7, day14, day30 = db.get_sales_in_multi_range(item_id,7,14,30)
         stock_strings = ['%.2f'%day7,'%.2f'%day14,'%.2f'%day30]
-        dist_list = item.get_distributors()     
+        dist_list = item.get_distributors()
         dist_count = len(dist_list)
-        
-        for i in range(max(1,dist_count)):   # need the max in case the item has no distributors            
+
+        for i in range(max(1,dist_count)):   # need the max in case the item has no distributors
             row_color = ""
             if count < -10.0:
                 row_color = "na"
@@ -169,48 +169,48 @@ def main():
                 row_color = "out"
             elif count < day14:
                 row_color = "low"
-            print '<tr id="tr_%d_%.2f" class="%s">' % (item_id, day14,row_color)
-            
-            print '<div class="div_%d">' % (item_id)
-        
+            print('<tr id="tr_%d_%.2f" class="%s">' % (item_id, day14,row_color))
+
+            print('<div class="div_%d">' % (item_id))
+
             if dist_count == 0:  # don't have any distributors so we just print blanks in first two spots
-                print '''<td> - &nbsp; </td> <td> - &nbsp; </td>'''
+                print('''<td> - &nbsp; </td> <td> - &nbsp; </td>''')
             else:
                 d_i = dist_list[i]
                 dist = distributors[d_i.get_dist_id()]
                 case_str = '''%.2f''' % d_i.get_case_size()
                 price_str = '''$%.2f''' % d_i.get_wholesale_price()
-                print '''<td>''',str(dist),'(',case_str,' ',d_i.get_case_unit(),' ',price_str,') </td> <td>',d_i.get_dist_item_id(),' </td>'''
-        
-            print '''<td style='padding-left: 1em;'>''',str(item),'</td>'''
-            print '''<td>''',item.get_size_str(),'''</td>'''
-            print '''<td>''',item.get_price_str(),'''</td>'''
-            print '<td>',stock_strings[0],'</td><td>',stock_strings[1],'</td><td>',stock_strings[2],'</td>'
+                print('''<td>''',str(dist),'(',case_str,' ',d_i.get_case_unit(),' ',price_str,') </td> <td>',d_i.get_dist_item_id(),' </td>''')
+
+            print('''<td style='padding-left: 1em;'>''',str(item),'</td>''')
+            print('''<td>''',item.get_size_str(),'''</td>''')
+            print('''<td>''',item.get_price_str(),'''</td>''')
+            print('<td>',stock_strings[0],'</td><td>',stock_strings[1],'</td><td>',stock_strings[2],'</td>')
             if count > 0:
                 if float(day14) > 0:
                     days_of_stock = float(count) *14.0/ float(day14)
-                    print '<td>','%.0f'%days_of_stock,' days</td>'
+                    print('<td>','%.0f'%days_of_stock,' days</td>')
                 else:
-                    print '''<td>No sales</td>'''
+                    print('''<td>No sales</td>''')
             else:
-                print '''<td>0 days</td>'''
+                print('''<td>0 days</td>''')
 
             speculated = count - day14/14*days_to_speculate   # days_to_speculate determined outside of loop
-            print '''<td id="%d_spec_%d" class="spec">''' % (item_id,i)
-            print '%d'%speculated,'''</td>'''
-            print '''<td id="%d_amt_%d" style="border-left: 1px solid #999; padding-left: 1em;">''' % (item_id, i)
-            print int(count),'''</td>'''
-            print '''<td><input class="count default" id="%d_count_%d" size="3" /></td>''' % (item_id,i)
-            print '''<td style='text-align: center;'> <a href="''',db.get_item_info_page_link(item_id),'''" target="_blank">''',str(item_id),'''</a> </td>'''
-            print '''<td>''',item.get_barcodes_str(),'''&nbsp;</td>'''
+            print('''<td id="%d_spec_%d" class="spec">''' % (item_id,i))
+            print('%d'%speculated,'''</td>''')
+            print('''<td id="%d_amt_%d" style="border-left: 1px solid #999; padding-left: 1em;">''' % (item_id, i))
+            print(int(count),'''</td>''')
+            print('''<td><input class="count default" id="%d_count_%d" size="3" /></td>''' % (item_id,i))
+            print('''<td style='text-align: center;'> <a href="''',db.get_item_info_page_link(item_id),'''" target="_blank">''',str(item_id),'''</a> </td>''')
+            print('''<td>''',item.get_barcodes_str(),'''&nbsp;</td>''')
             if not item.get_is_discontinued():
-                print '''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,)
+                print('''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,))
             else:
-                print '''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,)                                             
-            print '''</div>'''
-            print '''</tr>\n'''
-    print '''</tbody></table>\n'''
-    print '''</body></html>'''
+                print('''<td><input type="checkbox" id="%d_isStocked"  onClick="discontinueItem(this)"/> </td>''' % (item_id,))
+            print('''</div>''')
+            print('''</tr>\n''')
+    print('''</tbody></table>\n''')
+    print('''</body></html>''')
 
 
 if __name__ == "__main__":

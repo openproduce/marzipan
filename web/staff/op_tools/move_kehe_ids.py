@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # catalog.py
 # Patrick McQuighan
 # An update script that takes distributor item ids from Kehe items and appends them to the item's notes section.
@@ -22,6 +22,4 @@ for p,item,d,dist_item in kehe_items:  # p and d are unused
     if len(barcodes) == 1:
         dist_item.set_dist_item_id(barcodes[0])
     else:
-        print 'Item %s has more than 1 barcode --> ambiguity, no action taken.' % (item)
-    
-    
+        print('Item %s has more than 1 barcode --> ambiguity, no action taken.' % (item))
