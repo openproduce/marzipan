@@ -60,18 +60,19 @@
         $ python3 register/ui.py 2> error.log
 
 * Make the computer boot directly into text mode, if desired.  Edit
-  /etc/default/grub and change the line that reads
-  
-        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+  /etc/default/grub:
 
-        to
+    - disable GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" by adding # at the beginning.
+    - set GRUB_CMDLINE_LINUX="" to GRUB_CMDLINE_LINUX="quiet splash text"
+    - remove # from the line GRUB_TERMINAL="console" to disable graphical terminal.
 
-        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash text"
 
-        Then run 'update-grub' and reboot.
+        Then run 'update-grub', set system target, and reboot.
  
         $ sudo vi /etc/default/grub
         $ sudo update-grub
+	$ sudo systemctl set-default multi-user.target
+	$ sudo 
 
         You can then reboot, or wait until you complete the next step.
 
@@ -85,9 +86,15 @@
         exec /sbin/getty -8 -n -l /home/openproduce/marzipan/register/launch.sh 38400 tty1
 
 * Or, for later versions of ubuntu:
-  sudo systemctl edit gety@tty1
+  sudo systemctl edit getty@tty1
   and edit the second ExecStart line to read:
-  ExecStart=-/home/openproduce/marzipan/register/launch.sh --autologin openproduce
+  ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
+
+  And add the launch script to your shell .profile:
+
+  if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
+     /path/to/marzipan/register/launch.sh
+  fi
 
   Now do the same for tty2 and tty3 if desired.
 

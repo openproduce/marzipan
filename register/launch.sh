@@ -1,3 +1,3 @@
 #!/bin/bash
-su - openproduce -c "(cd /home/openproduce/marzipan-prep/register; python ui.py 2> /var/tmp/pos_errs)"
+(cd /home/openproduce/marzipan/register; python ui.py 2> /var/tmp/pos_errs)
 
