@@ -72,7 +72,7 @@
         $ sudo vi /etc/default/grub
         $ sudo update-grub
 	$ sudo systemctl set-default multi-user.target
-	$ sudo 
+
 
         You can then reboot, or wait until you complete the next step.
 
