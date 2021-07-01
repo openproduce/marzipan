@@ -378,8 +378,8 @@ def send_dejavoo_void_request(amount, xid):
     c.setopt(pycurl.POSTFIELDS, json.dumps(values))
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
     c.setopt(pycurl.TIMEOUT, 75) #terminal times out in 60s so this must be longer than that
-    import StringIO
-    b = StringIO.StringIO()
+    import io
+    b = io.BytesIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
     try:
         c.perform()
@@ -387,6 +387,7 @@ def send_dejavoo_void_request(amount, xid):
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
         return {"success": False, "message": "No card inserted"}
+
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         print >> sys.stderr, b.getvalue()
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
@@ -431,7 +432,7 @@ def send_dejavoo_request(amount, tid):
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
     c.setopt(pycurl.TIMEOUT, 75) #terminal times out in 60s so this must be longer than that
     import io
-    b = io.StringIO()
+    b = io.BytesIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
     try:
         c.perform()
