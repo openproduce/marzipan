@@ -36,8 +36,8 @@ from datetime import *
 import lxml
 from lxml import etree
 import suds
-from urllib2 import Request, urlopen
-from urllib import urlencode
+import urllib
+
 
 
 def write_cui_pipe(str):
