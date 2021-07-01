@@ -430,8 +430,8 @@ def send_dejavoo_request(amount, tid):
     c.setopt(pycurl.POSTFIELDS, json.dumps(values))
     c.setopt(pycurl.USERAGENT, 'curl/7.58.0') # was getting blocked by cloudflare with pycurl user agent
     c.setopt(pycurl.TIMEOUT, 75) #terminal times out in 60s so this must be longer than that
-    import StringIO
-    b = StringIO.StringIO()
+    import io
+    b = io.StringIO()
     c.setopt(pycurl.WRITEFUNCTION, b.write)
     try:
         c.perform()
