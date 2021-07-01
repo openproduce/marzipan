@@ -444,11 +444,11 @@ def send_dejavoo_request(amount, tid):
     if c.getinfo(pycurl.HTTP_CODE) == 502: #bad gateway
         return {"success": False, "message": "bad gateway; try again"}
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
-        print >> sys.stderr, b.getvalue()
+        sys.stderr.write(b.getvalue())
         return {"success": False, "message": "dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE))}
         #raise CCError()
     resp = b.getvalue()
-    print >> sys.stderr, resp
+    sys.stderr.write(resp)
     c.close()
     return json.loads(resp)
     
