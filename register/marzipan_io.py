@@ -392,7 +392,7 @@ def send_dejavoo_void_request(amount, xid):
         sys.stderr.write(b.getvalue().decode('utf-8'))
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
     resp = b.getvalue()
-    sys.stderr(resp.decode('utf-8'))
+    sys.stderr.write(resp.decode('utf-8'))
     c.close()
     return json.loads(resp)
 
@@ -478,11 +478,11 @@ def request_dejavoo_status(xid):
     except:
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) != 200:
-        print >> xid
-        print >> sys.stderr, b.getvalue()
+        print(xid)
+        sys.stderr.write(b.getvalue().decode('utf-8'))
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
-    resp = b.getvalue()
-    print >> sys.stderr, resp
+    resp = b.getvalue().decode('utf-8')
+    sys.stderr.write(resp)
     return json.loads(resp)
 
 
