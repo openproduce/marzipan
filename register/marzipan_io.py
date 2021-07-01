@@ -435,7 +435,8 @@ def send_dejavoo_request(amount, tid):
     c.setopt(pycurl.WRITEFUNCTION, b.write)
     try:
         c.perform()
-    except:
+    except Exception as e:
+        print(err)
         return {"success": False, "message": "Can't contact Fatt Merchant server"}
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
         return {"success": False, "message": "No card inserted"}
