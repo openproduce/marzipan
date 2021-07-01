@@ -2,17 +2,17 @@
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2015 Open Produce LLC
-#
+# 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,10 +31,13 @@ import cc
 import money
 from util import tabutil
 import datetime
+import json
 from datetime import *
 import lxml
 from lxml import etree
 import suds
+from urllib2 import Request, urlopen
+from urllib import urlencode
 
 
 def write_cui_pipe(str):
@@ -55,10 +58,8 @@ def write_cui_pipe(str):
     except:
         return
 
-
 def read_scale():
     pass
-
 
 def print_customer_card(customer):
     barcode_ps = open('postscriptbarcode/barcode.ps')
@@ -78,9 +79,7 @@ def print_customer_card(customer):
     except:
         pass
 
-
 def print_card_receipt(sale, paid, merchant_copy=False):
-    
     tex = _make_card_receipt_tex(sale, paid, merchant_copy)
 
     if merchant_copy:
@@ -98,7 +97,6 @@ def print_card_receipt(sale, paid, merchant_copy=False):
         out.write(line)
     out.flush()
     _print_tex_file(out.name)
-
 
 def print_receipt(sale):
     tex = _make_receipt_tex(sale)
@@ -133,6 +131,7 @@ def _print_tex_file(fname):
         dvi_file = fname + ".dvi"
         os.stat(dvi_file)
     except:
+
         os.chdir(cwd)
         return False
 
@@ -147,7 +146,6 @@ def _print_tex_file(fname):
             pass
     os.chdir(cwd)
     return True
-
 
 def _make_card_receipt_tex(sale, paid, merchant_copy=False):
     out = [
@@ -204,7 +202,6 @@ r"""\nonstopmode
 """)
     out.append("\end{document}\n")
     return out
-
 
 def _make_receipt_tex(sale):
     out = [
@@ -298,7 +295,6 @@ Thanks for shopping!\n\n
     out.append("\end{document}\n")
     return out
 
-
 def email_receipt(address, sale):
     email = _make_receipt_email(address, sale)
     try:
@@ -310,7 +306,6 @@ def email_receipt(address, sale):
         return True
     except:
         return False
-
 
 def _make_receipt_email(address, sale):
     out = []
@@ -346,17 +341,14 @@ def _make_receipt_email(address, sale):
 class CCError(Exception):
     def __init__(self, error):
         self.error = error
-
     def __str__(self):
         return self.error
-
 
 def _parse_ippay_response(resp):
     m = re.search('<ResponseText>(.*)</ResponseText>', resp)
     if not m:
         raise CCError('no ResponseText in ippay xml')
     return m.group(1)
-
 
 def send_ippay_request(amount, card):
     if not card.validate():
@@ -399,13 +391,12 @@ def _parse_tnbci_response(resp):
         response_text = "DECLINED (%d)" % resp_code
     elif resp_code >= 300 and resp_code < 400:
         response_text = "MERCHANT ERROR (%d)" % resp_code
-    elif resp_code >= 400:
+    elif resp_code >= 400 :
         response_text = "PROCESSOR ERROR (%d)" % resp_code
     else:
         response_text = "I'M QUITE CONFUSED"
 
     return (resp_hash['transactionid'], response_text)
-
 
 def send_tnbci_request(amount, card):
     if not card.validate():
@@ -426,45 +417,40 @@ def send_tnbci_request(amount, card):
 
     if len(wget_errors) > 0:
         raise CCError('wget can\'t contact tnbci')
-
+    
     (xid, status) = _parse_tnbci_response(resp_text)
     return (xid, status)
 
-
 def _parse_globalpay_response(resp):
-    # This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working
+#This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
     m = re.search('<Message>(.*)</Message>', resp)
     if m:
-        print(("global said: %s" % m.group(1)))
-
+        print "global said: %s" % m.group(1)
+    
     m = re.search('<RespMSG>(.*)</RespMSG>', resp)
     if not m:
         raise CCError('no RespMSG in globalpay xml')
-
+    
     return m.group(1).upper()
 
-
 try:
-    transact = suds.client.Client(
-        'https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+    transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
     transact.set_options(timeout=7)
-    report = suds.client.Client(
-        'https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+    report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
     report.set_options(timeout=7)
     # try to setup cc on boot, but fail silently if we can't
 except:
     pass
 
 
+
 def send_globalpay_request(amount, card, sale):
     try:
         transact
     except NameError:
-        transact = suds.client.Client(
-            'https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+        transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
         transact.set_options(timeout=7)
-        report = suds.client.Client(
-            'https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+        report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
         report.set_options(timeout=7)
     f = open('/tmp/marzipanlog', 'w')
     f.write("file open\n")
@@ -473,34 +459,30 @@ def send_globalpay_request(amount, card, sale):
         raise CCError('invalid card info')
     try:
         resp = transact.service.ProcessCreditCard(config.get('globalpay-login'), config.get('globalpay-password'), 'sale',
-                                                  card.number,
-                                                  '%02d%02d' % (
-                                                      card.exp_month, card.exp_year % 100),
-                                                  card.track2,
-                                                  card.account_name,
-                                                  '%.2f' % amount,
-                                                  '', '', '', '', '', '3AO')
+                                                card.number,
+                                                '%02d%02d' % (card.exp_month, card.exp_year % 100),
+                                                card.track2,
+                                                card.account_name,
+                                                '%.2f' % amount,
+                                                '', '', '', '', '', '3AO')
     except:
-        # request timed out. check logs to see if it managed to go through.
+        #request timed out. check logs to see if it managed to go through.
         now = datetime.now()
-        twenty_seconds_ago = (now - timedelta(seconds=20)
-                              ).strftime("%Y-%m-%dT%H:%M:%S")
+        twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
         try:
-            resp = report.service.GetCardTrx(config.get('globalpay-login'), config.get('globalpay-password'), '84571', '', twenty_seconds_ago,
-                                             now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
+            resp = report.service.GetCardTrx(config.get('globalpay-login'), config.get('globalpay-password'), '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
             root = etree.fromstring(str(resp))
-            res = root.xpath(
-                "//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
+            res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
             if len(res) >= 1:
-                # we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
+                #we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
                 return (res[0].find('TranID').text.strip(), 'APPROVED')
             else:
-                # If reporting works but transaction timed out, just try again
+                #If reporting works but transaction timed out, just try again 
                 send_globalpay_request(amount, card, sale)
         except:
-            # asking for the log timed out too.
-            # if the clerk reruns it and it says "duplicate", then we're fine, and the sale should be logged as completed
-            return ('', 'timeout. re-run transaction.')
+            #asking for the log timed out too.
+            #if the clerk reruns it and it says "duplicate", then we're fine, and the sale should be logged as completed 
+            return ('','timeout. re-run transaction.' )
     try:
         f.write(str(resp))
         f.write("\n--------------------\n")
@@ -516,7 +498,7 @@ def send_globalpay_request(amount, card, sale):
         sale.cc_mid = m.group(1)
         xid = m.group(2)
         sale.cc_pnref = resp.PNRef
-        sale.cc_auth = resp.AuthCode
+        sale.cc_auth = resp.AuthCode    
     except AttributeError:
         msg = resp.RespMSG
         xid = ""
@@ -533,7 +515,6 @@ def print_tabhistory(customer, tab_history):
     out.writelines(_make_tabhistory_tex(customer, tab_history))
     out.flush()
     _print_tex_file(out.name)
-
 
 def _texify_tablog(entry):
     d = entry.delta()

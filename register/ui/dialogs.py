@@ -288,24 +288,25 @@ class PaymentDialog(Dialog):
             cust_name = self.sale.customer.name
         total = money.moneyfmt(self.sale.total, curr='$', sep='')
         total_nod = money.moneyfmt(self.sale.total, curr='', sep='')
+        w = 45 #width of dialog
         self.add_frame(Frame([
-            Label(0, 0, 30, 'Enter payment information.'),
-            Label(1, 0, 30, '(ESC to cancel, TAB to switch)'),
-            Label(2, 0, 30, 'Customer: %s'%(cust_name), name='customer'),
-            Label(3, 0, 30, 'Total due: %s'%(total), name='total'),
-            Label(4, 0, 30, '', name='alert', color_id=ALERT_COLOR),
-            Label(5, 0, 30, 'Payment method:'),
+            Label(0, 0, w, 'Enter payment information.'),
+            Label(1, 0, w, '(ESC to cancel, TAB to switch)'),
+            Label(2, 0, w, 'Customer: %s'%(cust_name), name='customer'),
+            Label(3, 0, w, 'Total due: %s'%(total), name='total'),
+            Label(4, 0, w, '', name='alert', color_id=ALERT_COLOR),
+            Label(5, 0, w, 'Payment method:'),
 
             #second 6 used to be a 5. changed to accomodate link APC
-            ListBox('method', 6, 0, 30, 6, 
+            ListBox('method', 6, 0, w, 6, 
                 [(k, db.PAYMENT[k]) for k in sorted(db.PAYMENT.keys())],
                 sel=1),
-            Label(12, 0, 30, 'Amount tendered (d.dd):'), 
-            TextBox('paid', 13, 0, 30, total_nod, clear_on_insert=True),
-            Label(14, 0, 30, 'Change due: $0.00', name='change'),
-            Label(16, 0, 14, 'F6: No Rcpt', color_id=HELP_COLOR),
-            Label(16, 15, 14, 'F7: Print Rcpt', color_id=HELP_COLOR),
-            Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
+            Label(12, 0, w, 'Amount tendered (d.dd):'), 
+            TextBox('paid', 13, 0, w, total_nod, clear_on_insert=True),
+            Label(14, 0, w, 'Change due: $0.00', name='change'),
+            Label(16, 0, 15, 'F6: No Receipt', color_id=HELP_COLOR),
+            Label(16, 16, 20, 'F7: Print Receipt', color_id=HELP_COLOR),
+            #Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
 #            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
             ], layout.Center()))
 
@@ -322,13 +323,13 @@ class PaymentDialog(Dialog):
         is_void = db.PAYMENT[method] == 'void'
         is_tab = db.PAYMENT[method] == 'tab'
         if not paid or not re.match('^-?\d{0,6}(\.\d{0,2})?$', paid):
-            alert.set_text('execting amount like 1.25')
+            alert.set_text('expecting amount like 1.25')
             return self.frame.get('paid')
         elif is_void and decimal.Decimal(paid):
             alert.set_text('sale void but paid?')
             return self.frame.get('method')
         elif not is_void and (not paid or not decimal.Decimal(paid)):
-            alert.set_text('must be void if not paid')
+            alert.set_text('sale total is $0')
             return self.frame.get('paid')
         elif not is_void and decimal.Decimal(paid) < self.sale.total and \
              not is_tab and self.sale.total != decimal.Decimal('0.00'):
@@ -388,6 +389,81 @@ class PaymentDialog(Dialog):
         return True
 
     def _pay_credit(self, want_receipt):
+
+        #paid = decimal.Decimal(self.frame.get('paid').get_text())
+
+        # ^^^^^ not sure whose idea this was but we should charge the cc the sale total not some random amount the clerk types in the "tendered" box
+        # vvvvv much better --SL Nov2019
+
+        paid = self.sale.total
+
+        if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
+            if paid < decimal.Decimal('0'):
+                self.frame.get('alert').set_text("REFUND: %s (insert card...)" % paid)
+            else:
+                self.frame.get('alert').set_text('insert card...')
+            self.frame.show()
+            curses.panel.update_panels()
+            curses.doupdate()
+
+            resp = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+            if resp['success'] == False:
+                self.frame.get('alert').set_text(resp['message'] + "; try again")
+                self.frame.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                return False
+
+            if False:
+                # THIS CODE is for the /terminal/charge/queue method, whereas we are using the /terminal/charge method for compatibility with the /terminal/credit method
+
+                xid = marzipan_io.send_dejavoo_request(paid, config.get('dejavoo-terminal-id'))
+                while True: # terminal will time out after 60 seconds, no need to handle that here
+                    resp = marzipan_io.request_dejavoo_status(xid)
+                    if resp['message'] == 'terminalservice.waiting': # waiting for user to put in card
+                        time.sleep(0.25) #don't overload the API servers
+                        continue
+                    if resp['success'] == False:
+                        self.frame.get('alert').set_text(resp['message'])
+                        self.frame.show()
+                        curses.panel.update_panels()
+                        curses.doupdate()
+                        return False
+                    if resp['success'] == True:
+                        break
+                    # resp['success'] was neither False nor True, not sure what to do
+                    print >> sys.stderr, resp
+                    raise
+
+            # at this point, sale was approved:
+
+            try:
+                self.sale.cc_name = resp['payment_method']['person_name']
+            except:
+                self.sale.cc_name = '?'
+        
+            self.sale.cc_last4 = resp['last_four']
+            self.sale.cc_brand = ''
+            self.sale.cc_trans = resp['id'] # this is useful for voiding later
+            self._fill()
+        
+            if paid > decimal.Decimal(config.get('signature-threshold')):
+                marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=True)
+                TearDialog('merchant receipt').main()
+            else:
+                self.frame.get('alert').set_text('APPROVED - no signature necessary')
+                self.frame.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                #NoSignatureDialog().main() #prompt user to press any key
+    
+            if want_receipt:
+                marzipan_io.print_card_receipt(self.sale, paid, merchant_copy=False)
+
+        return True
+
+        # use magstripe reader:
+
         if not self.card:
             self._get_card()
             if not self.card:
@@ -471,14 +547,19 @@ class PaymentDialog(Dialog):
         return True
 
     def _get_card(self, in_swipe=False):
-        try:
-            cd = CCInfoDialog(in_swipe)
-            cd.main()
-            self.card = cd.get_result()
-        except:
-            alert = self.frame.get('alert')
-            alert.set_text('Network is DOWN')
-            return self.frame.get('method')
+
+        if config.get('cc-processor') == 'dejavoo': # use Dejavoo counter-top terminal to complete transaction, different workflow than magstripe reader
+            self._finish_sale(want_receipt=False)
+
+        else: # magswipe / manual entry
+            try:
+                cd = CCInfoDialog(in_swipe)
+                cd.main()
+                self.card = cd.get_result()
+            except:
+                alert = self.frame.get('alert')
+                alert.set_text('Network is DOWN')
+                return self.frame.get('method')
 
     def _get_link_info(self):
         ld = LinkDialog(self.sale)
@@ -572,6 +653,20 @@ class TearDialog(Dialog):
         Dialog.__init__(self)
         self.add_frame(Frame([
             Label(0, 0, 40, 'Wait for %s, then tear.'%(clue)),
+            Label(1, 0, 40, 'Press any key to continue...')
+            ], layout.Center()))
+
+    def input(self, c):
+        if not Dialog.input(self, c):
+            self.done = True
+        return True
+
+class NoSignatureDialog(Dialog):
+    """Tell clerk no signature needed"""
+    def __init__(self):
+        Dialog.__init__(self)
+        self.add_frame(Frame([
+            Label(0, 0, 40, 'APPROVED! No signature neccessary'),
             Label(1, 0, 40, 'Press any key to continue...')
             ], layout.Center()))
 
@@ -679,8 +774,8 @@ class LinkDialog(Dialog):
             Label(2, 0, 30, '', name='alert', color_id=ALERT_COLOR),
             Label(3, 0, 30, "Total (no tax): %s" % self.sale.base_cost ),
             Label(4, 0, 40, 'Approval Code:', name='name'),
-            TextBox('number', 4, r_margin, 30, ''),
-            Label(6, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
+            TextBox('number', 5, r_margin, 30, ''),
+            Label(7, 0, 15, 'F6: Save Info', color_id=HELP_COLOR),
             ], layout.Center()))
 
     def get_result(self):
@@ -1660,8 +1755,9 @@ class TransactionDialog(Dialog):
             Label(4,0, 50, "Paid by: %s" % db.PAYMENT[sale.payment]),
             Label(5,0, 50, "TOTAL: %s" % total),
             ListBox("bought_items", 7,0, 50, 10,
-                [ (si.id, "$%6s:  %2d x %s" % (si.total, si.quantity, si.item.name))  for si in self.sale_items ]),
-            Label(18,  0, 25, "F6: %s transaction" % void_toggle, color_id=HELP_COLOR),
+                [ (si.id, "$%6s:  %.2f x %s" % (si.total, si.quantity, si.item.name))  for si in self.sale_items ]),
+            (Label(18,0,25, "can't unvoid debit/credit") if (db.PAYMENT[sale.payment] == "debit/credit" and self.sale.is_void) else Label(18,  0, 25, "F6: %s transaction" % void_toggle, color_id=HELP_COLOR)),
+            # can't unvoid voided credit card payments
             Label(18, 26, 25, "F7: REPRINT receipt", color_id=HELP_COLOR),
         ], layout.Center()))
 
@@ -1674,15 +1770,19 @@ class TransactionDialog(Dialog):
     def input(self, c):
         if Dialog.input(self,c):
             pass    # really pass
-        elif c == curses.KEY_F6:    # void transaction
-            if self.sale.is_void:
+        elif c == curses.KEY_F6:    # void/unvoid transaction
+            if self.sale.is_void: #need to unvoid the transaction
+                if db.PAYMENT[self.sale.payment] == "debit/credit":
+                    return False #can't unvoid voided CC trans
                 if self.sale.has_tab_payment():
                     self.sale.customer.balance -= self.sale.tab_payment_amount()
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance += self.sale.total
                 self.sale.is_void = 0
-            else:
-                if self.sale.has_tab_payment():
+            else: #need to void the trans
+                if db.PAYMENT[self.sale.payment] == "debit/credit":
+                    marzipan_io.send_dejavoo_void_request(self.sale.total, self.sale.cc_trans)
+                elif self.sale.has_tab_payment():
                     self.sale.customer.balance += self.sale.tab_payment_amount()
                 elif db.PAYMENT[self.sale.payment] == 'tab':
                     self.sale.customer.balance -= self.sale.total
@@ -1690,9 +1790,9 @@ class TransactionDialog(Dialog):
             self.done = True
             self.result = True
         elif c == curses.KEY_F7:    # reprint receipt
-            marzipan_io.print_receipt(self.sale)
             if db.PAYMENT[self.sale.payment] == 'debit/credit':
                 marzipan_io.print_card_receipt(self.sale, self.sale.total, merchant_copy=False)
+            marzipan_io.print_receipt(self.sale)
             #TearDialog('sale receipt').main()
             self.done = True
         elif c == KEY_ESCAPE:
