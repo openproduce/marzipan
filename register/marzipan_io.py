@@ -421,89 +421,89 @@ def send_tnbci_request(amount, card):
     (xid, status) = _parse_tnbci_response(resp_text)
     return (xid, status)
 
-def _parse_globalpay_response(resp):
-#This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
-    m = re.search('<Message>(.*)</Message>', resp)
-    if m:
-        print "global said: %s" % m.group(1)
+# def _parse_globalpay_response(resp):
+# #This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
+#     m = re.search('<Message>(.*)</Message>', resp)
+#     if m:
+#         print "global said: %s" % m.group(1)
     
-    m = re.search('<RespMSG>(.*)</RespMSG>', resp)
-    if not m:
-        raise CCError('no RespMSG in globalpay xml')
+#     m = re.search('<RespMSG>(.*)</RespMSG>', resp)
+#     if not m:
+#         raise CCError('no RespMSG in globalpay xml')
     
-    return m.group(1).upper()
+#     return m.group(1).upper()
 
-try:
-    transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-    transact.set_options(timeout=7)
-    report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-    report.set_options(timeout=7)
-    # try to setup cc on boot, but fail silently if we can't
-except:
-    pass
+# try:
+#     transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#     transact.set_options(timeout=7)
+#     report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#     report.set_options(timeout=7)
+#     # try to setup cc on boot, but fail silently if we can't
+# except:
+#     pass
 
 
 
-def send_globalpay_request(amount, card, sale):
-    try:
-        transact
-    except NameError:
-        transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-        transact.set_options(timeout=7)
-        report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
-        report.set_options(timeout=7)
-    f = open('/tmp/marzipanlog', 'w')
-    f.write("file open\n")
-    f.flush
-    if not card.validate():
-        raise CCError('invalid card info')
-    try:
-        resp = transact.service.ProcessCreditCard(config.get('globalpay-login'), config.get('globalpay-password'), 'sale',
-                                                card.number,
-                                                '%02d%02d' % (card.exp_month, card.exp_year % 100),
-                                                card.track2,
-                                                card.account_name,
-                                                '%.2f' % amount,
-                                                '', '', '', '', '', '3AO')
-    except:
-        #request timed out. check logs to see if it managed to go through.
-        now = datetime.now()
-        twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
-        try:
-            resp = report.service.GetCardTrx(config.get('globalpay-login'), config.get('globalpay-password'), '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
-            root = etree.fromstring(str(resp))
-            res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
-            if len(res) >= 1:
-                #we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
-                return (res[0].find('TranID').text.strip(), 'APPROVED')
-            else:
-                #If reporting works but transaction timed out, just try again 
-                send_globalpay_request(amount, card, sale)
-        except:
-            #asking for the log timed out too.
-            #if the clerk reruns it and it says "duplicate", then we're fine, and the sale should be logged as completed 
-            return ('','timeout. re-run transaction.' )
-    try:
-        f.write(str(resp))
-        f.write("\n--------------------\n")
-        f.flush
-        f.close
-        if resp.RespMSG != 'Approved':
-            msg = "%s (%s)" % (resp.RespMSG, resp.Message)
-        else:
-            msg = resp.RespMSG
-        m = re.search('<MID>(.*)</MID><Trans_Id>(.*)</Trans_Id>', str(resp))
-        if not m:
-            raise AttributeError()
-        sale.cc_mid = m.group(1)
-        xid = m.group(2)
-        sale.cc_pnref = resp.PNRef
-        sale.cc_auth = resp.AuthCode    
-    except AttributeError:
-        msg = resp.RespMSG
-        xid = ""
+# def send_globalpay_request(amount, card, sale):
+#     try:
+#         transact
+#     except NameError:
+#         transact = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#         transact.set_options(timeout=7)
+#         report = suds.client.Client('https://api.globalpay.com/GlobalPay/transact.asmx?WSDL')
+#         report.set_options(timeout=7)
+#     f = open('/tmp/marzipanlog', 'w')
+#     f.write("file open\n")
+#     f.flush
+#     if not card.validate():
+#         raise CCError('invalid card info')
+#     try:
+#         resp = transact.service.ProcessCreditCard(config.get('globalpay-login'), config.get('globalpay-password'), 'sale',
+#                                                 card.number,
+#                                                 '%02d%02d' % (card.exp_month, card.exp_year % 100),
+#                                                 card.track2,
+#                                                 card.account_name,
+#                                                 '%.2f' % amount,
+#                                                 '', '', '', '', '', '3AO')
+#     except:
+#         #request timed out. check logs to see if it managed to go through.
+#         now = datetime.now()
+#         twenty_seconds_ago = (now - timedelta(seconds=20)).strftime("%Y-%m-%dT%H:%M:%S")
+#         try:
+#             resp = report.service.GetCardTrx(config.get('globalpay-login'), config.get('globalpay-password'), '84571', '', twenty_seconds_ago, now, '', '', '', '', '', '', '', '', '', '', ' ', 'TRUE', '', '', '', '', '', '', '', '', '', '', '<TermType>3A0</TermType>')
+#             root = etree.fromstring(str(resp))
+#             res = root.xpath("//TrxDetailCard[Name_on_Card_VC[starts-with(.,'%s')]]" % card.account_name)
+#             if len(res) >= 1:
+#                 #we don't deal with the case that there are two or more transactions in the past 20 seconds with the same cardholder name.
+#                 return (res[0].find('TranID').text.strip(), 'APPROVED')
+#             else:
+#                 #If reporting works but transaction timed out, just try again 
+#                 send_globalpay_request(amount, card, sale)
+#         except:
+#             #asking for the log timed out too.
+#             #if the clerk reruns it and it says "duplicate", then we're fine, and the sale should be logged as completed 
+#             return ('','timeout. re-run transaction.' )
+#     try:
+#         f.write(str(resp))
+#         f.write("\n--------------------\n")
+#         f.flush
+#         f.close
+#         if resp.RespMSG != 'Approved':
+#             msg = "%s (%s)" % (resp.RespMSG, resp.Message)
+#         else:
+#             msg = resp.RespMSG
+#         m = re.search('<MID>(.*)</MID><Trans_Id>(.*)</Trans_Id>', str(resp))
+#         if not m:
+#             raise AttributeError()
+#         sale.cc_mid = m.group(1)
+#         xid = m.group(2)
+#         sale.cc_pnref = resp.PNRef
+#         sale.cc_auth = resp.AuthCode    
+#     except AttributeError:
+#         msg = resp.RespMSG
+#         xid = ""
 
-    return (xid, msg)
+#     return (xid, msg)
 
 
 def print_ar_report(customers):
