@@ -389,10 +389,10 @@ def send_dejavoo_void_request(amount, xid):
         return {"success": False, "message": "No card inserted"}
 
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
-        sys.stderr.write(b.getvalue().encode('utf-8'))
+        sys.stderr.write(b.getvalue().decode('utf-8'))
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
     resp = b.getvalue()
-    sys.stderr(resp.encode('utf-8'))
+    sys.stderr(resp.decode('utf-8'))
     c.close()
     return json.loads(resp)
 
