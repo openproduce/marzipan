@@ -381,8 +381,7 @@ class CCError(Exception):
     except:
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
-        return {"success": False, "message": "No card inserted"}
-
+        raise CCError('no card inserted')
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         sys.stderr.write(b.getvalue().decode('utf-8'))
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
