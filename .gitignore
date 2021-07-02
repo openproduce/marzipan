@@ -5,6 +5,7 @@ error
 *.swo
 web/staff/.htpasswd
 web/staff/op_tools/db_config.py
+web/staff/op_tools/DBCreds.pm
 sale_receipt.tex
 register/launch.sh
 

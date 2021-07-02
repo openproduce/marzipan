@@ -659,12 +659,14 @@ def connect():
     global _inv_engine
     global _reg_engine
     global _Session
-    _inv_engine = create_engine('mysql://%s:%s@%s/%s' % (
+    _inv_engine = create_engine('mysql://%s:%s@%s:%s/%s' % (
         config.get('db-user'), config.get('db-passwd'),
-        config.get('db-host'), config.get('db-name-inv')))
-    _reg_engine = create_engine('mysql://%s:%s@%s/%s' % (
+        config.get('db-host'), config.get('db-port'),
+        config.get('db-name-inv')))
+    _reg_engine = create_engine('mysql://%s:%s@%s:%s/%s' % (
         config.get('db-user'), config.get('db-passwd'),
-        config.get('db-host'), config.get('db-name-reg')))
+        config.get('db-host'), config.get('db-port'),
+        config.get('db-name-reg')))
     _Session = sessionmaker(twophase=True)
     # Set up binding between each class and the appropriate DB
     D = {}
@@ -719,6 +721,7 @@ def make_db():
         mysql = subprocess.Popen([config.get('db-mysql-path'),
                                   '-h', config.get('db-host'),
                                   '-u', config.get('db-mysql-admin'),
+                                  '-P', config.get('db-mysql-port'),
                                   '--password=%s' % (admin_passwd)],
                                  stdin=subprocess.PIPE)
     except OSError as e:

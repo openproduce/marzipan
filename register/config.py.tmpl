@@ -51,6 +51,9 @@ _options = {
         _Option(True, 'mysql db name - register tape', None, True, 'CHANGE_THIS_REGISTER_DATABASE_NAME'),
     'db-name-inv':
         _Option(True, 'mysql db name - inventory', None, True, 'CHANGE_THIS_INVENTORY_DATABASE_NAME'),
+    'signature-threshold':
+        # dollar amount over which customer needs to sign CC recepit
+        _Option(True, 'signature threshold', None, True, '50.00'),
     'globalpay-login':
         _Option(True, 'globalpay login', None, True, 'CHANGE_THIS_LOGIN_NAME'),
     'globalpay-password':
@@ -58,6 +61,15 @@ _options = {
     'globalpay-url':
         # this url is something like "https://api.globalpay.com/GlobalPay/foo.asmx"
         _Option(True, 'globalpay url', None, True, 'CHANGE_THIS_GLOBALPAY_URL'),        
+    'dejavoo-terminal-id':
+        # this url is something like "282733"
+        _Option(True, 'dejavoo terminal id', None, True, 'CHANGE_THIS_TERMINAL_ID'),
+    'dejavoo-url':
+        # this url is something like "https://apiprod.fattlabs.com"
+        _Option(True, 'dejavoo url', None, True, 'CHANGE_THIS_DEJAVOO_URL'),
+    'dejavoo-api-key':
+        # this url is something like "kk3ZGY5OWZmYTYiLCJpc3MiOiJodHRwOi8vYXBpcHJvZ......Dk3ZGY5OWZmYTYiLCJpc3MiOiJodHRwOi8vYXBpcHJva"
+        _Option(True, 'dejavoo api key', None, True, 'CHANGE_THIS_DEJAVOO_API_KEY'),
     'ippay-terminalid':
         _Option(True, 'ippay terminal id', None, True, 'CHANGE_THIS_TERMINAL_ID'),
     'ippay-url':
@@ -105,6 +117,9 @@ _options = {
         _Option(True, 'mysql admin user', None, True, 'root'),
     'db-host':
         _Option(True, 'mysql db hostname', None, True, 'localhost'),
+    'db-port':
+        _Option(True, 'mysql db port', None, True, '3306'),
+
         
 }
 
