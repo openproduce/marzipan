@@ -8,7 +8,7 @@
 import op_db_library as db
 
 hours = [0,1,2,3,23]
-outputfilename = '/var/www/marzipan/web/site/openproduce.org/wordpress/latenight-sales.csv'
+outputfilename = 'latenight-sales.csv'
 outputfile = open(outputfilename, 'w')
 daily_sales = db.get_daily_sales()
 format = "%Y%m%d"

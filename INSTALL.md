@@ -3,23 +3,23 @@
 * PACKAGES  
   - sudo apt-get install git  
   - sudo apt-get install mysql-client  
-  - sudo apt-get install mysql-server  
-  - sudo apt-get install python-pip  
-  - sudo apt-get install python-dev  
-  - sudo apt-get install python-mysqldb  
-  - sudo apt-get install libcurl4-openssl-dev  
-  - sudo pip install pycurl  
-  - sudo apt-get install texlive  
-
-
-* Install SQL Alchemy (the copy of it in this tree will eventually be
-  removed).  The most recent version is 1.0.4.
-
-        $ sudo pip install SqlAlchemy
+  - sudo apt-get install mysql-server
+  - sudo apt-get install python-dev-is-python3  
+  - sudo apt-get install python3-pip  
+  - sudo apt-get install libmysqlclient-dev
+  - sudo apt-get install texlive
+  - sudo apt-get install libcurl4-openssl-dev
+  - pip3 install mysqlclient
+  - pip3 install pycurl
+  - pip3 install sqlalchemy
+  - pip3 install lxml
+  - pip3 install suds-jurko
 
 * Get the source code:
 
-        $ git clone git@github.com:openproduce/marzipan.git
+        $ git clone https://github.com/openproduce/marzipan.git
+
+* Set the mysql root password via "sudo mysql", if it isn't already set
 
 * Set up the databases and database users.  Note that as currently written this script will drop an existing database, so do not run it if your database exists and has data you want to keep!  If your databases don't exist yet this will create them.
 
@@ -57,23 +57,22 @@
   work in there):
 
         $ cd marzipan
-        $ python register/ui.py
-
-* TODO: Make sure everything is working
+        $ python3 register/ui.py 2> error.log
 
 * Make the computer boot directly into text mode, if desired.  Edit
-  /etc/default/grub and change the line that reads
-  
-        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+  /etc/default/grub:
 
-        to
+    - disable GRUB_CMDLINE_LINUX_DEFAULT="quiet splash" by adding # at the beginning.
+    - set GRUB_CMDLINE_LINUX="" to GRUB_CMDLINE_LINUX="quiet splash text"
+    - remove # from the line GRUB_TERMINAL="console" to disable graphical terminal.
 
-        GRUB_CMDLINE_LINUX_DEFAULT="quiet splash text"
 
-        Then run 'update-grub' and reboot.
+        Then run 'update-grub', set system target, and reboot.
  
         $ sudo vi /etc/default/grub
         $ sudo update-grub
+	$ sudo systemctl set-default multi-user.target
+
 
         You can then reboot, or wait until you complete the next step.
 
@@ -87,9 +86,15 @@
         exec /sbin/getty -8 -n -l /home/openproduce/marzipan/register/launch.sh 38400 tty1
 
 * Or, for later versions of ubuntu:
-  sudo systemctl edit gety@tty1
+  sudo systemctl edit getty@tty1
   and edit the second ExecStart line to read:
-  ExecStart=-/home/openproduce/marzipan/register/launch.sh --autologin openproduce
+  ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
+
+  And add the launch script to your shell .profile:
+
+  if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
+     /path/to/marzipan/register/launch.sh
+  fi
 
   Now do the same for tty2 and tty3 if desired.
 
@@ -100,7 +105,7 @@
 
   These instructions should work on Ubuntu or Debian GNU/Linux.
 
-* Make sure you have Python 2.7.x installed.
+* Make sure you have Python 3 installed
   (It probably is by default, but check with `python --version`.)
 
 * Install other needed packages:
@@ -112,10 +117,15 @@
         $ sudo apt-get install mysql-server
         $ sudo apt-get install libmysqlclient-dev
         $ sudo apt-get install git
-        $ sudo apt-get install python-dev
-        $ sudo apt-get install python-pip
-        $ sudo pip install SQLAlchemy
-        $ sudo pip install MySQL-python
+        $ sudo apt-get install python-dev-is-python3
+        $ sudo apt-get install python3-pip python3-wheel
+        $ sudo pip3 install SQLAlchemy
+        $ sudo pip install mysqlclient
+	$ sudo apt-get install libdbi-perl
+	$ sudo apt-get install libdbd-mysql-perl
+
+* Set up MySQL root credentials:
+https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/default-privileges.html
 
 * Install Database:
 
@@ -131,26 +141,29 @@
         $ 
 
 * Unzip sample data files:
-        $ bunzip2 -k sample-data/op-register_tape-20150316.sql.bz2
-        $ bunzip2 -k sample-data/op-inventory-20150316.sql.bz2
+        $ bunzip2 -k sample-data/op-register_tape-sample.sql.bz2
+        $ bunzip2 -k sample-data/op-inventory-sample.sql.bz2
 
-* Load data (THIS IS REAL DATA!)
-
+* Load data 
         $ mysql -u marzipan -p
         mysql> use register_tape
-        mysql> source sample-data/op-register_tape-20150316.sql
+        mysql> source sample-data/op-register_tape-sample.sql
         mysql> use inventory
-        mysql> source sample-data/op-inventory-20150316.sql
+        mysql> source sample-data/op-inventory-sample.sql
         mysql> quit
         Bye
-        $ 
+        $
+
+* Configure db for grouping
+  	$ mysql -u marzipan -p
+	mysql> SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 
 * Update DB config with new DB credentials:
 
  * Staff op_tools:
   * Update web/staff/op_tools/db_config.py with correct database credentials
-
- *      
+  * Update web/staff/dash.pl with correct database credentials
+  * Update web/staff/dash_booze.pl with correct database credentials
 
 
 * Create the marzipan web root:

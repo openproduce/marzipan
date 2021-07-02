@@ -299,11 +299,7 @@ class ScrollDimension:
     def __init__(self, real_size, virtual_size,
         leading_context=0, trailing_context=0):
         self.real_size = math.floor(real_size) 
-        sys.stderr.write("\n real size ")
-        sys.stderr.write(str(self.real_size))
         self.virtual_size = virtual_size
-        sys.stderr.write("\n virtual size ")
-        sys.stderr.write(str(self.virtual_size))
         self.base = 0
         self.offset = 0
         self.leading_context = leading_context
