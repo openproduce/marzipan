@@ -2,17 +2,17 @@
 
 # This file is part of Marzipan, an open source point-of-sale system.
 # Copyright (C) 2015 Open Produce LLC
-#
+# 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,10 +31,13 @@ import cc
 import money
 from util import tabutil
 import datetime
+import json
 from datetime import *
 import lxml
 from lxml import etree
 import suds
+import urllib
+
 
 
 def write_cui_pipe(str):
@@ -55,10 +58,8 @@ def write_cui_pipe(str):
     except:
         return
 
-
 def read_scale():
     pass
-
 
 def print_customer_card(customer):
     barcode_ps = open('postscriptbarcode/barcode.ps')
@@ -78,9 +79,7 @@ def print_customer_card(customer):
     except:
         pass
 
-
 def print_card_receipt(sale, paid, merchant_copy=False):
-    
     tex = _make_card_receipt_tex(sale, paid, merchant_copy)
 
     if merchant_copy:
@@ -98,7 +97,6 @@ def print_card_receipt(sale, paid, merchant_copy=False):
         out.write(line)
     out.flush()
     _print_tex_file(out.name)
-
 
 def print_receipt(sale):
     tex = _make_receipt_tex(sale)
@@ -133,6 +131,7 @@ def _print_tex_file(fname):
         dvi_file = fname + ".dvi"
         os.stat(dvi_file)
     except:
+
         os.chdir(cwd)
         return False
 
@@ -147,7 +146,6 @@ def _print_tex_file(fname):
             pass
     os.chdir(cwd)
     return True
-
 
 def _make_card_receipt_tex(sale, paid, merchant_copy=False):
     out = [
@@ -204,7 +202,6 @@ r"""\nonstopmode
 """)
     out.append("\end{document}\n")
     return out
-
 
 def _make_receipt_tex(sale):
     out = [
@@ -298,7 +295,6 @@ Thanks for shopping!\n\n
     out.append("\end{document}\n")
     return out
 
-
 def email_receipt(address, sale):
     email = _make_receipt_email(address, sale)
     try:
@@ -310,7 +306,6 @@ def email_receipt(address, sale):
         return True
     except:
         return False
-
 
 def _make_receipt_email(address, sale):
     out = []
@@ -346,10 +341,21 @@ def _make_receipt_email(address, sale):
 class CCError(Exception):
     def __init__(self, error):
         self.error = error
-
     def __str__(self):
         return self.error
 
+def send_dejavoo_void_request(amount, xid):
+
+    c = pycurl.Curl()
+    if amount > 0:
+        #c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/charge/queue')
+        # opting to use /terminal/charge because it's compatible with /terminal/credit so only one set of code for handling response
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/void')
+        credit = False
+    else:
+        c.setopt(pycurl.URL, config.get('dejavoo-url') + '/terminal/void')
+        amount = -amount
+        credit = True
 
     values = {
     "total": str(amount),
@@ -381,7 +387,8 @@ class CCError(Exception):
     except:
         raise CCError('can\'t contact dejavoo server')
     if c.getinfo(pycurl.HTTP_CODE) == 504: #terminal timed out
-        raise CCError('no card inserted')
+        return {"success": False, "message": "No card inserted"}
+
     if c.getinfo(pycurl.HTTP_CODE) != 200 and c.getinfo(pycurl.HTTP_CODE) != 400:
         sys.stderr.write(b.getvalue().decode('utf-8'))
         raise CCError("dejavoo HTTP code %d" % (c.getinfo(pycurl.HTTP_CODE)))
@@ -488,7 +495,6 @@ def _parse_ippay_response(resp):
         raise CCError('no ResponseText in ippay xml')
     return m.group(1)
 
-
 def send_ippay_request(amount, card):
     if not card.validate():
         raise CCError('invalid card info')
@@ -530,13 +536,12 @@ def _parse_tnbci_response(resp):
         response_text = "DECLINED (%d)" % resp_code
     elif resp_code >= 300 and resp_code < 400:
         response_text = "MERCHANT ERROR (%d)" % resp_code
-    elif resp_code >= 400:
+    elif resp_code >= 400 :
         response_text = "PROCESSOR ERROR (%d)" % resp_code
     else:
         response_text = "I'M QUITE CONFUSED"
 
     return (resp_hash['transactionid'], response_text)
-
 
 def send_tnbci_request(amount, card):
     if not card.validate():
@@ -557,12 +562,12 @@ def send_tnbci_request(amount, card):
 
     if len(wget_errors) > 0:
         raise CCError('wget can\'t contact tnbci')
-
+    
     (xid, status) = _parse_tnbci_response(resp_text)
     return (xid, status)
 
 # def _parse_globalpay_response(resp):
-# #This is  not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
+# #This is not used. It is provided in case the WSDL stuff in formerly_io.send_globalpay_request stops working 
 #     m = re.search('<Message>(.*)</Message>', resp)
 #     if m:
 #         print "global said: %s" % m.group(1)
@@ -581,6 +586,8 @@ def send_tnbci_request(amount, card):
 #     # try to setup cc on boot, but fail silently if we can't
 # except:
 #     pass
+
+
 
 # def send_globalpay_request(amount, card, sale):
 #     try:
@@ -653,7 +660,6 @@ def print_tabhistory(customer, tab_history):
     out.writelines(_make_tabhistory_tex(customer, tab_history))
     out.flush()
     _print_tex_file(out.name)
-
 
 def _texify_tablog(entry):
     d = entry.delta()
