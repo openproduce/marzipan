@@ -390,7 +390,7 @@ def remove_distributor_item(item,distributor):
     inv_session.delete(to_remove)
     inv_session.flush()
 
-def get_items(hide_discontinued=False,show_categories=None,show_distributors=None,hide_distributorless=False,hide_categoryless=False,move_discontinued=False):
+def get_items(hide_discontinued=False,show_categories=None,show_distributors=None,hide_distributorless=False,hide_categoryless=False,move_discontinued=False, hide_additional_distributors=False):
     '''returns a list of Items sorted by name.  options should come from item_display_form.py and have the same values as there. '''
     if show_categories == None:
         show_categories = get_categories()

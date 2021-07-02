@@ -10,12 +10,13 @@
 
 import op_db_library as db
 
-def init(form, discontinued=False, categories=False, distributors=False):
-    global input_form, discontinued_option, categories_option, distributors_option
+def init(form, discontinued=False, categories=False, distributors=False, additional_distributors=False):
+    global input_form, discontinued_option, categories_option, distributors_option, additional_distributors_option
     input_form = form
     discontinued_option = discontinued
     categories_option = categories
     distributors_option = distributors
+    additional_distributors_option = additional_distributors
 
 def print_javascript():
     if categories_option:
@@ -133,6 +134,19 @@ def print_discontinued():
 
     return h_discontinued,m_discontinued
 
+def print_additional_distributors():
+    if "hide_additional_distributors" in input_form:
+        ha_distributors = input_form.getvalue("hide_additional_distributors")
+    else:
+        ha_distributors = False
+
+    if ha_distributors:
+        print('''Hide additional distributors?<input type="checkbox" name="hide_additional_distributors" value="True" checked/><br />''')
+    else:
+        print('''Hide additional distributors?<input type="checkbox" name="hide_additional_distributors" value="True" /><br />''')
+
+    return ha_distributors
+
 def print_form():
     discont = False
     move = False
@@ -140,6 +154,7 @@ def print_form():
     hide_distributors=[]
     hide_distributorless = False
     hide_categoryless = False
+    hide_additional_distributors = False
 
     if discontinued_option:
         discont,move = print_discontinued()
@@ -149,4 +164,7 @@ def print_form():
 
     if distributors_option:
         show_distributors, hide_distributorless = print_distributors()
-    return {'hide_discontinued' : discont, 'show_categories' : show_categories, 'show_distributors' : show_distributors, 'hide_distributorless' : hide_distributorless, 'hide_categoryless' : hide_categoryless, 'move_discontinued':move}
+
+    if additional_distributors_option:
+        hide_additional_distributors = print_additional_distributors()
+    return {'hide_discontinued' : discont, 'show_categories' : show_categories, 'show_distributors' : show_distributors, 'hide_distributorless' : hide_distributorless, 'hide_categoryless' : hide_categoryless, 'move_discontinued':move, 'hide_additional_distributors':hide_additional_distributors }
