@@ -366,7 +366,7 @@ def send_dejavoo_void_request(amount, xid):
 
     headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ***REMOVED***',
+        'Authorization': 'Bearer ' + config.get('dejavoo-api-key'),
       'Accept': 'application/json'
     }
 
@@ -419,7 +419,7 @@ def send_dejavoo_request(amount, tid):
 
     headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ***REMOVED***',
+      'Authorization': 'Bearer ' + config.get('dejavoo-api-key'),
       'Accept': 'application/json'
     }
 
@@ -457,7 +457,7 @@ def request_dejavoo_status(xid):
 
     headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ***REMOVED***',
+      'Authorization': 'Bearer ' + config.get('dejavoo-api-key'),
       'Accept': 'application/json'
     }
 
