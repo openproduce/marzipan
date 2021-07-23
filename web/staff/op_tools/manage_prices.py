@@ -357,7 +357,7 @@ def main():
             print('''<td rowspan='%s' id='%d_td' width='400' style='padding-left: 1em;'> %s </td>''' %  (item_dist_count, item_id, str(item)))
             print('''<td rowspan='%s' width='80'> <a href='%s' onclick="window.open(this.href,'_blank'); return false;">%d</a> </td>''' % (item_dist_count,db.get_item_info_page_link(item_id),item_id))
             print('''<td rowspan='%s' width='80' id="%d_amt"> %d </td>''' % (item_dist_count,item_id,item.get_count()))
-            print('''<td rowspan="%d" width='100'><input class="amt" id="%d_in" name="%d_in" size="2"/>''' % (item_dist_count,item_id, item_id))
+            print('''<td rowspan="%d" width='200'><input class="amt" id="%d_in" name="%d_in" size="2"/>''' % (item_dist_count,item_id, item_id))
             print('''<select id="%d_dist_in" name="%d_dist_in">''' % (item_id, item_id))
             for d in item.get_distributors():
                 print('''<option value="%s"> %s </option>''' % (d.get_dist_id(),d.get_distributor()))
@@ -376,7 +376,7 @@ def main():
         else:
             margin = 100
 
-        print('''<td width="100">$<input class="casecost" size="6" value="%.2f" id="%d_%d_%d_casecost" /></td>''' % (dist_item.get_wholesale_price(), item.get_id(), dist.get_id(), price_id))
+        print('''<td width="100">$<input class="casecost" size="4" value="%.2f" id="%d_%d_%d_casecost" /></td>''' % (dist_item.get_wholesale_price(), item.get_id(), dist.get_id(), price_id))
         print('''<td width="80" ><input class="casesize" size="5" value="%.2f" id="%d_%d_%d_casesize"/> </td>''' % (dist_item.get_case_size(), item.get_id(), dist.get_id(), price_id))
         print('''<td width="80">%s </td>''' % (dist_item.get_case_unit(),))
 

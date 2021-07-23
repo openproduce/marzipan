@@ -421,7 +421,7 @@ def get_items_by_price(price_id):
     '''returns pairs of (item,dist) where the items have a particular price_id'''
     return inv_session.query(Item,Distributor).filter(and_(Item.id == DistributorItem.item_id, Distributor.id == DistributorItem.dist_id, Item.price_id == price_id)).all()
 
-def get_distributor_items(hide_discontinued=False,show_categories=None,show_distributors=None,hide_distributorless=False,hide_categoryless=False, move_discontinued=False):
+def get_distributor_items(hide_discontinued=False,show_categories=None,show_distributors=None,hide_distributorless=False,hide_categoryless=False, move_discontinued=False,hide_additional_distributors=False):
     '''returns pairs (price,item,dist,dist_item)'''
     if show_categories == None:
         show_categories = get_categories()
