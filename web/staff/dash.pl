@@ -62,7 +62,7 @@ EOF
     # make sure to count sales from midnight-3am as day before's data
     $sth = $dbh_marzipan->prepare(qq{
 				  select date((s.time_ended)) as d,
-				  dayname(s.time_ended) as dn, 
+b				  dayname(s.time_ended) as dn, 
 				  hour(s.time_ended) as hour, 
 				  sum(si.total),count(distinct s.id) from sales as s, sale_items as si
 				  where si.sale_id = s.id and (s.customer_id != 151 or s.customer_id is null)
