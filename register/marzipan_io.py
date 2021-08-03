@@ -83,20 +83,20 @@ def print_card_receipt(sale, paid, merchant_copy=False):
     tex = _make_card_receipt_tex(sale, paid, merchant_copy)
 
     if merchant_copy:
-        filename = 'merchant_card_receipt.tex'
+        filename = 'merchant_card_receipt'
     else:
-        filename = 'customer_card_receipt.tex'
-    out = open(filename, 'w')
+        filename = 'customer_card_receipt'
+    out = open(filename + '.tex', 'w+t')
     for line in tex:
         out.write(line)
     out.flush()
     out.close()
 
-    out = tempfile.NamedTemporaryFile()
-    for line in tex:
-        out.write(line)
-    out.flush()
-    _print_tex_file(out.name)
+    # out = tempfile.NamedTemporaryFile(mode='w+t')
+    # for line in tex:
+    #     out.write(line)
+    # out.flush()
+    _print_tex_file(filename)
 
 def print_receipt(sale):
     tex = _make_receipt_tex(sale)
@@ -107,10 +107,10 @@ def print_receipt(sale):
     out.flush()
     out.close()
 
-    out = tempfile.NamedTemporaryFile(mode='w+t')
-    for line in tex:
-        out.write(line)
-    out.flush()
+    # out = tempfile.NamedTemporaryFile(mode='w+t')
+    # for line in tex:
+    #     out.write(line)
+    # out.flush()
 #    _print_tex_file(out.name)
     _print_tex_file('sale_receipt')
 
@@ -157,12 +157,14 @@ r"""\nonstopmode
 \begin{document}
 \epsfig{file=logo.eps,width=4cm,height=1.5cm}
 \parindent=0pt
-\\vskip 0.2cm
-{\small 1635 E. 55th St.}\n\n
-{\small Chicago, IL 60615}\n\n
-{\small (773) 496-4327}
-\\vskip 0.5cm
-{\Large \sf \\bf CARD RECEIPT}
+\vskip 0.2cm
+\begin{center}
+{\small 1635 E. 55th St.}\\
+{\small Chicago, IL 60615}\\
+{\small (773) 496-4327}\\
+\vskip 0.5cm
+{\Large \sf \bf CARD RECEIPT}
+\end{center}
 """,
     ]
     out.append(sale.time_ended.strftime("\n%m/%d/%y %H:%M:%S\n\n"))
