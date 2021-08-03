@@ -62,7 +62,7 @@ EOF
     # make sure to count sales from midnight-3am as day before's data
     $sth = $dbh_marzipan->prepare(qq{
 				  select date((s.time_ended)) as d,
-b				  dayname(s.time_ended) as dn, 
+				  dayname(s.time_ended) as dn, 
 				  hour(s.time_ended) as hour, 
 				  sum(si.total),count(distinct s.id) from sales as s, sale_items as si
 				  where si.sale_id = s.id and (s.customer_id != 151 or s.customer_id is null)
@@ -88,8 +88,6 @@ b				  dayname(s.time_ended) as dn,
 
 	$day = $row[0];
 	$day_name = $row[1];
-
-	calculate_totals($row);
 
 	# make sure sales from midnite-4am are in the last day's thing
 	if ((($day ne $last_day) and ($row[2] ne '0') and ($row[2] ne '1') and ($row[2] ne '2') and ($row[2] ne '3') and $count > 0)) {
@@ -159,7 +157,7 @@ b				  dayname(s.time_ended) as dn,
 	    $day_count++ unless ($day_count == 7);
 
 	} # close day
-
+	calculate_totals($row);
 	$last_day = $day unless ($row[2] eq '0' or $row[2] eq '1' or $row[2] eq '2' or $row[2] eq '3' );
 	$last_day_name = $day_name unless ($row[2] eq '0' or $row[2] eq '1' or $row[2] eq '2' or $row[2] eq '3');
 	$count++;
