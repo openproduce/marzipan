@@ -15,11 +15,11 @@ def print_results(results,order=None):
         if order != None:
             for o in order:
                 if o in row:
-                    print('<td>%s</td>' % (row[o]))
+                    print('<td>%10.2f</td>' % (row[o]))
                 else:
                     print('<td>0</td>')
         else:
-            print('<td>%s</td>' % (row))
+            print('<td>%10.2f</td>' % (row))
         print('</tr>')
 
 print('Content-Type: text/html\n')
