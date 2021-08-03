@@ -158,11 +158,13 @@ r"""\nonstopmode
 \epsfig{file=logo.eps,width=4cm,height=1.5cm}
 \parindent=0pt
 \vskip 0.2cm
-{\small 1635 E. 55th St.}\n\n
-{\small Chicago, IL 60615}\n\n
-{\small (773) 496-4327}
+\begin{center}
+{\small 1635 E. 55th St.}\\
+{\small Chicago, IL 60615}\\
+{\small (773) 496-4327}\\
 \vskip 0.5cm
 {\Large \sf \bf CARD RECEIPT}
+\end{center}
 """,
     ]
     out.append(sale.time_ended.strftime("\n%m/%d/%y %H:%M:%S\n\n"))
