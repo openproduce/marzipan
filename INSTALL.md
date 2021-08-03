@@ -93,7 +93,7 @@
   And add the launch script to your shell .profile:
 
   if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
-     /path/to/marzipan/register/launch.sh
+     exec /path/to/marzipan/register/launch.sh
   fi
 
   Now do the same for tty2 and tty3 if desired.
