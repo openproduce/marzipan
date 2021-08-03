@@ -206,7 +206,7 @@ def main():
             print(int(count),'''</td>''')
             print('''<td><input class="count default" id="%d_count_%d" size="3" /></td>''' % (item_id,i))
             print('''<td style='text-align: center;'> <a href="''',db.get_item_info_page_link(item_id),'''" target="_blank">''',str(item_id),'''</a> </td>''')
-            print('''<td>''',item.get_barcodes_str(),'''&nbsp;</td>''')
+            print('''<td >''',item.get_barcodes_str(),'''&nbsp;</td>''')
             if not item.get_is_discontinued():
                 print('''<td><input type="checkbox" id="%d_isStocked" onClick="discontinueItem(this)" checked /> </td>''' % (item_id,))
             else:
