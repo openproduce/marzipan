@@ -87,14 +87,16 @@
 
 * Or, for later versions of ubuntu:
   sudo systemctl edit getty@tty1
-  and edit the second ExecStart line to read:
-  ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
+  and enter the following:
+    [Service]
+    ExecStart=  
+    ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
 
   And add the launch script to your shell .profile:
 
-  if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
-     exec /path/to/marzipan/register/launch.sh
-  fi
+    if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
+      exec /path/to/marzipan/register/launch.sh
+    fi
 
   Now do the same for tty2 and tty3 if desired.
 
