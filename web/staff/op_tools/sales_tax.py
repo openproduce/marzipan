@@ -16,6 +16,7 @@ print('''Content-type: text/html\n
 </head>
 <body>''')
 
+
 def print_the_stuff(start_date, end_date):
 
     normal_report,soft_drink_report = db.get_sales_tax_report(start_date, end_date)
@@ -48,30 +49,15 @@ def print_the_stuff(start_date, end_date):
     print('''Line 4: Tax due <u>$%.2f</u><br />''' % (soft_drink_report['taxdue']))
     print('''Line 5: Discount <u>$%.2f</u><br />''' % (soft_drink_report['discount']))
     print('''Line 6: Payment <u>$%.2f</u> <br />''' % (soft_drink_report['payment']))
-    print('''</body>\n</html>''')
 
-print_the_stuff(datetime.datetime (2016,1,1), datetime.datetime (2016,2,1))
-print_the_stuff(datetime.datetime (2016,2,1), datetime.datetime (2016,3,1))
-print_the_stuff(datetime.datetime (2016,3,1), datetime.datetime (2016,4,1))
-print_the_stuff(datetime.datetime (2016,4,1), datetime.datetime (2016,5,1))
-print_the_stuff(datetime.datetime (2016,5,1), datetime.datetime (2016,6,1))
-print_the_stuff(datetime.datetime (2016,6,1), datetime.datetime (2016,7,1))
-print_the_stuff(datetime.datetime (2016,7,1), datetime.datetime (2016,8,1))
-print_the_stuff(datetime.datetime (2016,8,1), datetime.datetime (2016,9,1))
-print_the_stuff(datetime.datetime (2016,9,1), datetime.datetime (2016,10,1))
-print_the_stuff(datetime.datetime (2016,10,1), datetime.datetime (2016,11,1))
-print_the_stuff(datetime.datetime (2016,11,1), datetime.datetime (2016,12,1))
-print_the_stuff(datetime.datetime (2016,12,1), datetime.datetime (2017,1,1))
 
-print_the_stuff(datetime.datetime (2017,1,1), datetime.datetime (2017,2,1))
-print_the_stuff(datetime.datetime (2017,2,1), datetime.datetime (2017,3,1))
-print_the_stuff(datetime.datetime (2017,3,1), datetime.datetime (2017,4,1))
-print_the_stuff(datetime.datetime (2017,4,1), datetime.datetime (2017,5,1))
-print_the_stuff(datetime.datetime (2017,5,1), datetime.datetime (2017,6,1))
-print_the_stuff(datetime.datetime (2017,6,1), datetime.datetime (2017,7,1))
-print_the_stuff(datetime.datetime (2017,7,1), datetime.datetime (2017,8,1))
-print_the_stuff(datetime.datetime (2017,8,1), datetime.datetime (2017,9,1))
-print_the_stuff(datetime.datetime (2017,9,1), datetime.datetime (2017,10,1))
-print_the_stuff(datetime.datetime (2017,10,1), datetime.datetime (2017,11,1))
-print_the_stuff(datetime.datetime (2017,11,1), datetime.datetime (2017,12,1))
-print_the_stuff(datetime.datetime (2017,12,1), datetime.datetime (2018,1,1))
+
+for i in range(0,10):
+    print_the_stuff(datetime.datetime (2021,i+1,1), datetime.datetime(2021,i+2,1))
+
+    print_the_stuff(datetime.datetime (2021,12,1), datetime.datetime(2022,1,1))
+
+    
+print('''</body>\n</html>''')
+
+
