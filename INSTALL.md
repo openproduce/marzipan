@@ -79,7 +79,7 @@
 * Make the computer's TTY1, 2, and 3 run the POS instead of prompting for
   login:  Edit /etc/init/tty1.conf and replace the line
 
-        exec /sbin/getty -8 -38400 tty1
+        exec /sbin/getty -8 -34800 tty1
 
         with
 
@@ -90,7 +90,7 @@
   and enter the following:
     [Service]
     ExecStart=  
-    ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
+    ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 38400 linux
 
   And add the launch script to your shell .profile:
 
