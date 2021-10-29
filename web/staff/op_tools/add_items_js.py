@@ -84,7 +84,7 @@ print('''
                 newrow += '<td rowspan="1" width="80"><div onClick="split('+item_id+')">split</div></td>';
                 newrow += '</tr>';
 
-                table = $('#' + price_id  + '_table', window.parent.main.document);
+                table = $('#' + price_id  + '_table', document);
                 if(table.length != 0){
                    table.append(newrow);
                 }
@@ -103,16 +103,18 @@ print('''
                    newpricerow += '</select></td>';
 
                   newpricerow += '<td colspan="13" class="td"> <table id="'+price_id+'_table" cellspacing=0 cellpadding=0></table></td></tr>';
-                  $('#main', window.parent.main.document).append(newpricerow);
-                  $('#'+price_id+'_table',window.parent.main.document).append(newrow);
+                  $('#main', document).append(newpricerow);
+                  $('#'+price_id+'_table',document).append(newrow);
                }
-               $('.price',window.parent.main.document).keypress(parent.main.handlePriceChange);
-               $('.ditemid', window.parent.main.document).keypress(parent.main.handleDItemChange);
-               $('.casesize', window.parent.main.document).keypress(parent.main.handleCaseSizeChange);
-               $('.casecost', window.parent.main.document).keypress(parent.main.handleCaseCostChange);
-               $('.group', window.parent.main.document).keypress(parent.main.handleGroupChange);
-               $('.amt', window.parent.main.document).keypress(parent.main.handleAmtChange);
+               // $('.price',document).keypress(parent.main.handlePriceChange);
+               // $('.ditemid', document).keypress(parent.main.handleDItemChange);
+               // $('.casesize', document).keypress(parent.main.handleCaseSizeChange);
+               // $('.casecost', document).keypress(parent.main.handleCaseCostChange);
+               // $('.group', document).keypress(parent.main.handleGroupChange);
+               // $('.amt', document).keypress(parent.main.handleAmtChange);
+// commented out bc idk what is happening -CR 10/29/21
 
+$('#msg').text('Item ' + item_id + ' added.');
 
                $('#name').val('');
                $('#itemsize').val('');
@@ -125,7 +127,8 @@ print('''
                $('#case_size').val('');
                $('#price').val('');
 
-                parent.main.updateMargins(price_id);
+
+//                parent.main.updateMargins(price_id);
             }
             else{
                alert(data);
@@ -138,7 +141,7 @@ print('''
 
 
 
-
+print('''<div id="msg"></div>''')    
 print('''item name*: <input type="text" id="name" />''')
 print('''item size*: <input type="text" id="itemsize" size="5" /> size unit*: <select id="size_unit">''')
 for unit in db.get_units():

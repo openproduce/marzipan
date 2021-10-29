@@ -77,6 +77,7 @@ if "name" in form  and "taxcat" in form and ("price" in form and "price_unit" in
 else:
     print('''<p>Not all required fields were filled out </p>''')
 
+
 print('''<form name="newitem" action="add_items.py" method="get">''')
 print('''item name*: <input type="text" name="name" />''')
 print('''item size*: <input type="text" name="itemsize" size="5" /> size unit*: <select name="size_unit">''')
