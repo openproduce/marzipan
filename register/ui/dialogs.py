@@ -1812,7 +1812,7 @@ def item_info(session, item):
     q = session.query(db.SaleItem).filter_by(item = item)
     q = q.join(db.Sale).filter( db.Sale.time_ended > mct_when)
     quantity_sold = sum( x.quantity  for x in q )
-    ret = cStringIO.StringIO()
+    ret = StringIO()
     oldstdout = sys.stdout
     sys.stdout = ret
     print(("Item %d: %s" % (item.id, item.name)))
