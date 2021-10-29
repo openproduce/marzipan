@@ -3,6 +3,9 @@ use DBI;
 use DBD::mysql;
 use CGI qw/:standard/;
 
+use lib "../staff/";
+use DBCreds;
+
 print "Content-type: text/html\n\n";
 
 $platform = "mysql";
@@ -10,7 +13,8 @@ $database = "register_tape";
 $host = "localhost";
 $port = "3306";
 $user = "marzipan";
-$pw = "";
+our $DB_PASSWORD;
+$pw = $DBCreds::DB_PASSWORD;
 
 $dsn = "dbi:mysql:$database:localhost:3306";
 $dbh = DBI->connect($dsn, $user, $pw);
