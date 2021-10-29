@@ -23,11 +23,16 @@ def print_the_stuff(start_date, end_date):
 
     format = '%m/%d/%y'
 
+
     print('''<hr />''')
+    print(normal_report)
     print('''<h2>Results are for sales between %s and %s</h2> <p />''' % (start_date.strftime(format), end_date.strftime(format)))
 
     print('''<b>Normal Sales Tax (ST-1): </b> <br />''')
     print('''Line 1: Total receipts <u>$%.2f</u><br />''' % (normal_report['total']))
+    print('''Line 1a: Non link receipts <u>$%.2f</u><br />''' % (normal_report['non_link']))
+    print('''Line 1b: Link receipts <u>$%.2f</u><br />''' % (normal_report['link']))
+    print('''Line 1c: Refunds <u>$%.2f</u><br />''' % (normal_report['refunds']))
     print('''Line 2: Deductions <u>$%.2f</u><br />''' % (normal_report['deductions']))
     print('''&nbsp; 1: General retail tax <u>$%.2f</u><br />''' % (normal_report['general_tax']))
     print('''&nbsp; 2: food retail tax <u>$%.2f</u><br />''' % (normal_report['food_tax'] + normal_report['orphan_tax'])) #assume unknown items are food rate
@@ -39,7 +44,7 @@ def print_the_stuff(start_date, end_date):
     print('''Line 8a: other  <u>$%.2f</u><br />''' % (normal_report['other_sales']))
     line3 = round(normal_report['total'])-round(normal_report['deductions'])
     four_to_eight = round(normal_report['general_sales'])+round(normal_report['other_sales'])+round(normal_report['food_sales'] + round(normal_report['orphan_sales']))
-    print('''Line 3 = 4a + 5a + 8a --> %.2f == %.2f? %s<br />'''  % ( line3, four_to_eight, int(line3) == int(four_to_eight)))
+    print('''Line 3 = 4a + 5a + 8a --> %.2f + %.2f + %.2f --> %.2f == %.2f? %s<br />'''  % ( normal_report['general_sales'], normal_report['orphan_sales'] + normal_report['food_sales'], normal_report['other_sales'], line3, four_to_eight, int(line3) == int(four_to_eight)))
 
     print('''<p>''')
     print('''<b>Chicago Soft Drink tax:</b><br />''')
@@ -51,11 +56,18 @@ def print_the_stuff(start_date, end_date):
     print('''Line 6: Payment <u>$%.2f</u> <br />''' % (soft_drink_report['payment']))
 
 
+print_the_stuff(datetime.datetime(2021,2,1), datetime.datetime(2021,3,1))
+print_the_stuff(datetime.datetime(2021,3,1), datetime.datetime(2021,4,1))
+print_the_stuff(datetime.datetime(2021,4,1), datetime.datetime(2021,5,1))
+print_the_stuff(datetime.datetime(2021,5,1), datetime.datetime(2021,6,1))
+print_the_stuff(datetime.datetime(2021,6,1), datetime.datetime(2021,7,1))
+print_the_stuff(datetime.datetime(2021,7,1), datetime.datetime(2021,8,1))
+print_the_stuff(datetime.datetime(2021,8,1), datetime.datetime(2021,9,1))
+print_the_stuff(datetime.datetime(2021,9,1), datetime.datetime(2021,10,1))
+print_the_stuff(datetime.datetime(2021,10,1), datetime.datetime(2021,11,1))
+print_the_stuff(datetime.datetime(2021,11,1), datetime.datetime(2021,12,1))
+print_the_stuff(datetime.datetime(2021,12,1), datetime.datetime(2022,1,1))
 
-for i in range(0,10):
-    print_the_stuff(datetime.datetime (2021,i+1,1), datetime.datetime(2021,i+2,1))
-
-    print_the_stuff(datetime.datetime (2021,12,1), datetime.datetime(2022,1,1))
 
     
 print('''</body>\n</html>''')

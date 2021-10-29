@@ -22,7 +22,7 @@ def print_results(results,order=None):
                 else:
                     print('<td>0</td>')
         else:
-            print('<td>%s</td>' % (row))
+            print('<td>% 10.2f</td>' % (row))
         print('</tr>')
 
 def print_body(month,year):

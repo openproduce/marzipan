@@ -689,9 +689,24 @@ def get_sales_tax_report(start_date, end_date):
     payment = 3
     item_id = 4
 
-    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date + datetime.timedelta(hours = 4), end_date + datetime.timedelta(hours=4))
+#    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date + datetime.timedelta(hours = 4), end_date + datetime.timedelta(hours=4))
 
+    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date, end_date)
+ 
     sales = valid_sales_query.group_by(Sale.payment).group_by(SaleItem.item_id).all()        # used to get total values appropriately (need to sum differently for LINK sales
+
+#    sales = valid_sales_query.all()
+    print('<hr />')
+    print(TAB_PAYMENT)
+    print(SLUSHFUND)
+    print(CASH_BACK)
+    print(start_date)
+    print(end_date)
+    print( '<hr />')
+    print(len(list(sales)))
+    print( '<hr />')
+    print(valid_sales_query)
+    print( '<hr />')
 
     # get items that are sold under high and low tax rates
     taxcats = get_tax_categories ()
@@ -718,12 +733,13 @@ def get_sales_tax_report(start_date, end_date):
 
     # there are some sales where the item has been deleted or doesn't have a tax_category_id or something...in this case assume 2.25%
     # -SL 5/18/12
-    orphan_rate_ids = range(10000)
+    orphan_rate_ids = list(range(10000)) 
     for x in zero_rate_ids + food_rate_ids + general_rate_ids + soft_drink_rate_ids:
       try:
         orphan_rate_ids.remove(x)
       except:
         pass
+
 
     refund_item_ids = list(map(to_id, refund_items))
 
