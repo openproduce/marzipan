@@ -192,11 +192,10 @@ https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/default-privileges.h
         $ sudo service apache2 restart
 	
 If you are planning to connect to a database over a network connection, and you are using a laptop, you will need to turn off wifi powersave in order to avoid lag:
+
 	$ sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
-Change
-	wifi.powersave = 3
-to
-	wifi.powersave = 2	b
+
+Change `wifi.powersave = 3` to `wifi.powersave = 2`
 
 # SETTING UP MYSQL REPLICATION IN THE CLOUD
 
