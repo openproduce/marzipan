@@ -287,7 +287,7 @@ www.openproduce.org\\\\
 \\begin{center}
 Thanks for shopping!\n\n
 \\vskip 0.2cm
-{\\large \\textbf{Open 8am--2am every day}}
+{\\large \\textbf{Open 8am -- 12 midnight every day}}
 \end{center}
 %\\vspace*{4cm}
 \\vskip 1.5cm

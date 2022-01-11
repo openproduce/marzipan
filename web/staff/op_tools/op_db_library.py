@@ -696,31 +696,39 @@ def get_sales_tax_report(start_date, end_date):
     sales = valid_sales_query.group_by(Sale.payment).group_by(SaleItem.item_id).all()        # used to get total values appropriately (need to sum differently for LINK sales
 
 #    sales = valid_sales_query.all()
-    print('<hr />')
-    print(TAB_PAYMENT)
-    print(SLUSHFUND)
-    print(CASH_BACK)
-    print(start_date)
-    print(end_date)
-    print( '<hr />')
-    print(len(list(sales)))
-    print( '<hr />')
-    print(valid_sales_query)
-    print( '<hr />')
+    # print('<hr />')
+    # print(TAB_PAYMENT)
+    # print(SLUSHFUND)
+    # print(CASH_BACK)
+    # print(start_date)
+    # print(end_date)
+    # print( '<hr />')
+    # print(len(list(sales)))
+    # print( '<hr />')
+    # print(valid_sales_query)
+    # print( '<hr />')
 
     # get items that are sold under high and low tax rates
     taxcats = get_tax_categories ()
+#    print(taxcats)
 
     # map() returns a map object in python3, but we're expecting lists
     zero_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0000, taxcats)))
     food_rate = list(map(to_id,filter (lambda x: x.get_rate() == .0225, taxcats)))
     general_rate = list(map(to_id,filter (lambda x: x.get_rate() > .0225, taxcats)))
     soft_drink_rate = list(map(to_id, filter (lambda x: x.get_name() == 'soda', taxcats)))
-
+    # print("<hr />")
+    # print("soft drink rate")
+    # print(soft_drink_rate)
+    # print("<hr />")
     zero_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(zero_rate)).all()
     food_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(food_rate)).all()
     general_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(general_rate)).all()
     soft_drink_rate_items = inv_session.query(Item).filter(Item.tax_category_id.in_(soft_drink_rate)).all()
+    # print("<hr />")
+    # print("soft drink rate items")
+    # print(soft_drink_rate_items)
+    # print("<hr />")
 
     negative_prices = map(to_id, inv_session.query(Price).filter(Price.unit_cost < 0.0).all())
     refund_items = inv_session.query(Item).filter(Item.price_id.in_(negative_prices)).all()
@@ -730,6 +738,10 @@ def get_sales_tax_report(start_date, end_date):
     food_rate_ids = list(map(to_id, food_rate_items))
     general_rate_ids = list(map(to_id, general_rate_items))
     soft_drink_rate_ids = list(map(to_id, soft_drink_rate_items))
+    # print("<hr />")
+    # print("soft drink rate ids")
+    # print(soft_drink_rate_ids)
+    # print("<hr />")
 
     # there are some sales where the item has been deleted or doesn't have a tax_category_id or something...in this case assume 2.25%
     # -SL 5/18/12
@@ -778,6 +790,16 @@ def get_sales_tax_report(start_date, end_date):
                 return (x[0]+float(y[cost]),x[1]+float(y[tax]))
         return x
 
+    def link_soft_drink (x,y):
+        if int(y[item_id]) in soft_drink_rate_ids and int(y[payment] == LINK_PAYMENT):
+                return (x+float(y[cost]))
+        return x
+
+    def non_link_soft_drink (x,y):
+        if int(y[item_id]) in soft_drink_rate_ids and int(y[payment] != LINK_PAYMENT):
+                return (x[0]+float(y[cost]),x[1]+float(y[tax]))
+        return x
+    
     def refunds (x,y):
         if int(y[item_id]) in refund_item_ids:
             return x + float(y[cost])
@@ -789,7 +811,8 @@ def get_sales_tax_report(start_date, end_date):
     general_sales,general_tax = reduce (general_rate, sales, (0,0))
     transit_sales,transit_tax = reduce (zero_rate, sales, (0,0))
     orphan_sales,orphan_tax = reduce (orphan_rate, sales, (0,0))
-
+    link_soft_drink_sales = reduce (link_soft_drink, sales, 0)
+    non_link_soft_drink_sales,non_link_soft_drink_tax = reduce (non_link_soft_drink, sales, (0,0))
     other_sales = 0
 
     refund_sales = -1.0 * reduce(refunds,sales,0)  # refund total is negative, so we flip the sign
@@ -800,11 +823,29 @@ def get_sales_tax_report(start_date, end_date):
     # removing the 2x -SL 5/18/12
 
     deductions = link_sales + food_tax + general_tax + orphan_tax + refund_sales + transit_sales
+#     print("sales size")
+#     print(len(sales))
 
-    soft_drink_sales = filter(lambda x: x[item_id] in soft_drink_rate_ids, sales)
-    s_d_link = reduce (link_only, soft_drink_sales,0)
-    s_d_non_link, s_d_nl_tax = reduce (non_link, soft_drink_sales, (0,0))
+# #    soft_drink_sales = filter(lambda x: x[item_id] in soft_drink_rate_ids, sales)
+#     print("soft drink sale size")
+#     print((soft_drink_sales))
+#     print("<hr />")
+#     print("soft drink sales")
 
+#     print("link")
+#     print(LINK_PAYMENT)
+
+#     # print(list(sales))
+#     # print("<hr />")
+
+    s_d_link = link_soft_drink_sales #reduce (link_only, list(soft_drink_sales),0)
+    s_d_non_link, s_d_nl_tax = non_link_soft_drink_sales, non_link_soft_drink_tax #reduce (non_link, list(soft_drink_sales), (0,0))
+    # print ("<hr />")
+    # print ("sd_link")
+    # print(s_d_link)
+    # print ("<hr />")
+    # print ("sd_non_link")
+    # print(s_d_non_link)
     s_d_sales_dollars = s_d_link + (s_d_non_link - s_d_nl_tax) * 1.03   # Don't want to count any taxes other than the 3% soft drink tax
     s_d_deductions = s_d_nl_tax + s_d_link
     s_d_taxable = s_d_sales_dollars - s_d_deductions
@@ -1042,6 +1083,10 @@ class Item(object):
 
     def get_size_unit_id(self):
         return self.size_unit_id
+
+    def get_sale_unit_id(self):
+        price = get_price(int(self.price_id))
+        return price.sale_unit_id
 
     def get_size_str(self):
         return '''%.2f %s''' % (self.size, units_dict[self.size_unit_id])

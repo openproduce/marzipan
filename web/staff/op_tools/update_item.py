@@ -82,6 +82,11 @@ elif action == "sizeunit":
         s_u = db.get_unit_byname(size_unit).get_id()
         item = db.get_item(int(form.getvalue("id")))
         db.set_item_size_unit(item, s_u)
+elif action == "saleunit":
+    if "id" in form and "saleunit" in form:
+        sale_unit = form.getvalue("saleunit")
+        item = db.get_item(int(form.getvalue("id")))
+        db.set_price_sale_unit_id(db.get_price(item.price_id), int(sale_unit))
     else:
         raise Exception ('incorrect arguments. need id, sizeunit. given %s' % (form.keys()))
 elif action == "sizeunit_byid":

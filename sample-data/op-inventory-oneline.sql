@@ -257,6 +257,9 @@ CREATE TABLE `items` (
   `last_manual_count_timestamp` datetime default NULL,
   `is_discontinued` tinyint(1) NOT NULL,
   `notes` text,
+  `display_name` text,
+  `description` text,
+  `weight` float,
   PRIMARY KEY  (`id`),
   KEY `price_id` (`price_id`),
   KEY `size_unit_id` (`size_unit_id`),
@@ -264,7 +267,7 @@ CREATE TABLE `items` (
 ) ENGINE=MyISAM AUTO_INCREMENT=4196 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 LOCK TABLES `items` WRITE;
-/*!40000 ALTER TABLE `items` DISABLE KEYS */;
+/*!40000 ALTER bbbTABLE `items` DISABLE KEYS */;
 INSERT INTO `items` VALUES (1,'test item name',1,1,'','1.0000',1,5,'2015-01-01 02:22:22',0,NULL,1,NULL);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;

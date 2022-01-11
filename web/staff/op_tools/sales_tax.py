@@ -25,7 +25,10 @@ def print_the_stuff(start_date, end_date):
 
 
     print('''<hr />''')
-    print(normal_report)
+    # print('''normal report''')
+    # print(normal_report)
+    # print('''soft drink report''')
+    # print(soft_drink_report)
     print('''<h2>Results are for sales between %s and %s</h2> <p />''' % (start_date.strftime(format), end_date.strftime(format)))
 
     print('''<b>Normal Sales Tax (ST-1): </b> <br />''')
@@ -48,13 +51,13 @@ def print_the_stuff(start_date, end_date):
 
     print('''<p>''')
     print('''<b>Chicago Soft Drink tax:</b><br />''')
-    print('''Line 1: Total Chicago soft drinks receipts <u>$%.2f</u><br />''' % (soft_drink_report['total']))
-    print('''Line 2: Deductions <u>$%.2f</u><br />''' % (soft_drink_report['deductions']))
-    print('''Line 3: Taxable receipts <u>$%.2f</u><br />''' % (soft_drink_report['taxable']))
-    print('''Line 4: Tax due <u>$%.2f</u><br />''' % (soft_drink_report['taxdue']))
-    print('''Line 5: Discount <u>$%.2f</u><br />''' % (soft_drink_report['discount']))
-    print('''Line 6: Payment <u>$%.2f</u> <br />''' % (soft_drink_report['payment']))
-
+    print('''Total Chicago soft drinks receipts <u>$%.2f</u><br />''' % (soft_drink_report['total']))
+    # print('''Line 2: Deductions <u>$%.2f</u><br />''' % (soft_drink_report['deductions']))
+    # print('''Line 3: Taxable receipts <u>$%.2f</u><br />''' % (soft_drink_report['taxable']))
+    # print('''Line 4: Tax due <u>$%.2f</u><br />''' % (soft_drink_report['taxdue']))
+    # print('''Line 5: Discount <u>$%.2f</u><br />''' % (soft_drink_report['discount']))
+    # print('''Line 6: Payment <u>$%.2f</u> <br />''' % (soft_drink_report['payment']))
+    print('''</p>''')
 
 print_the_stuff(datetime.datetime(2021,2,1), datetime.datetime(2021,3,1))
 print_the_stuff(datetime.datetime(2021,3,1), datetime.datetime(2021,4,1))
