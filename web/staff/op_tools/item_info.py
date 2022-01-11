@@ -367,6 +367,16 @@ def print_item_history(item):
     for ttp in history:
         print('''<tr><td>%s</td><td>%.2f</td><td>%s</td></tr>''' % ttp)
     print('''</table>''')
+    print('''<br /> <b>365 day history for item %d (%s) </b><br />''' % (item.get_id(), item)) 
+    total_sales,total_deliveries,total_slush,history = db.get_item_history(item.get_id(),365)
+    print('<b>Total sales: %d <br />' % (total_sales,)) 
+    print('Total deliveries: %d <br />' % (total_deliveries,)) 
+    print('Total slushfunded: %d <br /></b>' % (total_slush,))
+    print('''<table><thead><th>Date</th><th>+/-</th><th>Type</th></thead>''') 
+    for ttp in history:
+        print( '''<tr><td>%s</td><td>%.2f</td><td>%s</td></tr>''' % ttp)
+    print('''</table>''') 
+
 
 def print_barcodes(item,key_handlers):
     print('''<table id="barcodes">

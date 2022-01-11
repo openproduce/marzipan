@@ -287,7 +287,10 @@ PAYMENT = {
     2: 'check',
     3: 'debit/credit',
     4: 'tab',
-    5: 'link'
+    5: 'link',
+    6: 'paid online',
+    7: 'manual credit/debit'
+   
 }
 
 

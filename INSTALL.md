@@ -79,7 +79,7 @@
 * Make the computer's TTY1, 2, and 3 run the POS instead of prompting for
   login:  Edit /etc/init/tty1.conf and replace the line
 
-        exec /sbin/getty -8 -38400 tty1
+        exec /sbin/getty -8 -34800 tty1
 
         with
 
@@ -87,14 +87,16 @@
 
 * Or, for later versions of ubuntu:
   sudo systemctl edit getty@tty1
-  and edit the second ExecStart line to read:
-  ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 34800 linux
+  and enter the following:
+    [Service]
+    ExecStart=  
+    ExecStart=-/sbin/agetty --autologin openproduce --noclear %I 38400 linux
 
   And add the launch script to your shell .profile:
 
-  if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
-     exec /path/to/marzipan/register/launch.sh
-  fi
+    if [[ -z "$DISPLAY" ]] && [[ $(tty) == /dev/tty1 ]]; then
+      exec /path/to/marzipan/register/launch.sh
+    fi
 
   Now do the same for tty2 and tty3 if desired.
 
@@ -188,6 +190,12 @@ https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/default-privileges.h
         $ sudo a2enmod cgi
         $ sudo a2ensite marzipan
         $ sudo service apache2 restart
+	
+If you are planning to connect to a database over a network connection, and you are using a laptop, you will need to turn off wifi powersave in order to avoid lag:
+
+	$ sudo nano /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+
+Change `wifi.powersave = 3` to `wifi.powersave = 2`
 
 # SETTING UP MYSQL REPLICATION IN THE CLOUD
 

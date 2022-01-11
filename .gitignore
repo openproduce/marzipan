@@ -8,7 +8,8 @@ web/staff/op_tools/db_config.py
 web/staff/op_tools/DBCreds.pm
 sale_receipt.tex
 register/launch.sh
-
+scripts/check_store_open.sh
+scripts/inventory_count.sh
 
 ---- Register files
 

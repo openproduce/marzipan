@@ -689,9 +689,24 @@ def get_sales_tax_report(start_date, end_date):
     payment = 3
     item_id = 4
 
-    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date + datetime.timedelta(hours = 4), end_date + datetime.timedelta(hours=4))
+#    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date + datetime.timedelta(hours = 4), end_date + datetime.timedelta(hours=4))
 
+    valid_sales_query = filter_valid_sales(reg_session.query(func.sum(SaleItem.cost),func.sum(SaleItem.total), func.sum(SaleItem.tax),Sale.payment, SaleItem.item_id), start_date, end_date)
+ 
     sales = valid_sales_query.group_by(Sale.payment).group_by(SaleItem.item_id).all()        # used to get total values appropriately (need to sum differently for LINK sales
+
+#    sales = valid_sales_query.all()
+    print('<hr />')
+    print(TAB_PAYMENT)
+    print(SLUSHFUND)
+    print(CASH_BACK)
+    print(start_date)
+    print(end_date)
+    print( '<hr />')
+    print(len(list(sales)))
+    print( '<hr />')
+    print(valid_sales_query)
+    print( '<hr />')
 
     # get items that are sold under high and low tax rates
     taxcats = get_tax_categories ()
@@ -718,12 +733,13 @@ def get_sales_tax_report(start_date, end_date):
 
     # there are some sales where the item has been deleted or doesn't have a tax_category_id or something...in this case assume 2.25%
     # -SL 5/18/12
-    orphan_rate_ids = range(10000)
+    orphan_rate_ids = list(range(10000)) 
     for x in zero_rate_ids + food_rate_ids + general_rate_ids + soft_drink_rate_ids:
       try:
         orphan_rate_ids.remove(x)
       except:
         pass
+
 
     refund_item_ids = list(map(to_id, refund_items))
 
@@ -808,7 +824,8 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
         #sales = sales.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
     #else:
             #commented out because i don't understand it.  -SL 5/18/12
-    sales = sales.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
+            #oh thanks. -CR 8/03/21
+    sales = sales.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
 
     totals = {}
     tabs = {}
@@ -853,9 +870,9 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
     tab_payments = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == TAB_PAYMENT, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
 
     if order_type == 'monthly':
-        tab_payments = tab_payments.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
+        tab_payments = tab_payments.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by (Sale.time_ended)
     else:
-        tab_payments = tab_payments.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
+        tab_payments = tab_payments.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
 
     for row in tab_payments.all():
         day = datetime.datetime(row[0].year, row[0].month, row[0].day, row[0].hour)
@@ -887,9 +904,9 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
     cash_back = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == CASH_BACK, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
 
     if order_type == 'monthly':
-        cash_back = cash_back.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
+        cash_back = cash_back.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
     else:
-        cash_back = cash_back.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended))
+        cash_back = cash_back.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
 
     for row in cash_back.all():
         day = datetime.datetime(row[0].year, row[0].month, row[0].day, row[0].hour)
@@ -1046,7 +1063,7 @@ class Item(object):
 
     def get_barcodes_str(self):
         barcodes = self.get_barcodes()
-        return ','.join(map(BarcodeItem.get_barcode, barcodes))
+        return ', '.join(map(BarcodeItem.get_barcode, barcodes))
 
     def get_category_items(self):
         c_items = inv_session.query(CategoryItem).filter(CategoryItem.item_id == self.id).all()
