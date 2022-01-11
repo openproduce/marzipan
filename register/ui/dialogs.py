@@ -298,14 +298,14 @@ class PaymentDialog(Dialog):
             Label(5, 0, w, 'Payment method:'),
 
             #second 6 used to be a 5. changed to accomodate link APC
-            ListBox('method', 6, 0, w, 6, 
+            ListBox('method', 6, 0, w, 8, 
                 [(k, db.PAYMENT[k]) for k in sorted(db.PAYMENT.keys())],
-                sel=1),
-            Label(12, 0, w, 'Amount tendered (d.dd):'), 
-            TextBox('paid', 13, 0, w, total_nod, clear_on_insert=True),
-            Label(14, 0, w, 'Change due: $0.00', name='change'),
-            Label(16, 0, 15, 'F6: No Receipt', color_id=HELP_COLOR),
-            Label(16, 16, 20, 'F7: Print Receipt', color_id=HELP_COLOR),
+                    sel=3),
+            Label(14, 0, w, 'Amount tendered (d.dd):'), 
+            TextBox('paid', 15, 0, w, total_nod, clear_on_insert=True),
+            Label(16, 0, w, 'Change due: $0.00', name='change'),
+            Label(18, 0, 15, 'F6: No Receipt', color_id=HELP_COLOR),
+            Label(18, 16, 20, 'F7: Print Receipt', color_id=HELP_COLOR),
             #Label(17, 0, 14, 'F8: E-mail Rcpt', color_id=HELP_COLOR),
 #            Label(17, 15, 14, 'F9: Customer...', color_id=HELP_COLOR),
             ], layout.Center()))
@@ -1329,7 +1329,11 @@ class SaleDialog(Dialog):
                 name = si.item.name
                 unit = ''.join(['/',si.item.price.sale_unit.name])
 #                tax = str(si.item.price.tax)
-            s = "%s x %s [%.2f %s]\n%5s (%s%s)"%(qty, name, si.item.size, si.item.size_unit, total, unit_cost, unit)
+            if si.item.size_unit.name == 'each':
+                s = "%s %s x %s \n%5s (%s%s)"%(qty, si.item.price.sale_unit.name, name, total, unit_cost, unit)
+            else:
+                s = "%s x %s [%.2f %s]\n%5s (%s%s)"%(qty, name, si.item.size, si.item.size_unit, total, unit_cost, unit)
+
             labels.append((si, s))
         item_list = self.items.get('items')
         item_list.set_labels(labels)
