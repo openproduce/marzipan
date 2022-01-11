@@ -418,6 +418,10 @@ def main():
                                             'update_item.py',{'action':'size','id':str(itemid),'size':TEXTBOX_VALUE},
                                             'updateItemString();', 'item_string'),
 
+                    'saleunit' : KeyHandler('handleItemSaleUnit','changes the sold by size of a given item', ENTER_KEY,
+                                            'update_item.py',{'action':'saleunit','id':str(itemid),'size':TEXTBOX_VALUE},
+                                            'updateItemString();', 'item_string'),
+
                     'barcode' : KeyHandler('handleBarcodeChange','changes the barcode of an item', ENTER_KEY,
                                            'update_item.py',{'action':'barcode_byid', 'barcode_id':TEXTBOX_ID, 'new_barcode':TEXTBOX_VALUE}, '','barcode'),
 
@@ -428,6 +432,10 @@ def main():
 
                        'itemsize' : SelectHandler('setItemSizeUnit','changes the size of the item','update_item.py',
                                                   {'action':'sizeunit_byid','id':str(itemid), 'sizeunit':SELECT_VALUE}, 'updateItemString();','item_size_unit'),
+
+                       'saleunit' : SelectHandler('setItemSaleUnit','changes the size of the item price','update_item.py',
+                                                  {'action':'saleunit','id':str(itemid), 'saleunit':SELECT_VALUE}, 'updateItemString();','item_sale_unit'),
+
 
                        'caseunit' : SelectHandler('setCaseUnits','changes the units of the distributor_item', 'update_distributor_item.py',
                                                   {'action':'update_byid', 'dist_item_id' : SELECT_ID , 'caseunit':SELECT_VALUE},
@@ -457,6 +465,10 @@ def main():
         print_tax_categories(item,select_handlers)
         print('''<br />''')
         print('''OP Price: $<input type="text" size="5" class="op_price" value="%.2f" id="%d_op_price" />''' % (item.get_price(),item.get_id()))
+        # priced by
+        print(''' <select class="%s">''' % (select_handlers['saleunit'].element))
+        print_unit_options(item.get_sale_unit_id())
+        print('''</select> <br />''')
         print('''<br />''')
 #        print('''OP in store count: %d''' % (item.get_count()))
         print('''OP in store count: <input type="text" size="5" class="count" value="%d" id="%d_count" />''' % (item.get_count(),item.get_id()))
