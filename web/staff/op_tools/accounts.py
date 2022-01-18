@@ -42,12 +42,14 @@ print('''
   <th>credit</th>
   <th>tab</th>
   <th>LINK</th>
+<th>manual credit/debit</th>
+<th>online</th>
   <th>total</th>
  </tr>
 </thead>
 
 <tbody>''')
-print_results(sales, ['cash','check','debit/credit','tab','link','total'])
+print_results(sales, ['cash','check','debit/credit','tab','link','manual credit/debit', 'paid online', 'total'])
 print('''
 </tbody>
 
@@ -63,11 +65,14 @@ print('''
   <th>check</th>
   <th>credit</th>
   <th>LINK</th>
+<th>manual credit/debit</th>
+<th>online</th>
+
  </tr>
 </thead>
 
 <tbody>''')
-print_results(payments, ['cash','check','debit/credit','link'])
+print_results(payments, ['cash','check','debit/credit','link', 'manual credit/debit', 'paid online'])
 
 print('''
 </tbody>
