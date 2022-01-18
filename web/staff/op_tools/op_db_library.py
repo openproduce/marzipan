@@ -56,14 +56,21 @@ CATEGORY_INFO_PAGE = "category_info.py"   # location of the category_info.py pag
 
 # Constants from the database
 SLUSHFUND = 151                      # customer ID of the slushfund account
-PAYMENT = {                          # payment types as defined in db.py
-    0 : 'void',
-    1 : 'cash',
-    2 : 'check',
-    3 : 'debit/credit',
-    4 : 'tab' ,
-    5 : 'link'
+# payment types as defined in db.py
+# ugh, changing the same constant in two different files, great software design us - CR 1/18/22
+PAYMENT = {
+    0: 'void',
+    1: 'cash',
+    2: 'check',
+    3: 'debit/credit',
+    4: 'tab',
+    5: 'link',
+    6: 'paid online',
+    7: 'manual credit/debit'
+   
 }
+
+
 LINK_PAYMENT = 5
 
 TAB_PAYMENT = 807                    # item ID of 'tab payment'
