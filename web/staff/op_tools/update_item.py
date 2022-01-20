@@ -52,6 +52,27 @@ elif action == "name":
         db.set_item_name(item, form.getvalue("name"))
     else:
         raise Exception ('incorrect arguments. need id and name.  given %s' % (form.keys()))
+elif action == "display_name":
+    if "id" in form and "display_name" in form:
+        itemid = int(form.getvalue("id"))
+        item = db.get_item(itemid)
+        db.set_item_display_name(item, form.getvalue("display_name"))
+    else:
+        raise Exception ('incorrect arguments. need id and name.  given %s' % (form.keys()))
+elif action == "description":
+    if "id" in form and "description" in form:
+        itemid = int(form.getvalue("id"))
+        item = db.get_item(itemid)
+        db.set_item_description(item, form.getvalue("description"))
+    else:
+        raise Exception ('incorrect arguments. need id and description.  given %s' % (form.keys()))
+elif action == "weight":
+    if "id" in form and "weight" in form:
+        itemid = int(form.getvalue("id"))
+        item = db.get_item(itemid)
+        db.set_item_weight(item, form.getvalue("weight"))
+    else:
+        raise Exception ('incorrect arguments. need id and weight.  given %s' % (form.keys()))
 elif action == "barcode_byid":  # hack to get around barcode
     if "barcode_id" in form and "new_barcode" in form:
         bc_id = int(form.getvalue("barcode_id"))

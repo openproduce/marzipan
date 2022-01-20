@@ -414,6 +414,15 @@ def main():
                     'name' : KeyHandler('handleItemNameChange','changes the name of a given item', ENTER_KEY,
                                         'update_item.py',{'action':'name','id' : str(itemid), 'name':TEXTBOX_VALUE},
                                         'updateItemString();', 'item_name'),
+                    'display_name' : KeyHandler('handleItemDisplayNameChange','changes the display name of a given item', ENTER_KEY,
+                                        'update_item.py',{'action':'display_name','id' : str(itemid), 'display_name':TEXTBOX_VALUE},
+                                        'updateItemString();', 'item_display_name'),
+                    'description' : KeyHandler('handleDescriptionChange','changes the description of a given item', ENTER_KEY,
+                                        'update_item.py',{'action':'description','id' : str(itemid), 'description':TEXTBOX_VALUE},
+                                        'updateItemString();', 'item_description'),
+                    'weight' : KeyHandler('handleWeightChange','changes the weight of a given item', ENTER_KEY,
+                                        'update_item.py',{'action':'weight','id' : str(itemid), 'weight':TEXTBOX_VALUE},
+                                        'updateItemString();', 'item_weight'),
                     'itemsize' : KeyHandler('handleItemSizeChange','changes the size of a given item', ENTER_KEY,
                                             'update_item.py',{'action':'size','id':str(itemid),'size':TEXTBOX_VALUE},
                                             'updateItemString();', 'item_string'),
@@ -432,6 +441,13 @@ def main():
 
                        'itemsize' : SelectHandler('setItemSizeUnit','changes the size of the item','update_item.py',
                                                   {'action':'sizeunit_byid','id':str(itemid), 'sizeunit':SELECT_VALUE}, 'updateItemString();','item_size_unit'),
+
+                       # 'weight' : SelectHandler('setItemWeight','changes the weight of the item','update_item.py',
+                       #                            {'action':'weight','id':str(itemid), 'weight':TEXTBOX_VALUE}, 'updateItemString();','item_weight'),
+                       # 'description' : SelectHandler('setItemDescription','changes the description of the item','update_item.py',
+                       #                            {'action':'description','id':str(itemid), 'description':TEXTBOX_VALUE}, 'updateItemString();','item_description'),
+                       # 'display_name' : SelectHandler('setItemDisplayName','changes the display name of the item','update_item.py',
+                       #                            {'action':'display_name','id':str(itemid), 'display_name':TEXTBOX_VALUE}, 'updateItemString();','item_display_name'),
 
                        'saleunit' : SelectHandler('setItemSaleUnit','changes the size of the item price','update_item.py',
                                                   {'action':'saleunit','id':str(itemid), 'saleunit':SELECT_VALUE}, 'updateItemString();','item_sale_unit'),
@@ -457,10 +473,12 @@ def main():
         item = db.get_item(itemid)
         print('''<b><div id="item_string">OP SKU  %d: %s</div></b><br />''' % (itemid, item))
         print('''Name: <input type="text" size="40" class="%s" value="%s" /> <br />''' % (key_handlers['name'].element, item.get_name()))
+        print('''Display Name (for online sales - name above used if this is blank): <input type="text" size="40" class="%s" value="%s" /> <br />''' % (key_handlers['display_name'].element, item.get_display_name()))
         print('''Item size: <input type="text" size="5" class="%s" value="%.2f" /> &nbsp;''' % (key_handlers['itemsize'].element, item.get_unit_size()))
         print(''' <select class="%s">''' % (select_handlers['itemsize'].element))
         print_unit_options(item.get_size_unit_id())
-        print('''</select> <br />''')
+        print('''</select> ''')
+        print('''Description: <br /><textarea id="description" cols="40" class="%s" rows="4">%s</textarea><br />''' % (key_handlers['description'].element, item.get_description()))
         print('''Tax category:''')
         print_tax_categories(item,select_handlers)
         print('''<br />''')
@@ -469,6 +487,7 @@ def main():
         print(''' <select class="%s">''' % (select_handlers['saleunit'].element))
         print_unit_options(item.get_sale_unit_id())
         print('''</select> <br />''')
+        print('''Approximate weight: <input type="text" size="5" class="%s" value="%s" /> &nbsp;''' % (key_handlers['weight'].element, item.get_weight_string()))
         print('''<br />''')
 #        print('''OP in store count: %d''' % (item.get_count()))
         print('''OP in store count: <input type="text" size="5" class="count" value="%d" id="%d_count" />''' % (item.get_count(),item.get_id()))

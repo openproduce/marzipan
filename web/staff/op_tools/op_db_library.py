@@ -174,6 +174,18 @@ def set_item_name(item, newname):
     item.name = newname
     inv_session.flush()
 
+def set_item_display_name(item, newname):
+    item.display_name = newname
+    inv_session.flush()
+
+def set_item_description(item, newname):
+    item.description = newname
+    inv_session.flush()
+
+def set_item_weight(item, weight):
+    item.weight = weight
+    inv_session.flush()
+    
 def set_item_barcode(item, oldbarcode, newbarcode):
     '''Changes the barcode_item corresponding to (item.id, oldbarcode) to be (item.id, newbarcode)'''
     old_barcode_item = inv_session.query(BarcodeItem).filter(and_(BarcodeItem.item_id == item.id, BarcodeItem.barcode == oldbarcode)).one()
@@ -1037,9 +1049,30 @@ class Item(object):
     def get_name(self):
         return self.name
 
+    def get_display_name(self):
+        if self.display_name != None:
+            return self.display_name
+        else:
+            return ''
+
+    def get_weight_string(self):
+        if self.weight == None:
+            return ''
+        else:
+            return "%.2f" % self.weight
+
+    def get_description(self):
+        if self.description == None:
+            return ''
+        else:
+            return self.description
+        
     def get_price(self):
         return float(inv_session.query(Price.unit_cost).filter(Price.id == self.price_id).one()[0])
 
+    def set_popularity(self, new_pop):
+        self.popularity = new_pop
+    
     def get_count(self):
         '''Returns count + (deliveries since count_timestamp) - (sales since last_manual_count_timestamp)
         This will become slow unless count_timestamp is updated on a regular basis'''
@@ -1591,7 +1624,10 @@ items = Table('items', inv_md,
               Column('last_manual_count',Integer),
               Column('last_manual_count_timestamp',DateTime),
               Column('is_discontinued',Boolean, nullable=False),
-              Column('notes', Text)
+              Column('notes', Text),
+              Column('display_name', Text),
+              Column('weight', Numeric(8,4)),
+              Column('description', Text)
               )
 
 prices = Table('prices', inv_md,

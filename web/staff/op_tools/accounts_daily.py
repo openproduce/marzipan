@@ -44,12 +44,14 @@ def print_body(month,year):
   <th>Credit</th>
   <th>Tab</th>
   <th>LINK</th>
+    <th>Manual Credit/Debit</th>
+    <th>Online</th>
   <th>total</th>
  </tr>
 </thead>
 
 <tbody>''')
-    print_results(sales, ['cash','check','debit/credit','tab','link','total'])
+    print_results(sales, ['cash','check','debit/credit','tab','link','manual credit/debit','paid online', 'total'])
     print('''
 </tbody>
 
@@ -64,11 +66,13 @@ def print_body(month,year):
   <th>Check</th>
   <th>Credit</th>
   <th>LINK</th>
+<th>Manual Credit/Debit</th>
+<th>Paid Online</th>
  </tr>
 </thead>
 
 <tbody>''')
-    print_results(payments, ['cash','check','debit/credit','link'])
+    print_results(payments, ['cash','check','debit/credit','link','manual credit/debit', 'paid online'])
 
     print('''
 </tbody>
