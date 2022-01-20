@@ -185,7 +185,11 @@ def set_item_description(item, newname):
 def set_item_weight(item, weight):
     item.weight = weight
     inv_session.flush()
-    
+
+def set_item_popularity(item, new_pop):
+     item.popularity = int(new_pop)
+     inv_session.flush()
+
 def set_item_barcode(item, oldbarcode, newbarcode):
     '''Changes the barcode_item corresponding to (item.id, oldbarcode) to be (item.id, newbarcode)'''
     old_barcode_item = inv_session.query(BarcodeItem).filter(and_(BarcodeItem.item_id == item.id, BarcodeItem.barcode == oldbarcode)).one()
@@ -1070,8 +1074,6 @@ class Item(object):
     def get_price(self):
         return float(inv_session.query(Price.unit_cost).filter(Price.id == self.price_id).one()[0])
 
-    def set_popularity(self, new_pop):
-        self.popularity = new_pop
     
     def get_count(self):
         '''Returns count + (deliveries since count_timestamp) - (sales since last_manual_count_timestamp)
@@ -1627,7 +1629,8 @@ items = Table('items', inv_md,
               Column('notes', Text),
               Column('display_name', Text),
               Column('weight', Numeric(8,4)),
-              Column('description', Text)
+              Column('description', Text),
+              Column('popularity', Integer)
               )
 
 prices = Table('prices', inv_md,
