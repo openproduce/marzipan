@@ -138,10 +138,12 @@ elif action == "add":
             count = int(form.getvalue('count'))
             plu = None
             itemsize = float(form.getvalue('itemsize'))
+            description = form.getvalue('description')
+            display_name = form.getvalue('display_name')
             sizeunit = form.getvalue('size_unit')
             if 'plu' in form:
                 plu = form.getvalue('plu')
-            itemid = db.add_item(name,itemsize, sizeunit, plu, count, price, taxcatname,price_unit)
+            itemid = db.add_item(name,itemsize, sizeunit, plu, count, price, taxcatname, display_name, description, price_unit)
             if 'barcode' in form:
                 db.add_barcode_item(itemid, form.getvalue('barcode'))
 

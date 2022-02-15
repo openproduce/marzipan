@@ -40,9 +40,11 @@ if "name" in form  and "taxcat" in form and ("price" in form and "price_unit" in
         plu = None
         itemsize = float(form.getvalue('itemsize'))
         sizeunit = form.getvalue('size_unit')
+        display_name = form.getvalue('display_name')
+        description = form.getvalue('description')
         if 'plu' in form:
             plu = form.getvalue('plu')
-        itemid = db.add_item(name,itemsize, sizeunit, plu, count, price, taxcatname,price_unit)
+        itemid = db.add_item(name,itemsize, sizeunit, plu, count, price, taxcatname,display_name,description,price_unit)
         if 'barcode' in form:
             db.add_barcode_item(itemid, form.getvalue('barcode'))
 
@@ -84,6 +86,8 @@ print('''item size*: <input type="text" name="itemsize" size="5" /> size unit*: 
 for unit in db.get_units():
     print('''<option> %s </option> ''' % unit)
 print('''</select>''')
+print('''display name: <input type="text" name="display_name" />''')
+print('''description: <textarea name="description" ></textarea>''')
 print('''barcode: <input type="text" name="barcode" size="10" />''')
 print('''PLU : <input type="text" name="plu" size="10" />''')
 print('''count*: <input type="text" name="count" size="3" /> <br />''')

@@ -120,7 +120,7 @@ def add_barcode_item(item_id, barcode):
     inv_session.add(newbi)
     inv_session.flush()
 
-def add_item(name, s, sizeunit_name, PLU, count, price, taxcat_name, price_unit=None):
+def add_item(name, s, sizeunit_name, PLU, count, price, taxcat_name, display_name, description, price_unit=None):
     '''if price_unit != None then this creates a new price object, then creates the item
        otherwise it assumes that the price passed in is an already existing price_id'''
     taxcat = get_tax_category_byname(taxcat_name)
@@ -129,9 +129,9 @@ def add_item(name, s, sizeunit_name, PLU, count, price, taxcat_name, price_unit=
     if price_unit != None:
         priceunit = get_unit_byname(price_unit).id
         p_id = add_price(price, priceunit)
-        newitem = Item(name, p_id, count, taxcat.id, plu=PLU, size=s, size_unit=sizeunit, last_count=datetime.datetime.now())
+        newitem = Item(name, p_id, count, taxcat.id, plu=PLU, size=s, size_unit=sizeunit, last_count=datetime.datetime.now(),display_name=display_name,description=description)
     else:
-        newitem = Item(name, price, count, taxcat.id, plu=PLU, size=s, size_unit=sizeunit, last_count=datetime.datetime.now())
+        newitem = Item(name, price, count, taxcat.id, plu=PLU, size=s, size_unit=sizeunit, last_count=datetime.datetime.now(), display_name=display_name, description=description)
     inv_session.add(newitem)
     inv_session.flush()
 
@@ -1014,7 +1014,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 class Item(object):
     """something the store sells"""
     def __init__(self, name, price_id, count, tax_category,
-                 plu=None, size="", size_unit=None, is_discontinued=False,last_count=None, id=None, notes=None):
+                 plu=None, size="", size_unit=None, is_discontinued=False,last_count=None, id=None, notes=None,description=None,display_name=None):
 
         self.name = name
         self.price_id = price_id
@@ -1023,6 +1023,8 @@ class Item(object):
         self.plu = plu
         self.size = size
         self.count = count
+        self.display_name = display_name
+        self.description = description
         self.last_manual_count = count
         self.notes = notes
         if (last_count != None):

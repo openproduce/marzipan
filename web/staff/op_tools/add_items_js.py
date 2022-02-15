@@ -41,6 +41,8 @@ print('''
        case_unit = $('#case_unit').val();
        dist_item_id = $('#dist_item_id').val();
        p_id = $('#price_id').val();
+display_name = $('#display_name').val();
+description = $('#description').val();
 
        var categories = '';
        catselect = $('#categories option:selected').each(function() {
@@ -50,7 +52,7 @@ print('''
 
        if(p_id == ''){  p_id = 0;}   // pass in 0 for p_id if it isn't selected
 
-       $.post('update_item.py', {action: 'add', name : name, itemsize : size, size_unit : s_unit, barcode : bcode, plu : plu, count : count, price : $('#price').val(), price_unit : $('#price_unit').val(), price_id : p_id, taxcat : $('#taxcat').val(), distributor : distributor, dist_item_id : $('#dist_item_id').val(), wholesale_price : $('#wholesale_price').val(), case_size : $('#case_size').val(), case_unit : $('#case_unit').val(), categories : categories},
+       $.post('update_item.py', {action: 'add', name : name, itemsize : size, size_unit : s_unit, barcode : bcode, plu : plu, count : count, price : $('#price').val(), price_unit : $('#price_unit').val(), price_id : p_id, taxcat : $('#taxcat').val(), distributor : distributor, dist_item_id : $('#dist_item_id').val(), wholesale_price : $('#wholesale_price').val(), case_size : $('#case_size').val(), case_unit : $('#case_unit').val(), categories : categories, description: description, display_name: display_name},
         function(data){
             if(data.indexOf('Error:') == -1){
 
@@ -126,6 +128,8 @@ $('#msg').text('Item ' + item_id + ' added.');
                $('#wholesale_price').val('');
                $('#case_size').val('');
                $('#price').val('');
+$('#description').val('');
+$('#display_name').val('');
 
 
 //                parent.main.updateMargins(price_id);
@@ -147,6 +151,9 @@ print('''item size*: <input type="text" id="itemsize" size="5" /> size unit*: <s
 for unit in db.get_units():
     print('''<option> %s </option> ''' % unit)
 print('''</select>''')
+print('''display name: <input type="text" name="display_name" id="display_name"  />''')
+print('''description: <textarea name="description" id="description"></textarea>''')
+
 print('''barcode: <input type="text" id="barcode" size="10" />''')
 print('''PLU : <input type="text" id="plu" size="10" />''')
 print('''count*: <input type="text" id="count" size="3" /> <br />''')
