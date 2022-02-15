@@ -478,6 +478,7 @@ def main():
         print(''' <select class="%s">''' % (select_handlers['itemsize'].element))
         print_unit_options(item.get_size_unit_id())
         print('''</select> ''')
+        print('''<br />''')
         print('''Description: <br /><textarea id="description" cols="40" class="%s" rows="4">%s</textarea><br />''' % (key_handlers['description'].element, item.get_description()))
         print('''Tax category:''')
         print_tax_categories(item,select_handlers)

@@ -59,19 +59,10 @@ def print_the_stuff(start_date, end_date):
     # print('''Line 6: Payment <u>$%.2f</u> <br />''' % (soft_drink_report['payment']))
     print('''</p>''')
 
-print_the_stuff(datetime.datetime(2021,2,1), datetime.datetime(2021,3,1))
-print_the_stuff(datetime.datetime(2021,3,1), datetime.datetime(2021,4,1))
-print_the_stuff(datetime.datetime(2021,4,1), datetime.datetime(2021,5,1))
-print_the_stuff(datetime.datetime(2021,5,1), datetime.datetime(2021,6,1))
-print_the_stuff(datetime.datetime(2021,6,1), datetime.datetime(2021,7,1))
-print_the_stuff(datetime.datetime(2021,7,1), datetime.datetime(2021,8,1))
-print_the_stuff(datetime.datetime(2021,8,1), datetime.datetime(2021,9,1))
-print_the_stuff(datetime.datetime(2021,9,1), datetime.datetime(2021,10,1))
-print_the_stuff(datetime.datetime(2021,10,1), datetime.datetime(2021,11,1))
-print_the_stuff(datetime.datetime(2021,11,1), datetime.datetime(2021,12,1))
-print_the_stuff(datetime.datetime(2021,12,1), datetime.datetime(2022,1,1))
 
-
+print_the_stuff(datetime.datetime(2021,12,1), datetime.datetime(2022,1,1))        
+print_the_stuff(datetime.datetime(2022,1,1), datetime.datetime(2022,2,1))    
+print_the_stuff(datetime.datetime(2022,2,1), datetime.datetime(2022,3,1))
     
 print('''</body>\n</html>''')
 
