@@ -425,7 +425,7 @@ def main():
                                         'updateItemString();', 'item_weight'),
                     'itemsize' : KeyHandler('handleItemSizeChange','changes the size of a given item', ENTER_KEY,
                                             'update_item.py',{'action':'size','id':str(itemid),'size':TEXTBOX_VALUE},
-                                            'updateItemString();', 'item_string'),
+                                            'updateItemString();', 'item_size'),
 
                     'saleunit' : KeyHandler('handleItemSaleUnit','changes the sold by size of a given item', ENTER_KEY,
                                             'update_item.py',{'action':'saleunit','id':str(itemid),'size':TEXTBOX_VALUE},
