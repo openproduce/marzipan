@@ -235,6 +235,8 @@ www.openproduce.org\\\\
     out.append("\\end{center}\n\n")
     if sale.clerk:
         out.append("\nClerk: %s\n\n" % (sale.clerk.name))
+
+    out.append("\nSale ID: %d\n\n" % (sale.id))
     out.append("""
 \\vskip 0.3cm
 \\vskip 3pt

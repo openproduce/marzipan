@@ -371,7 +371,9 @@ class PaymentDialog(Dialog):
         # END TEST ME
         self.done = True
         self.sale_done = True
+        self.s.add(self.sale)
         self.s.commit()
+        self.s.flush()
 
     def _finish_sale(self, want_receipt=False):
         bad_widget = self._validate()
