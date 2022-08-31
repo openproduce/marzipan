@@ -60,9 +60,19 @@ def print_the_stuff(start_date, end_date):
     print('''</p>''')
 
 
-print_the_stuff(datetime.datetime(2021,12,1), datetime.datetime(2022,1,1))        
+print_the_stuff(datetime.datetime(2021,12,1), datetime.datetime(2022,1,1))
 print_the_stuff(datetime.datetime(2022,1,1), datetime.datetime(2022,2,1))    
 print_the_stuff(datetime.datetime(2022,2,1), datetime.datetime(2022,3,1))
+print_the_stuff(datetime.datetime(2022,3,1), datetime.datetime(2022,4,1))    
+print_the_stuff(datetime.datetime(2022,4,1), datetime.datetime(2022,5,1))    
+print_the_stuff(datetime.datetime(2022,5,1), datetime.datetime(2022,6,1))    
+print_the_stuff(datetime.datetime(2022,6,1), datetime.datetime(2022,7,1))    
+print_the_stuff(datetime.datetime(2022,7,1), datetime.datetime(2022,8,1))    
+print_the_stuff(datetime.datetime(2022,8,1), datetime.datetime(2022,9,1))
+print_the_stuff(datetime.datetime(2022,9,1), datetime.datetime(2022,10,1))
+print_the_stuff(datetime.datetime(2022,10,1), datetime.datetime(2022,11,1))
+print_the_stuff(datetime.datetime(2022,11,1), datetime.datetime(2022,12,1))
+print_the_stuff(datetime.datetime(2022,12,1), datetime.datetime(2023,1,1))
     
 print('''</body>\n</html>''')
 
