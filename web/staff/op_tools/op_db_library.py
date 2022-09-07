@@ -994,6 +994,107 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
     return [totals,tabs,cash_in]
 
+def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now()):
+    '''used by and daily_accounts.py.  returns Total Sales and Tab Payments broken down by category.  Also returns a list of total cash in.
+
+    '''
+    sale_items = filter_valid_sales(reg_session.query(SaleItem.item_id,SaleItem.cost,SaleItem.total), start_date + datetime.timedelta(hours=4), end_date + datetime.timedelta(hours=4))
+
+
+    totals = {}
+    tabs = {}
+    cash_in = {}
+
+
+    ids = map((lambda si: si[0]), sale_items.all())
+    cat_rows = inv_session.query(Item.id,Category.name,CategoryItem).filter(Item.id.in_(ids)).filter(and_(CategoryItem.item_id == Item.id, Category.id == CategoryItem.cat_id)).all()
+    cat_hash = {}
+    for cat_row in cat_rows:
+        cat_hash[str(cat_row[0])] = cat_row[1]
+    for sale_item in sale_items.all():
+        if cat_hash.__contains__(str(sale_item[0])):
+            cat_key = cat_hash[str(sale_item[0])]
+        
+        # cat_key = cat_tuple[1][0]
+
+        if cat_key not in totals:
+             totals[cat_key] = {}
+             totals[cat_key]['total'] = 0
+        
+             cash_in[cat_key] = 0            # if it's not in the totals dict then it's also not in the cash_in dict
+
+        # # if payment_name != 'link':     # if we aren't summing link sales then add total
+        # #     totals[cat_key] += float(row[1])
+        # #     if payment_name == 'cash':
+        # #         cash_in[cat_key] += float(row[1])
+
+        # #     totals[cat_key]['total'] += float(row[1])
+        # # else:                                   # otherwise don't include tax when adding
+
+        totals[cat_key]['total'] += float(sale_item[2])
+
+    ### End getting sales
+#     tab_payments = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == TAB_PAYMENT, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
+
+#     if order_type == 'monthly':
+#         tab_payments = tab_payments.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by (Sale.time_ended)
+# a    else:
+#         tab_payments = tab_payments.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
+
+#     for row in tab_payments.all():
+#         day = datetime.datetime(row[0].year, row[0].month, row[0].day, row[0].hour)
+#         if day.hour < DAY_START_HOUR:         # if it happened before 4am put it on the previous day
+#             day -= datetime.timedelta(days=1)
+#             if day < start_date:
+#                 continue
+
+#         if order_type == 'monthly':
+#             day -= datetime.timedelta(days=day.day-1)
+
+#         date_key = day.date()
+
+#         if date_key not in tabs:
+#             tabs[date_key] = {}
+#             for k,v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
+#                 tabs[date_key][v] = 0
+
+#         payment_type = int(row[3])
+#         payment_name = PAYMENT[payment_type]
+#         tabs[date_key][payment_name] += float(row[2])
+
+#         if payment_name == 'cash':          # record cash in
+#             if date_key not in cash_in:
+#                 cash_in[date_key] = 0
+#             cash_in[date_key] += float(row[2])
+
+    ### End getting tab payments
+    # cash_back = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == CASH_BACK, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
+
+    # if order_type == 'monthly':
+    #     cash_back = cash_back.group_by(func.year(Sale.time_ended)).group_by(func.month(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
+    # else:
+    #     cash_back = cash_back.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended)
+
+    # for row in cash_back.all():
+    #     day = datetime.datetime(row[0].year, row[0].month, row[0].day, row[0].hour)
+    #     if day.hour < DAY_START_HOUR:         # if it happened before 4am put it on the previous day
+    #         day -= datetime.timedelta(days=1)
+    #         if day < start_date:
+    #             continue
+
+    #     if order_type == 'monthly':
+    #         day -= datetime.timedelta(days=day.day-1)
+
+    #     date_key = day.date()
+    
+    #     if payment_name == 'cash':          # record cash in
+    #         if date_key not in cash_in:
+    #             cash_in[date_key] = 0
+    #         cash_in[date_key] -= float(row[2])
+
+
+    return [totals,tabs,cash_in]
+
 
 #####################################################
 #

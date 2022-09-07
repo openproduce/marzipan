@@ -34,6 +34,8 @@ def print_body(month,year):
 
     sales,payments,cash = db.get_accounts('daily',start,end)
 
+    cat_stuff = db.get_category_accounts(start, end)
+    
     print('''
 <table border='1'> <caption>Total Sales</caption>
  <thead>
@@ -94,7 +96,7 @@ def print_body(month,year):
 </tbody>
 
 </table>''')
-
+    print(cat_stuff)
 
 
 print('Content-Type: text/html\n')
@@ -109,5 +111,7 @@ if 'month' not in form or 'year' not in form:
     print('Error! You must include a year and a month. Please go through <a href="accounts.py"> this tool</a>')
 else:
     print_body(int(form.getvalue('month')), int(form.getvalue('year')))
+
+
 
 print('</body></html>')
