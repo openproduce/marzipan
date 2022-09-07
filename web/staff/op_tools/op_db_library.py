@@ -210,11 +210,13 @@ def set_price(price, value):
 
 def get_distributors():
     '''returns a list of all distributors'''
-    return inv_session.query(Distributor).order_by(Distributor.name).all()
+    dists = inv_session.query(Distributor).order_by(Distributor.name).all()
+    return dists
 
 def get_categories():
     '''returns a list of categories'''
-    return inv_session.query(Category).order_by(Category.name).all()
+    cats = inv_session.query(Category).order_by(Category.name).all()
+    return cats
 
 def get_tax_categories():
     '''returns a list of tax categories'''
@@ -424,14 +426,14 @@ def get_items(hide_discontinued=False,show_categories=None,show_distributors=Non
         items = items.filter(Item.is_discontinued == False)
 
     if hide_categoryless:
-        items = items.filter(Item.categories.any(Category.name.in_(show_categories)))
+        items = items.filter(Item.categories.any(Category.name.in_(map(lambda cat: cat.name, show_categories))))
     else:
-        items = items.filter(or_(Item.categories == None, Item.categories.any(Category.name.in_(show_categories))))
+        items = items.filter(or_(Item.categories == None, Item.categories.any(Category.name.in_((map (lambda cat: cat.name, show_categories))))))
 
     if hide_distributorless:
-        items = items.filter(Item.distributors.any(Distributor.name.in_(show_distributors)))
+        items = items.filter(Item.distributors.any(Distributor.name.in_((map(lambda dist: dist.name, show_distributors)))))
     else:
-        items = items.filter(or_(Item.distributors.any(Distributor.name.in_(show_distributors)), Item.distributors == None))
+        items = items.filter(or_(Item.distributors.any(Distributor.name.in_((map(lambda dist: dist.name, show_distributors)))), Item.distributors == None))
 
     if move_discontinued:   # This will put discontinued items at the bottom of the page
         items = items.order_by(Item.is_discontinued)
@@ -461,14 +463,14 @@ def get_distributor_items(hide_discontinued=False,show_categories=None,show_dist
     if hide_discontinued:
         items = items.filter(Item.is_discontinued == False)
     if hide_categoryless:
-        items = items.filter(Item.categories.any(Category.name.in_(show_categories)))
+        items = items.filter(Item.categories.any((Category.name.in_(map(lambda cat: cat.name, show_categories)))))
     else:
-        items = items.filter(or_(Item.categories == None, Item.categories.any(Category.name.in_(show_categories))))
+        items = items.filter(or_(Item.categories == None, Item.categories.any(Category.name.in_((map (lambda cat: cat.name, show_categories))))))
 
     if hide_distributorless:
-        items = items.filter(Item.distributors.any(Distributor.name.in_(show_distributors)))
+        items = items.filter(Item.distributors.any(Distributor.name.in_(map(lambda dist: dist.name, show_distributors))))
     else:
-        items = items.filter(or_(Item.distributors.any(Distributor.name.in_(show_distributors)), Item.distributors == None))
+        items = items.filter(or_(Item.distributors.any(Distributor.name.in_(map(lambda dist: dist.name, show_distributors))), Item.distributors == None))
 
     return items.all()
 
@@ -1159,7 +1161,7 @@ class Item(object):
         return c_items
 
     def get_categories(self):
-        return inv_session.query(Category).filter(and_(Category.id == CategoryItem.cat_id, CategoryItem.item_id == self.id)).all()
+        return inv_session.query(Category).filter(and_(Category.id == CategoryItem.cat_id, CategoryItem.item_id == self.id)).all() 
 
     def get_categories_str(self):
         categories = list(map(str,self.get_categories()))
