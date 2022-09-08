@@ -96,7 +96,21 @@ def print_body(month,year):
 </tbody>
 
 </table>''')
-    print(cat_stuff)
+
+    print("<table border='1'><caption>By Category</caption>")
+    cats = ['produce', 'bakery', 'wine', 'beer', 'spirits', 'non-produce']
+    print('<tr><th></th>')
+    for c in cats:
+        print('<th>%s</th>' % c)
+    print('</tr>')
+    for date in sorted(cat_stuff.keys()):
+        row = cat_stuff[date]
+        print('<tr>')
+        print('<td><b>%s</b></td>' % (date.strftime('%Y-%m-%d')))
+        for c in cats:
+           print('<td>% 10.2f</td>' % row[c])
+        print('</tr>')
+    print('</table>')
 
 
 print('Content-Type: text/html\n')
