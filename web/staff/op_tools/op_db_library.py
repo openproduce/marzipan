@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # op_db_library.py
 # Patrick McQuighan
@@ -921,7 +922,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         payment_type = int(row[3])
         payment_name = PAYMENT[payment_type]
-
+        
         if payment_name != 'link':     # if we aren't summing link sales then add total
             totals[date_key][payment_name] += float(row[2])
             if payment_name == 'cash':
@@ -995,20 +996,27 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
     return [totals,tabs,cash_in]
 
 def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now()):
-    '''used by and daily_accounts.py.  returns Total Sales and Tab Payments broken down by category.  Also returns a list of total cash in.
+    '''used by and daily_accounts.py.  returns Total Sales broken down by category.  
 
     '''
-    sale_items = filter_valid_sales(reg_session.query(Sale, SaleItem.item_id,SaleItem.cost,SaleItem.total,Sale.time_ended), start_date + datetime.timedelta(hours=4), end_date + datetime.timedelta(hours=4))
+    sale_items = filter_valid_sales(reg_session.query(Sale, SaleItem.id,SaleItem.cost,SaleItem.total,Sale.time_ended,SaleItem.quantity,SaleItem.item_id,Sale.payment), start_date + datetime.timedelta(hours=4), end_date + datetime.timedelta(hours=4))
 
+    # sales = filter_valid_sales(reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.id), start_date + datetime.timedelta(hours=4), end_date + datetime.timedelta(hours=4))
+
+    # sale_ids = map((lambda si: si[3]), sales.group_by(Sale.time_ended).group_by(Sale.id).limit(10))
 
     totals = {}
     tabs = {}
     cash_in = {}
 
+#    sale_items = reg_session.query(Sale, SaleItem.item_id, SaleItem.cost,Sale.time_ended, SaleItem.total,SaleItem.quantity).filter(SaleItem.sale_id.in_(sale_ids))
+    
     sale_items = sale_items.group_by(func.date(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(func.hour(Sale.time_ended)).group_by(Sale.time_ended).group_by(Sale.id).group_by(SaleItem.id)
 
 
-    ids = map((lambda si: si[1]), sale_items.all())
+    ids = map((lambda si: si[6]), sale_items.all())
+
+
     cat_rows = inv_session.query(Item.id,Category.name,CategoryItem).filter(Item.id.in_(ids)).filter(and_(CategoryItem.item_id == Item.id, Category.id == CategoryItem.cat_id)).all()
     cat_hash = {}
     cats = ['produce', 'bakery', 'wine', 'beer', 'spirits', 'non-produce']
@@ -1016,7 +1024,11 @@ def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now(
         if (cats.__contains__(cat_row[1]) or (not(cat_hash.__contains__(str (cat_row[0]))))):
             cat_hash[str(cat_row[0])] = cat_row[1]
 
+
     for row in sale_items.all():
+        # print( "----")
+        # print("<br />") 
+        # print(row)
         day = datetime.datetime(row[4].year, row[4].month, row[4].day, row[4].hour)
         if day.hour < DAY_START_HOUR:         # if it happened before 4am put it on the previous day
             day -= datetime.timedelta(days=1)
@@ -1027,19 +1039,32 @@ def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now(
 
         if date_key not in totals:
             totals[date_key] = {}
+            totals[date_key]['total'] = 0
 
-        if cat_hash.__contains__(str(row[1])):
-            cat = cat_hash[str(row[1])]
+        if cat_hash.__contains__(str(row[6])):
+
+            cat = cat_hash[str(row[6])]
             if cats.__contains__(cat):
                 cat_key = cat
             else:
                 cat_key = 'non-produce'
+        else:
+            cat_key = 'non_produce'
+
 
         if cat_key not in totals[date_key]:
-             totals[date_key][cat_key] = {}
-             totals[date_key][cat_key] = 0
+            totals[date_key][cat_key] = 0
             
-        totals[date_key][cat_key] += float(row[3])
+        payment_type = int(row[7])
+        payment_name = PAYMENT[payment_type]
+
+        if payment_name != 'link':     # if we aren't summing link sales then add total
+            totals[date_key][cat_key] += (float(row[3])) 
+            totals[date_key]['total'] += (float(row[3]))
+        else:
+            totals[date_key][cat_key] += (float(row[2])) 
+            totals[date_key]['total'] += (float(row[2]))
+            
 
     return totals
 

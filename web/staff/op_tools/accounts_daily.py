@@ -35,7 +35,10 @@ def print_body(month,year):
     sales,payments,cash = db.get_accounts('daily',start,end)
 
     cat_stuff = db.get_category_accounts(start, end)
-    
+    # sales,payments,cash = db.get_accounts('daily',datetime.datetime(2022,8,1), datetime.datetime(2022,8,2))
+
+    # cat_stuff = db.get_category_accounts(datetime.datetime(2022,8,1), datetime.datetime(2022,8,2))
+
     print('''
 <table border='1'> <caption>Total Sales</caption>
  <thead>
@@ -98,7 +101,7 @@ def print_body(month,year):
 </table>''')
 
     print("<table border='1'><caption>By Category</caption>")
-    cats = ['produce', 'bakery', 'wine', 'beer', 'spirits', 'non-produce']
+    cats = ['produce', 'bakery', 'wine', 'beer', 'spirits', 'non-produce', 'total']
     print('<tr><th></th>')
     for c in cats:
         print('<th>%s</th>' % c)
@@ -108,7 +111,10 @@ def print_body(month,year):
         print('<tr>')
         print('<td><b>%s</b></td>' % (date.strftime('%Y-%m-%d')))
         for c in cats:
-           print('<td>% 10.2f</td>' % row[c])
+            if c in row:
+                print('<td>% 10.2f</td>' % row[c])
+            else:
+                print('<td></td>')
         print('</tr>')
     print('</table>')
 
