@@ -1039,7 +1039,7 @@ def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now(
 
         if date_key not in totals:
             totals[date_key] = {}
-            totals[date_key]['total'] = 0
+            totals[date_key]['total'] = float(0)
 
         if cat_hash.__contains__(str(row[6])):
 
@@ -1049,22 +1049,23 @@ def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now(
             else:
                 cat_key = 'non-produce'
         else:
-            cat_key = 'non_produce'
+            cat_key = 'non-produce'
 
 
         if cat_key not in totals[date_key]:
-            totals[date_key][cat_key] = 0
+            totals[date_key][cat_key] = float(0)
             
         payment_type = int(row[7])
         payment_name = PAYMENT[payment_type]
 
+
+        
         if payment_name != 'link':     # if we aren't summing link sales then add total
             totals[date_key][cat_key] += (float(row[3])) 
             totals[date_key]['total'] += (float(row[3]))
         else:
             totals[date_key][cat_key] += (float(row[2])) 
             totals[date_key]['total'] += (float(row[2]))
-            
 
     return totals
 
