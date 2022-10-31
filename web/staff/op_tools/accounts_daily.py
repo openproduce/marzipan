@@ -32,7 +32,7 @@ def print_body(month,year):
     else:
         end = datetime.datetime(year+1,1,1)
 
-    sales,payments,cash = db.get_accounts('daily',start,end)
+    sales,payments,cash,cards = db.get_accounts('daily',start,end)
 
     cat_stuff = db.get_category_accounts(start, end)
     # sales,payments,cash = db.get_accounts('daily',datetime.datetime(2022,8,1), datetime.datetime(2022,8,2))
@@ -73,11 +73,12 @@ def print_body(month,year):
   <th>LINK</th>
 <th>Manual Credit/Debit</th>
 <th>Paid Online</th>
+<th>Total</th>
  </tr>
 </thead>
 
 <tbody>''')
-    print_results(payments, ['cash','check','debit/credit','link','manual credit/debit', 'paid online'])
+    print_results(payments, ['cash','check','debit/credit','link','manual credit/debit', 'paid online', 'total'])
 
     print('''
 </tbody>
@@ -99,7 +100,23 @@ def print_body(month,year):
 </tbody>
 
 </table>''')
+    print('''
+<table border='1'> <caption>Total Cards In (including tab payments)</caption>
+<thead>
+ <tr>
+  <th>Date</th>
+  <th>Cards In</th>
+ </tr>
+</thead>
 
+<tbody>''')
+    print_results(cards)
+    print('''
+</tbody>
+
+</table>''')
+
+    
     print("<table border='1'><caption>By Category</caption>")
     cats = ['produce', 'bakery', 'wine', 'beer', 'spirits', 'non-produce', 'total']
     print('<tr><th></th>')

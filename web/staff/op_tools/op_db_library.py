@@ -897,6 +897,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
     totals = {}
     tabs = {}
     cash_in = {}
+    cards_in = {}
 
     for row in sales.all():
         day = datetime.datetime(row[0].year, row[0].month, row[0].day, row[0].hour)
@@ -919,6 +920,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             for k, v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 totals[date_key][v] = 0
             cash_in[date_key] = 0            # if it's not in the totals dict then it's also not in the cash_in dict
+            cards_in[date_key] = 0
 
         payment_type = int(row[3])
         payment_name = PAYMENT[payment_type]
@@ -927,6 +929,8 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             totals[date_key][payment_name] += float(row[2])
             if payment_name == 'cash':
                 cash_in[date_key] += float(row[2])
+            if payment_name == 'debit/credit':
+                cards_in[date_key] += float(row[2])
 
             totals[date_key]['total'] += float(row[2])
         else:                                   # otherwise don't include tax when adding
@@ -955,17 +959,23 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         if date_key not in tabs:
             tabs[date_key] = {}
+            tabs[date_key]['total'] = 0
             for k,v in PAYMENT.items(): # Have to initialize the each payment type for this day to be 0
                 tabs[date_key][v] = 0
 
         payment_type = int(row[3])
         payment_name = PAYMENT[payment_type]
         tabs[date_key][payment_name] += float(row[2])
+        tabs[date_key]['total'] += float(row[2])
 
         if payment_name == 'cash':          # record cash in
             if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] += float(row[2])
+        if payment_name == 'debit/credit':          # record card in
+            if date_key not in cards_in:
+                cards_in[date_key] = 0
+            cards_in[date_key] += float(row[2])
 
     ### End getting tab payments
     cash_back = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == CASH_BACK, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
@@ -993,7 +1003,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             cash_in[date_key] -= float(row[2])
 
 
-    return [totals,tabs,cash_in]
+    return [totals,tabs,cash_in,cards_in]
 
 def get_category_accounts(start_date=FIRST_SALES,end_date=datetime.datetime.now()):
     '''used by and daily_accounts.py.  returns Total Sales broken down by category.  
