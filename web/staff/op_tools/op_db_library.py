@@ -924,6 +924,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
 
         payment_type = int(row[3])
         payment_name = PAYMENT[payment_type]
+
         
         if payment_name != 'link':     # if we aren't summing link sales then add total
             totals[date_key][payment_name] += float(row[2])
@@ -931,10 +932,11 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
                 cash_in[date_key] += float(row[2])
             if payment_name == 'debit/credit':
                 cards_in[date_key] += float(row[2])
-
             totals[date_key]['total'] += float(row[2])
+
         else:                                   # otherwise don't include tax when adding
             totals[date_key][payment_name] += float(row[1])
+            cards_in[date_key] += float(row[1])
             totals[date_key]['total'] += float(row[1])
 
     ### End getting sales
@@ -972,7 +974,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] += float(row[2])
-        if payment_name == 'debit/credit':          # record card in
+        if (payment_name == 'debit/credit' or payment_name == 'link'):          # record card in 
             if date_key not in cards_in:
                 cards_in[date_key] = 0
             cards_in[date_key] += float(row[2])
@@ -1180,7 +1182,7 @@ class Item(object):
         item_sales = reg_session.query(func.sum(SaleItem.quantity)).filter(and_(SaleItem.sale_id == Sale.id, Sale.time_ended > count_starting, SaleItem.item_id == self.id, Sale.is_void == 0)).one()[0]
         if item_sales == None:
             item_sales = 0
-        return self.count + deliveries - item_sales
+        return float(self.count) + float(deliveries) - float(item_sales) 
 
     def get_is_discontinued(self):
         return self.is_discontinued
