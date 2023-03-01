@@ -930,7 +930,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             totals[date_key][payment_name] += float(row[2])
             if payment_name == 'cash':
                 cash_in[date_key] += float(row[2])
-            if payment_name == 'debit/credit':
+            if (payment_name == 'debit/credit' or payment_name == 'manual credit/debit'):
                 cards_in[date_key] += float(row[2])
             totals[date_key]['total'] += float(row[2])
 
@@ -974,11 +974,10 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             if date_key not in cash_in:
                 cash_in[date_key] = 0
             cash_in[date_key] += float(row[2])
-        if (payment_name == 'debit/credit' or payment_name == 'link'):          # record card in 
+        if ((payment_name == 'manual credit/debit') or (payment_name == 'debit/credit') or (payment_name == 'link')):          # record card in 
             if date_key not in cards_in:
                 cards_in[date_key] = 0
             cards_in[date_key] += float(row[2])
-
     ### End getting tab payments
     cash_back = reg_session.query(Sale.time_ended,func.sum(SaleItem.cost),func.sum(SaleItem.total), Sale.payment).filter(and_(Sale.id == SaleItem.sale_id,  Sale.is_void==0, SaleItem.item_id == CASH_BACK, Sale.time_ended > start_date, Sale.time_ended < end_date)).group_by(Sale.payment)
 
@@ -1182,7 +1181,7 @@ class Item(object):
         item_sales = reg_session.query(func.sum(SaleItem.quantity)).filter(and_(SaleItem.sale_id == Sale.id, Sale.time_ended > count_starting, SaleItem.item_id == self.id, Sale.is_void == 0)).one()[0]
         if item_sales == None:
             item_sales = 0
-        return float(self.count) + float(deliveries) - float(item_sales) 
+        return int(self.count) + int(deliveries) - int(item_sales) 
 
     def get_is_discontinued(self):
         return self.is_discontinued

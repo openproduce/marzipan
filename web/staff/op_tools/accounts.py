@@ -30,7 +30,7 @@ print('''<html>
 </head>
  <body>''')
 
-sales,payments,cash = db.get_accounts('monthly')
+sales,payments,cash,cards = db.get_accounts('monthly')
 
 print('''
 <table border='1'> <caption>Total Sales</caption>
@@ -94,5 +94,22 @@ print('''
 </tbody>
 
 </table>''')
+
+print('''
+<table border='1'> <caption>Total Cards In (including tab payments)</caption>
+<thead>
+ <tr>
+  <th>Date</th>
+  <th>Cards In</th>
+ </tr>
+</thead>
+
+<tbody>''')
+print_results(cards)
+print('''
+</tbody>
+
+</table>''')
+
 
 print('</body></html>')
