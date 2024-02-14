@@ -101,7 +101,7 @@ def print_body(month,year):
 
 </table>''')
     print('''
-<table border='1'> <caption>Total Cards In (including tab payments)</caption>
+<table border='1'> <caption>Total Cards In (including tab payments and online sales)</caption>
 <thead>
  <tr>
   <th>Date</th>

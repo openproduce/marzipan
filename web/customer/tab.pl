@@ -10,7 +10,7 @@ $database = "register_tape";
 $host = "localhost";
 $port = "3306";
 $user = "marzipan";
-$pw = "";
+$pw = "Almond paste 2";
 
 $dsn = "dbi:mysql:$database:localhost:3306";
 $dbh = DBI->connect($dsn, $user, $pw);

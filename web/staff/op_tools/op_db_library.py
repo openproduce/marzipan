@@ -930,7 +930,7 @@ def get_accounts(order_type, start_date=FIRST_SALES,end_date=datetime.datetime.n
             totals[date_key][payment_name] += float(row[2])
             if payment_name == 'cash':
                 cash_in[date_key] += float(row[2])
-            if (payment_name == 'debit/credit' or payment_name == 'manual credit/debit'):
+            if (payment_name == 'debit/credit' or payment_name == 'manual credit/debit' or payment_name == 'paid online'):
                 cards_in[date_key] += float(row[2])
             totals[date_key]['total'] += float(row[2])
 
