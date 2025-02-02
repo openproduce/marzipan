@@ -488,7 +488,7 @@ def filter_valid_sales (query_obj, start_date=None, end_date=None, slushfund=Fal
         query_obj = query_obj.filter(or_(Sale.customer_id!=SLUSHFUND, Sale.customer_id == None))
 
     if (start_date != None):
-        query_obj = query_obj.filter (Sale.time_ended > start_date)
+        query_obj = query_obj.filter (Sale.time_ended >= start_date)
     if (end_date != None):
         query_obj = query_obj.filter (Sale.time_ended < end_date)
 
