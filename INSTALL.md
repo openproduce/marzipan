@@ -9,11 +9,12 @@
   - sudo apt-get install libmysqlclient-dev
   - sudo apt-get install texlive
   - sudo apt-get install libcurl4-openssl-dev
-  - pip3 install mysqlclient
-  - pip3 install pycurl
-  - pip3 install sqlalchemy
-  - pip3 install lxml
-  - pip3 install suds-jurko
+  - python3 -m venv my-venv
+  - my-venv/bin/pip3 install mysqlclient
+  - my-venv/bin/pip3 install pycurl
+  - my-venv/bin/pip3 install "sqlalchemy=1.4.50"
+  - my-venv/bin/pip3 install lxml
+  - my-venv/bin/pip3 install py3-suds
 
 * Get the source code:
 
